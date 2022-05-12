@@ -1,10 +1,18 @@
 <template>
     <nav>
-        <span class="menu_button" @click="navbar_menu_open = !navbar_menu_open" style="background-image: url('@/assets/icons/menu_white_24dp.svg')">
-        </span>
-        <router-link to="/">Home</router-link> |
-        <router-link to="/about">About</router-link> |
-        <router-link to="/settings">Settings</router-link>
+          <div class="q-pa-md">
+            <q-toolbar class="bg-primary text-white shadow-2 glossy">
+            <q-btn flat label="Homepage" to="/" />
+            <q-space />
+
+            <q-tabs v-model="tab" shrink>
+                <q-route-tab name="Settings" label="Settings" to="/settings"/>
+                <q-route-tab name="Projects" label="Projects" to="/projects"/>
+                <q-route-tab name="Records" label="Records" to="/records"/>
+                <q-route-tab name="About" label="About" to="/about"/>
+            </q-tabs>
+            </q-toolbar>
+        </div>
     </nav>
   <router-view/>
 </template>
@@ -36,21 +44,20 @@ nav {
 	justify-content: space-between;
 	align-items: center;
 	height: var(--navbar_height);
-	padding: 0px 40px;
 	font-family: 'Lato';
 	font-size: 0.9em;
     color: white;
-	background-color: black;
+	background-color: white;
 }
 
-nav .menu_button {
-	position: relative;
-	display: block;
-	height: 75%;
-	aspect-ratio: 1;
-	background-position: center;
-	background-repeat: no-repeat;
-	background-size: 100%;
-	cursor: pointer;
+.q-tab__indicator{
+    opacity: 0;
+}
+.q-pa-md {
+    padding: 0px !important;
+}
+.q-tab__label{
+    opacity: 1;
+    color: white;
 }
 </style>
