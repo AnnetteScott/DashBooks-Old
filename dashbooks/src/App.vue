@@ -1,21 +1,33 @@
 <template>
     <nav>
-          <div class="q-pa-md">
+        <div class="q-pa-md">
             <q-toolbar class="bg-primary text-white shadow-2 glossy">
-            <q-btn flat label="Homepage" to="/" />
             <q-space />
 
             <q-tabs v-model="tab" shrink>
+                <q-route-tab name="DashBoard" label="DashBoard" to="/"/>
                 <q-route-tab name="Settings" label="Settings" to="/settings"/>
                 <q-route-tab name="Projects" label="Projects" to="/projects"/>
+                <q-route-tab name="Invoicing" label="Invoicing" to="/invoice"/>
                 <q-route-tab name="Records" label="Records" to="/records"/>
-                <q-route-tab name="About" label="About" to="/about"/>
+                <q-route-tab name="Help" label="Help" to="/help"/>
             </q-tabs>
             </q-toolbar>
         </div>
     </nav>
   <router-view/>
 </template>
+
+<script>
+
+export default {
+    name: 'HomeView',
+    components: {
+
+    }
+}
+</script>
+
 
 <style>
 @import url('../public/root.css');
@@ -24,7 +36,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
-    color: #2c3e50;
+    background-color: #f4f5f8;
     height: 100vh;
     margin-top: var(--navbar_height);
 }
@@ -50,14 +62,25 @@ nav {
 	background-color: white;
 }
 
-.q-tab__indicator{
-    opacity: 0;
+.q-tab--inactive{
+    opacity: 1 !important;
+}
+
+.q-tab--active{
+    opacity: 1 !important;
 }
 .q-pa-md {
     padding: 0px !important;
+    min-height: var(--navbar_height);
 }
 .q-tab__label{
     opacity: 1;
     color: white;
+}
+.q-toolbar{
+    min-height: var(--navbar_height) !important;
+}
+.q-tab__indicator{
+    display: none;
 }
 </style>

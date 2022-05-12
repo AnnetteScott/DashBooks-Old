@@ -1,5 +1,24 @@
 <template>
-  <div class="about">
-    <h1>This is a project page</h1>
+  <div class="project">
+    Welcome To DashBooks Project List
   </div>
 </template>
+
+<script>
+import { userDict } from '../main.js'
+export default {
+    name: 'projectView',
+    components: {
+
+    },
+    data(){
+
+    },
+    mounted(){
+
+    },
+    methods: {
+        
+    }
+}
+</script>

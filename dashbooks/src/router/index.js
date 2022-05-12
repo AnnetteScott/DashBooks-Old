@@ -1,9 +1,10 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
 import HomeView from '../views/HomeView.vue';
-import AboutView from '../views/AboutView.vue';
+import HelpView from '../views/HelpView.vue';
 import SettingsView from '../views/SettingsView.vue';
 import RecordView from '../views/RecordView.vue';
 import ProjectView from '../views/ProjectView.vue';
+import InvoiceView from '../views/InvoiceView.vue';
 
 const routes = [
   {
@@ -12,9 +13,9 @@ const routes = [
     component: HomeView
   },
   {
-    path: '/about',
-    name: 'about',
-    component: AboutView
+    path: '/help',
+    name: 'help',
+    component: HelpView
   },
   {
     path: '/settings',
@@ -30,6 +31,11 @@ const routes = [
     path: '/projects',
     name: 'projects',
     component: ProjectView
+  },
+  {
+    path: '/invoice',
+    name: 'invoice',
+    component: InvoiceView
   }
 ]
 

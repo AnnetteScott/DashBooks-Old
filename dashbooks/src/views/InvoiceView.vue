@@ -1,13 +1,13 @@
 <template>
-  <div class="records">
-    Welcome To DashBooks Records
+  <div class="invoice">
+    Welcome To DashBooks Invoice
   </div>
 </template>
 
 <script>
 import { userDict } from '../main.js'
 export default {
-    name: 'RecordView',
+    name: 'InvoiceView',
     components: {
 
     },
