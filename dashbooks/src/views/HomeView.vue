@@ -1,5 +1,5 @@
 <template>
-	<div class="home">
+	<div class="pageHome">
 		<div class="inner">
 			<h4>Welcome To DashBooks!</h4>
 			<div id="tile_container">
@@ -140,7 +140,6 @@ export default {
 		}
 	},
 	mounted(){
-		console.log(userDict)
 		for(const objKey of Object.keys(userDict['records'])){
 			if(objKey != 'accounts' && objKey != 'categories' && objKey != 'payee' && objKey != 'savedTransactions'){
 				this.years.push(objKey)
@@ -163,7 +162,6 @@ export default {
                 this.expenseSum[objDict.category] += objDict.amount;
             }
         }
-        console.log(this.projectDict)
 	},
 	methods: {
         numberWithCommas(num) {
@@ -208,13 +206,6 @@ export default {
 
 
 <style scoped lang="scss">
-.home{
-	width: 100%;
-	height: 100%;
-	display: flex;
-	justify-content: center;
-    min-width: 1438px;
-}
 .inner{
 	margin: 10px;
 	width: 100%;

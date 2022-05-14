@@ -19,11 +19,16 @@
 </template>
 
 <script>
-
+import { ref } from 'vue'
 export default {
     name: 'HomeView',
     components: {
 
+    },
+    setup () {
+        return {
+                tab: ref('')
+            }
     }
 }
 </script>
@@ -65,21 +70,15 @@ nav {
 	background-color: white;
 }
 
-.q-tab--inactive{
-    opacity: 1 !important;
+.pageHome{
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+    min-width: 1438px;
 }
 
-.q-tab--active{
-    opacity: 1 !important;
-}
-.q-tab__label{
-    opacity: 1;
-    color: white;
-}
-.q-toolbar{
-    min-height: var(--navbar_height) !important;
-}
-.q-tab__indicator{
-    display: none;
+p{
+    margin: 0px;
 }
 </style>
