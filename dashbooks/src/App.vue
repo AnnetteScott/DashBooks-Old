@@ -1,6 +1,6 @@
 <template>
     <nav>
-        <div class="q-pa-md">
+        <div>
             <q-toolbar class="bg-primary text-white shadow-2 glossy">
             <q-space />
 
@@ -41,8 +41,11 @@ export default {
     margin-top: var(--navbar_height);
 }
 
-.home {
-    height: 100%;
+@media only screen and (max-width: 1438px) {
+    #app {
+        height: 100vh;
+        overflow-x: auto;
+    }
 }
 
 nav {
@@ -68,10 +71,6 @@ nav {
 
 .q-tab--active{
     opacity: 1 !important;
-}
-.q-pa-md {
-    padding: 0px !important;
-    min-height: var(--navbar_height);
 }
 .q-tab__label{
     opacity: 1;
