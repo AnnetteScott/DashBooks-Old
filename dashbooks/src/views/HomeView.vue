@@ -173,8 +173,6 @@ export default {
             const d = new Date(newDate);
             const t = new Date();
             const date2 = new Date(d.getTime() + 12096e5);
-            console.log(date2)
-            console.log(d)
             if(date2.getTime() <= t.getTime()){
                 return true
             }else{

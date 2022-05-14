@@ -37,7 +37,7 @@
 	</div>
 	
 	<!-- Edit Project -->
-	<div class="form_container" v-if="projectForm == `editProjectForm`">
+	<div class="form_container" v-if="projectForm == `editProject`">
 		<div class="form">
 			<div id="edit_projectID" projectid="invalid"></div>
 			<label for="edit_project_name">Project name:</label>
@@ -51,8 +51,47 @@
 
 			<fieldset>
                 <q-btn class="glossy" rounded color="primary" label="Save Project" @click="editProject"/>
+                <q-btn class="glossy" rounded color="red" label="Delete" @click="deleteProject"/>
                 <q-btn class="glossy" rounded color="secondary" label="Cancel" @click="this.$emit('cancelled', '')"/>
-                <q-btn class="glossy" rounded color="red" label="Delete" />
+			</fieldset>
+		</div>
+	</div>
+    <!-- Create Colour -->
+	<div class="form_container" v-if="projectForm == `createColour`">
+		<div class="form">
+			<label for="create_colour_name">Colour Name:</label>
+			<input id="create_colour_name" type="text" />
+			
+			<label for="create_colour_rate">Colour Rate</label>
+			<input id="create_colour_rate" type="number" step="0.01" />
+
+			<label for="create_colour_colour">Colour:</label>
+			<input type="color" id="create_colour_colour" name="head" value="#000000">
+
+			<fieldset>
+				<q-btn class="glossy" rounded color="primary" label="Create Colour" @click="createColour"/>
+                <q-btn class="glossy" rounded color="secondary" label="Cancel" @click="this.$emit('cancelled', '')"/>
+			</fieldset>
+		</div>
+	</div>
+	
+	<!-- Edit Colour -->
+	<div class="form_container" v-if="projectForm == `editColour`">
+		<div class="form">
+			<div id="edit_colourID" colourid="invalid"></div>
+			<label for="edit_colour_name">Colour Name:</label>
+			<input id="edit_colour_name" type="text" />
+			
+			<label for="edit_colour_rate">Colour Rate:</label>
+			<input id="edit_colour_rate" type="number" step="0.01" />
+
+			<label for="edit_colour_colour">Colour:</label>
+			<input type="color" id="edit_colour_colour" name="head" value="#000000">
+
+			<fieldset>
+				<q-btn class="glossy" rounded color="primary" label="Save Colour" @click="editColour"/>
+                <q-btn class="glossy" rounded color="red" label="Delete" @click="deleteColour"/>
+                <q-btn class="glossy" rounded color="secondary" label="Cancel" @click="this.$emit('cancelled', '')"/>
 			</fieldset>
 		</div>
 	</div>
@@ -61,6 +100,7 @@
 <script>
 import { userDict } from '../main.js'
 import { generateID, reDoDate, addToDate } from '../../public/generalFunctions.js';
+import $ from 'jquery'
 export default {
     name: 'ProjectForms',
     emits: ["cancelled"],
@@ -147,6 +187,148 @@ export default {
 					date = addToDate(date, 14);
 				}
 			}
+            this.$emit('cancelled', '');
+        },
+        editProject(){
+            const projectID = $(`#edit_projectID`).attr('projectid');
+			const name = $('#edit_project_name').val();
+			const target = parseInt($('#edit_project_target').val());
+			let duration = parseInt($('#edit_project_duration').val());
+
+			if(name == '' || name == null){ //If no project name was entered.
+				$("#edit_project_name").addClass('form_error');
+				return false;
+			}
+			if(isNaN(duration)){ //If no duration was provided
+				$("#edit_project_duration").addClass('form_error');
+				$("#edit_project_name").removeClass('form_error');
+				return false;
+			}
+			if(isNaN(target)){ //If no duration was provided
+				$("#edit_project_target").addClass('form_error');
+				$("#edit_project_duration").removeClass('form_error');
+				return false;
+			}
+
+			$("#edit_project_name").removeClass('form_error');
+			$("#edit_project_duration").removeClass('form_error');
+			$("#edit_project_target").removeClass('form_error');
+
+			$('#edit_project_name').val('');
+			$('#edit_project_duration').val('');
+			$('#edit_project_target').val('');
+
+			let colourIds = Object.keys(userDict['colours'])
+			let previousDur = userDict['projects'][projectID]['duration'];
+			if(userDict['projects'][projectID]['duration'] < duration){
+				if(userDict['projects'][projectID]['weekInterval'] == 1){
+					let date = userDict['projects'][projectID]['weeks'][`${previousDur}`]['startDate'];
+					for(let w = previousDur + 1; w <= duration; w++){
+						date = addToDate(date, 14);
+						userDict['projects'][projectID]['weeks'][`${w}`] = {'startDate': date, 'colouredCells': {}, 'invoiced': false};
+						colourIds.forEach(colourID => {
+							if(colourID != 'colourWhite'){
+									userDict['projects'][projectID]['weeks'][`${w}`]['colouredCells'][colourID] = [];
+							}
+						});
+					}
+
+					userDict['projects'][projectID]['duration'] = duration;
+
+				}else if(userDict['projects'][projectID]['weekInterval'] == 2){
+					let lastKey = `${previousDur - 1} - ${previousDur}`;
+					let date = userDict['projects'][projectID]['weeks'][lastKey]['startDate'];
+					for(let w = previousDur + 1; w <= duration; w+= 2){
+						date = addToDate(date, 14);
+						userDict['projects'][projectID]['weeks'][`${w} - ${w + 1}`] = {'startDate': date, 'colouredCells': {}, 'invoiced': false};
+						colourIds.forEach(colourID => {
+							if(colourID != 'colourWhite'){
+									userDict['projects'][projectID]['weeks'][`${w} - ${w + 1}`]['colouredCells'][colourID] = [];
+							}
+						});
+					}
+					if(duration % 2 == 1){
+						userDict['projects'][projectID]['duration'] = duration + 1;
+					}else{
+						userDict['projects'][projectID]['duration'] = duration;
+					}
+				}
+			}
+
+			userDict['projects'][projectID]['name'] = name;
+			userDict['projects'][projectID]['targetHours'] = target;
+            this.$emit('cancelled', '');
+        },
+        deleteProject(){
+            const projectID = $(`#edit_projectID`).attr('projectid');
+            confirm(`Are you sure you want to delete ${userDict['projects'][projectID]['name']}?`).then(function(outcome) {
+                if(outcome){
+                    delete userDict['projects'][projectID];
+                }
+            });
+            setTimeout(() => {
+                this.$emit('cancelled', '');
+            }, 4000)
+        },
+        createColour(){
+            let colourName = $("#create_colour_name").val();
+			let colourRate = (parseFloat($("#create_colour_rate").val())).toFixed(2);
+			let colour = $("#create_colour_colour").val();
+
+			const colourID = generateID(userDict);
+
+			userDict['colours'][colourID] = {'name': colourName, 'rate': colourRate, 'colour': colour};
+			for (let [projectID, projectDict] of Object.entries(userDict['projects'])) {
+				projectDict['colours'].push(colourID);
+				projectID;
+				let duration = projectDict.duration;
+				if(projectDict.weekInterval == 1){
+					for(let w = 1; w <= duration; w++){
+						userDict['projects'][projectID]['weeks'][`${w}`]['colouredCells'][colourID] = [];
+					}
+				}
+				else if(projectDict.weekInterval == 2){
+					for(let w = 1; w <= duration; w+= 2){
+						userDict['projects'][projectID]['weeks'][`${w} - ${w + 1}`]['colouredCells'][colourID] = [];
+					}
+				}
+			}
+
+			this.$emit('cancelled', '');
+        },
+        editColour(){
+            const colourID = $(`#edit_colourID`).attr('colourid');
+			let colourName = $("#edit_colour_name").val();
+			let colourRate = (parseFloat($("#edit_colour_rate").val())).toFixed(2);
+			let colour = $("#edit_colour_colour").val();
+
+			userDict['colours'][colourID] = {'name': colourName, 'rate': colourRate, 'colour': colour};
+			this.$emit('cancelled', '');
+        },
+        deleteColour(){
+            const colourID = $(`#edit_colourID`).attr('colourid');
+            confirm(`Are you sure you want to delete ${userDict['projects'][projectID]['name']}?`).then(function(outcome) {
+                if(outcome){
+                    delete this.masterDict['colours'][colourID];
+                    for(const[projectID, projectDict] of Object.entries(this.masterDict['projects'])){
+                        const index = projectDict['colours'].indexOf(colourID);
+                        if (index > -1) {
+                            projectDict['colours'].splice(index, 1);
+                        }
+                        for(const [weekID, weekDict] of Object.entries(projectDict['weeks'])){
+                            for(const [projColour, colouredCell] of Object.entries(weekDict['colouredCells'])){
+                                if(projColour === colourID){
+                                    colouredCell;
+                                    delete this.masterDict['projects'][projectID]['weeks'][weekID]['colouredCells'][colourID]
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            setTimeout(() => {
+                this.$emit('cancelled', '');
+            }, 4000)
         }
     }
 }

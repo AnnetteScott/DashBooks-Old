@@ -27,8 +27,8 @@ export default {
     },
     setup () {
         return {
-                tab: ref('')
-            }
+            tab: ref('')
+        }
     }
 }
 </script>
@@ -79,6 +79,6 @@ nav {
 }
 
 p{
-    margin: 0px;
+    margin: 0px !important;
 }
 </style>
