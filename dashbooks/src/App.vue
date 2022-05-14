@@ -43,8 +43,8 @@ export default {
 
 @media only screen and (max-width: 1438px) {
     #app {
-        height: 100vh;
-        overflow-x: auto;
+        height: calc(100vh - var(--navbar_height));
+        overflow-x: scroll;
     }
 }
 

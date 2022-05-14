@@ -2,7 +2,7 @@
 	<div class="home">
 		<div class="inner">
 			<h4>Welcome To DashBooks!</h4>
-			<div class="tile_container">
+			<div id="tile_container">
 				<div id="records_container">
 					<div class="tile">
 						<div class="top_display">
@@ -85,6 +85,36 @@
 						</div>
                     </div>
 				</div>
+                <div id="project_container">
+                    <div class="inner_project_tiles">
+                        <template v-for="(item, keys) in projectDict" :key="keys">
+                            <div class="tile">
+                                <div class="top_display">
+                                    <p style="font-size:x-large; border-bottom: 1px solid black;">{{ item.name }}</p>
+                                </div>
+                                WEEKS:
+                                <div class="weeks_container">
+                                    <div class="inner_weeks">
+                                        <template v-for="(weekDict, week) in item.weeks" :key="week">
+                                        
+                                            <div class="week">
+                                                <template v-if="weekDict.invoiced">
+                                                    <p style="font-size:large; color: #53b700">{{ week }} : {{ weekDict.startDate }}</p>
+                                                </template>
+                                                <template v-else>
+                                                    <p style="font-size:large">{{ week }} : {{ weekDict.startDate }}</p>
+                                                </template>
+                                                <p v-if="!weekDict.invoiced && checkDate(weekDict.startDate)">Invoice Is Due</p>
+                                                <p v-else="" style="width: 88px"></p>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                    
+                </div>
 			</div>
 		</div>
 	</div>
@@ -104,7 +134,9 @@ export default {
 			netData: {'income': 0, 'expenses': 0},
             expenseSum: {},
             incomeSum: {},
-			years: []
+			years: [],
+            projectDict: {},
+            loaded: false
 		}
 	},
 	mounted(){
@@ -115,6 +147,7 @@ export default {
 			}
             
 		}
+        this.projectDict = {...userDict['projects']}
         this.netData.income = 0;
         this.netData.expenses = 0;
         this.expenseSum = {};
@@ -130,11 +163,27 @@ export default {
                 this.expenseSum[objDict.category] += objDict.amount;
             }
         }
+        console.log(this.projectDict)
 	},
 	methods: {
         numberWithCommas(num) {
 			return ((parseFloat(num).toFixed(2)).replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ","));
 		},
+        checkDate(date){
+            let newDate = date.split('/');
+            newDate = `${newDate[1]}/${newDate[0]}/${newDate[2]}`;
+            const d = new Date(newDate);
+            const t = new Date();
+            const date2 = new Date(d.getTime() + 12096e5);
+            console.log(date2)
+            console.log(d)
+            if(date2.getTime() <= t.getTime()){
+                return true
+            }else{
+                return false
+            }
+
+        },
 		loadNetData(event){
 			this.currentYear = $(event.target).attr('data');
             this.netData.income = 0;
@@ -147,9 +196,9 @@ export default {
                     objDict.category in this.incomeSum ? this.incomeSum[objDict.category] += 0: this.incomeSum[objDict.category] = 0;
                     this.incomeSum[objDict.category] += objDict.amount;
 				}else if(objDict.type == 'Debit'){
-					this.netData.expenses += objDict.amount;
+					this.netData.expenses += objDict.amount
                     objDict.category in this.expenseSum ? this.expenseSum[objDict.category] += 0: this.expenseSum[objDict.category] = 0;
-                    this.expenseSum[objDict.category] += objDict.amount
+                    this.expenseSum[objDict.category] += objDict.amount 
 				}
 			}
 		}
@@ -158,12 +207,13 @@ export default {
 </script>
 
 
-<style scoped>
+<style scoped lang="scss">
 .home{
 	width: 100%;
 	height: 100%;
 	display: flex;
 	justify-content: center;
+    min-width: 1438px;
 }
 .inner{
 	margin: 10px;
@@ -171,16 +221,36 @@ export default {
 	height: calc(100% - 20px - var(--navbar_height));
 	
 }
-.tile_container{
+#tile_container{
 	width: 100%;
 	height: 95%;
-	overflow-y: scroll;
 	padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
-#records_container{
+
+#tile_container > div{
+	display: flex;
+    justify-content: space-evenly;
+    margin-bottom: 15px;
+    height: 335px;
+    width: 100%;
+    overflow-x: auto;
+}
+
+#tile_container > #project_container{
+    justify-content: unset;
+    display: unset;
+}
+
+.inner_project_tiles{
     display: flex;
     justify-content: space-evenly;
+    width: fit-content;
+    min-width: 100%;
 }
+
 h4{
 	margin: 2px 0px;
 }
@@ -189,8 +259,11 @@ h4{
 	width: 300px;
 	min-width: 300px;
 	height: 300px;
+    margin: 0px 15px;
 	background-color: white;
-	box-shadow: 0px 0px 10px -5px white inset, 10px 14px 16px -16px black;
+	box-shadow: 2px 4px 10px -4px #000000a4;
+    border: 1px solid $accent;
+    border-radius: 0.3rem;
 }
 
 .top_display{
@@ -240,5 +313,25 @@ p{
     margin-bottom: 2px;
 }
 
-
+.weeks_container{
+    height: 220px;
+    overflow-y: auto;
+    
+}
+.inner_weeks{
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+}
+.week{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center
+}
+.week > p:first-child{
+    display: flex;
+    justify-content: flex-end;
+    width: 50%;
+}
 </style>
