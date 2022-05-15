@@ -4,9 +4,9 @@
 			<h4>Welcome To DashBooks!</h4>
 			<div id="tile_container">
 				<div id="records_container">
-					<div class="tile">
-						<div class="top_display">
-							<p>Net Profit: {{ currentYear }}</p>
+				    <div class="tile">
+                        <div class="top_display">
+							<p>Income: {{ currentYear }}</p>
 							<div>
 								<q-btn-dropdown color="primary" label="Years">
 								<q-list>
@@ -21,15 +21,16 @@
 								</q-btn-dropdown>
 							</div>
 						</div>
-						<div class="mid_display">
-							<p style="font-size: large">${{ numberWithCommas(netData.income + netData.expenses) }}</p>
-                            <p>Net Profit for {{ currentYear }}</p>
+                        <div class="mid_display">
+							<p style="font-size: large">${{ numberWithCommas(netData.income) }}</p>
+                            <p>Total Income for {{ currentYear }}</p>
 						</div>
-						<div class="bar_grapgh">
-                            <div class="incomeBar" :style="{width: `${(Math.min(275 * Math.abs(netData.income / netData.expenses), 275))}px`}">Income: &nbsp; &nbsp; ${{ numberWithCommas(netData.income) }}</div>
-                            <div class="expenseBar" :style="{width: `${(Math.min(275 * Math.abs(netData.expenses / netData.income), 275))}px`}">Expenses: ${{ numberWithCommas(netData.expenses) }}</div>
+                        <div class="bar_grapgh" style="overflow-y: auto; justify-content: flex-start; margin-top: 10px;">
+                            <template v-for="(item, keys) in incomeSum" :key="keys">
+                                <div class="incomeBar" :style="{width: `${(260 * Math.abs(item / netData.income))}px`}">{{ keys }}: {{ item }}</div>
+                            </template>
 						</div>
-					</div>
+                    </div>
                     <div class="tile">
                         <div class="top_display">
 							<p>Expenses: {{ currentYear }}</p>
@@ -58,8 +59,8 @@
 						</div>
                     </div>
                     <div class="tile">
-                        <div class="top_display">
-							<p>Income: {{ currentYear }}</p>
+						<div class="top_display">
+							<p>Net Profit: {{ currentYear }}</p>
 							<div>
 								<q-btn-dropdown color="primary" label="Years">
 								<q-list>
@@ -74,16 +75,15 @@
 								</q-btn-dropdown>
 							</div>
 						</div>
-                        <div class="mid_display">
-							<p style="font-size: large">${{ numberWithCommas(netData.income) }}</p>
-                            <p>Total Income for {{ currentYear }}</p>
+						<div class="mid_display">
+							<p style="font-size: large">${{ numberWithCommas(netData.income + netData.expenses) }}</p>
+                            <p>Net Profit for {{ currentYear }}</p>
 						</div>
-                        <div class="bar_grapgh" style="overflow-y: auto; justify-content: flex-start; margin-top: 10px;">
-                            <template v-for="(item, keys) in incomeSum" :key="keys">
-                                <div class="incomeBar" :style="{width: `${(260 * Math.abs(item / netData.income))}px`}">{{ keys }}: {{ item }}</div>
-                            </template>
+						<div class="bar_grapgh">
+                            <div class="incomeBar" :style="{width: `${(Math.min(275 * Math.abs(netData.income / netData.expenses), 275))}px`}">Income: &nbsp; &nbsp; ${{ numberWithCommas(netData.income) }}</div>
+                            <div class="expenseBar" :style="{width: `${(Math.min(275 * Math.abs(netData.expenses / netData.income), 275))}px`}">Expenses: ${{ numberWithCommas(netData.expenses) }}</div>
 						</div>
-                    </div>
+					</div>
 				</div>
                 <div id="project_container">
                     <div class="inner_project_tiles">
