@@ -162,6 +162,7 @@ export default {
                 this.expenseSum[objDict.category] += objDict.amount;
             }
         }
+        console.log(userDict)
 	},
 	methods: {
         numberWithCommas(num) {
