@@ -16,8 +16,15 @@
                     <p>You Have {{ Object.keys(userObj['projects']).length == 1 ? Object.keys(userObj['projects']).length + ' Project' : Object.keys(userObj['projects']).length + ' Projects' }}</p>
                     <q-btn class="glossy" rounded color="primary" label="Create Project" @click="projectRequest=`createProject`" style="width: 95%;"/>
                     </div>
-                    <div class="items">
-                        <div v-for="(projectDict, projectID) in userObj['projects']" :key="projectDict" class="list_item" :data="projectID" @click="editProject($event, `editProject`)" style="background: radial-gradient(circle, #35a2ff 0%, #014a88 100%)">{{ projectDict.name }}</div>
+                    <div class="item_container">
+                        <div class="items">
+                            <div v-for="(projectDict, projectID) in userObj['projects']" :key="projectDict" class="list_item" :data="projectID" @click="editProject($event, `editProject`)" style="background: radial-gradient(circle, #35a2ff 0%, #014a88 100%)">
+                                <div style="pointer-events: none;">
+                                    <p style="pointer-events: none;">{{ projectDict.name }}</p>
+                                    <p style="font-size: small; pointer-events: none;">Duration: {{ projectDict.duration }} Weeks</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="settings_container">
@@ -25,14 +32,19 @@
                         <p>You Have {{ (Object.keys(userObj['colours']).length - 1) == 1 ? (Object.keys(userObj['colours']).length - 1) + ' Colour' : (Object.keys(userObj['colours']).length - 1) + ' Colours' }}</p>
                         <q-btn class="glossy" rounded color="primary" label="Create Colour" @click="projectRequest=`createColour`" style="width: 95%;"/>
                     </div>
-                    <div class="items">
-                        <template v-for="(colourDict, colourID) in userObj['colours']" :key="colourDict">
-                            <div v-if="colourID != `colourWhite`" class="list_item" :data="colourID" @click="editProject($event, `editColour`)" style="background: radial-gradient(circle, #35a2ff 0%, #014a88 100%)">
-                                <div class="colour_preview" :style="{backgroundColor: colourDict['colour']}" style="margin-right:auto;"></div>
-                                <p>{{ colourDict.name }}</p>
-                                <div class="colour_preview" :style="{backgroundColor: colourDict['colour']}" style="margin-left:auto; opacity: 0;"></div>
-                            </div>
-                        </template>
+                    <div class="item_container">
+                        <div class="items">
+                            <template v-for="(colourDict, colourID) in userObj['colours']" :key="colourDict">
+                                <div v-if="colourID != `colourWhite`" class="list_item" :data="colourID" @click="editProject($event, `editColour`)" style="background: radial-gradient(circle, #35a2ff 0%, #014a88 100%)">
+                                    <div class="colour_preview" :style="{backgroundColor: colourDict['colour']}" style="margin-right:auto;"></div>
+                                    <div style="pointer-events: none;">
+                                        <p style="pointer-events: none;">{{ colourDict.name }}</p>
+                                        <p style="font-size: small;">${{ colourDict.rate }}</p>
+                                    </div>
+                                    <div class="colour_preview" :style="{backgroundColor: colourDict['colour']}" style="margin-left:auto; opacity: 0;"></div>
+                                </div>
+                            </template>
+                        </div>
                     </div>
                 </div>
                
@@ -44,8 +56,10 @@
                         <p>You Have {{ Object.keys(userObj['users']).length == 1 ? Object.keys(userObj['users']).length + ' User' : Object.keys(userObj['users']).length + ' Users' }}</p>
                         <q-btn class="glossy" rounded color="primary" label="Create User" @click="invoiceRequest=`createUser`" style="width: 95%;"/>
                     </div>
-                    <div class="items">
-                        <div v-for="(userDict, userID) in userObj['users']" :key="userDict" class="list_item" :data="userID" @click="editInvoice($event, `editUser`)" style="background: radial-gradient(circle, #35a2ff 0%, #014a88 100%)">{{ userDict.user }}</div>
+                    <div class="item_container">
+                        <div class="items">
+                            <div v-for="(userDict, userID) in userObj['users']" :key="userDict" class="list_item" :data="userID" @click="editInvoice($event, `editUser`)" style="background: radial-gradient(circle, #35a2ff 0%, #014a88 100%)">{{ userDict.user }}</div>
+                        </div>
                     </div>
                 </div>
                 <div class="settings_container">
@@ -53,14 +67,61 @@
                         <p>You Have {{ Object.keys(userObj['clients']).length == 1 ? Object.keys(userObj['clients']).length + ' Client' : Object.keys(userObj['clients']).length + ' Clients' }}</p>
                         <q-btn class="glossy" rounded color="primary" label="Create Client" @click="invoiceRequest=`createClient`" style="width: 95%;"/>
                     </div>
-                    <div class="items">
-                        <div v-for="(clientDict, clientID) in userObj['clients']" :key="clientDict" class="list_item" :data="clientID" @click="editInvoice($event, `editClient`)" style="background: radial-gradient(circle, #35a2ff 0%, #014a88 100%)">{{ clientDict.client }}</div>
+                    <div class="item_container">
+                        <div class="items">
+                            <div v-for="(clientDict, clientID) in userObj['clients']" :key="clientDict" class="list_item" :data="clientID" @click="editInvoice($event, `editClient`)" style="background: radial-gradient(circle, #35a2ff 0%, #014a88 100%)">{{ clientDict.client }}</div>
+                        </div>
                     </div>
                 </div>
                 <InvoiceForms :invoiceForm="invoiceRequest" @cancelled="invoiceRequest=``"/>
             </div>
             <div id="records_container" v-if="settingsPage == `records`">
-            
+                <div class="settings_container">
+                    <div class="settings_bottom_control">
+                        <p>You Have {{(Object.keys(userObj['records']['categories']).length) == 1 ? (Object.keys(userObj['records']['categories']).length) + ' Category' : (Object.keys(userObj['records']['categories']).length) + ' Categories' }}</p>
+                        <q-btn class="glossy" rounded color="primary" label="Create Category" @click="recordRequest=`createCategory`" style="width: 95%;"/>
+                    </div>
+                    <div class="item_container">
+                        <div class="items">
+                            <template v-for="(status, Category) in userObj['records']['categories']" :key="Category">
+                                <div class="list_item" :data="Category" :category="Category" @click="editRecords($event, `editCategory`)" style="background: radial-gradient(circle, #35a2ff 0%, #014a88 100%)">
+                                    {{ Category }}
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+                <div class="settings_container">
+                    <div class="settings_bottom_control">
+                        <p>You Have {{ ((userObj['records']['payee']).length) == 1 ? ((userObj['records']['payee']).length) + ' Payee' : ((userObj['records']['payee']).length) + ' Payees' }}</p>
+                        <q-btn class="glossy" rounded color="primary" label="Create Payee" @click="recordRequest=`createPayee`" style="width: 95%;"/>
+                    </div>
+                    <div class="item_container">
+                        <div class="items">
+                            <template v-for="payee in userObj['records']['payee']" :key="payee">
+                                <div class="list_item" :data="`payee`" :payee="payee" @click="editRecords($event, `editPayee`)" style="background: radial-gradient(circle, #35a2ff 0%, #014a88 100%)">
+                                    {{ payee }}
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+                <div class="settings_container">
+                    <div class="settings_bottom_control">
+                        <p>You Have {{ ((userObj['records']['accounts']).length) == 1 ? ((userObj['records']['accounts']).length) + ' Account' : ((userObj['records']['accounts']).length) + ' Accounts' }}</p>
+                        <q-btn class="glossy" rounded color="primary" label="Create Account" @click="recordRequest=`createAccount`" style="width: 95%;"/>
+                    </div>
+                    <div class="item_container">
+                        <div class="items">
+                            <template v-for="Account in userObj['records']['accounts']" :key="Account">
+                                <div class="list_item" :data="`accounts`" :account="Account" @click="editRecords($event, `editAccount`)" style="background: radial-gradient(circle, #35a2ff 0%, #014a88 100%)">
+                                    {{ Account }}
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+                <RecordForms :recordForm="recordRequest" @cancelled="recordRequest=``"/>
             </div>
         </div>
     </div>
@@ -71,19 +132,22 @@ import { userDict } from '../main.js'
 import { ref } from 'vue'
 import ProjectForms from '../components/ProjectForms'
 import InvoiceForms from '../components/InvoiceForms'
+import RecordForms from '../components/RecordForms'
 import $ from 'jquery'
 
 export default {
     name: 'SettingsView',
     components: {
-    ProjectForms,
-    InvoiceForms
-},
+        ProjectForms,
+        InvoiceForms,
+        RecordForms
+    },
     data(){
         return{
             settingsPage: '',
             projectRequest: '',
             invoiceRequest: '',
+            recordRequest: '',
             userObj: userDict
         }
     },
@@ -135,26 +199,21 @@ export default {
         },
         editRecords(event, form){
             const ID = $(event.target).attr('data');
-            this.invoiceRequest = form;
+            this.recordRequest = form;
             this.$nextTick(() => {
-                if(form.includes('User')){
-					$(`#edit_user`).val(userDict['users'][ID]['user']);
-					$(`#edit_user_name`).val(userDict['users'][ID]['name']);
-					$(`#edit_user_addOne`).val(userDict['users'][ID]['addOne']);
-					$(`#edit_user_addTwo`).val(userDict['users'][ID]['addTwo']);
-					$(`#edit_user_city`).val(userDict['users'][ID]['city']);
-					$(`#edit_user_country`).val(userDict['users'][ID]['country']);
-					$(`#edit_user_contact`).val(userDict['users'][ID]['contact']);
-					$(`#edit_userID`).attr(`userid`, ID);
+                if(form.includes('Category')){
+					let category = $(event.target).attr(`category`)
+                    $(`#edit_category_old`).attr(`oldcategory`, category);
+                    $(`#edit_category`).val(category);
+                    $(`#edit_category_status`).prop('checked', userDict['records']['categories'][category]);
+                }else if(form.includes('Payee')){
+                    let payee = $(event.target).attr(`payee`);
+                    $(`#edit_payee_old`).attr(`oldpayee`, payee);
+                    $(`#edit_payee`).val(payee);
                 }else{
-					$(`#edit_client`).val(userDict['clients'][ID]['client']);
-					$(`#edit_client_name`).val(userDict['clients'][ID]['name']);
-					$(`#edit_client_addOne`).val(userDict['clients'][ID]['addOne']);
-					$(`#edit_client_addTwo`).val(userDict['clients'][ID]['addTwo']);
-					$(`#edit_client_city`).val(userDict['clients'][ID]['city']);
-					$(`#edit_client_country`).val(userDict['clients'][ID]['country']);
-					$(`#edit_client_contact`).val(userDict['clients'][ID]['contact']);
-					$(`#edit_clientID`).attr(`clientid`, ID);
+                    let account = $(event.target).attr(`account`)
+                    $(`#edit_account_old`).attr(`oldaccount`, account);
+                    $(`#edit_account`).val(account);
                 }
             });
         },
@@ -192,7 +251,7 @@ export default {
     align-items: center;
     width: 100%;
     height: 100%;
-    gap: 18px;
+    gap: 7px;
     border: 1px solid $accent;
 }
 .settings_bottom_control{
@@ -206,19 +265,20 @@ export default {
 }
 .items{
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
+    justify-content: center;
     gap: 15px;
     width: 95%;
-    overflow-y: auto;
 }
 .list_item{
     display: flex;
     flex-flow: row nowrap;
     justify-content: center;
     align-items: center;
-    width: 95%;
-    height: 50px;
+    width: 45%;
+    height: 110px;
     padding: 0 20px;
     color: white;
     cursor: pointer;
@@ -237,5 +297,10 @@ export default {
     margin-right: 0px;
     border-radius: 10px;
     border: 1px solid black;
+}
+.item_container{
+    width: 100%;
+    height: calc(100vh - var(--navbar_height) - 180px - 18px);
+    overflow-y: auto;
 }
 </style>

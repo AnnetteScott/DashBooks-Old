@@ -170,7 +170,7 @@ export default {
 			let country = $('#edit_user_country').val();
 			let contact = $('#edit_user_contact').val();
 
-			this.masterDict['users'][userID] = {'user': user, 'name': name, 'addOne': addOne, 'addTwo': addTwo, 'city': city, 'country': country, 'contact': contact};
+			userDict['users'][userID] = {'user': user, 'name': name, 'addOne': addOne, 'addTwo': addTwo, 'city': city, 'country': country, 'contact': contact};
 			this.$emit('cancelled', '');
         },
         deleteUser(){
@@ -178,7 +178,7 @@ export default {
             let ref = this;
             confirm(`Are you sure you want to delete ${userDict['users'][userID]['user']}?`).then(function(outcome) {
                 if(outcome){
-                    delete this.masterDict['users'][userID];
+                    delete userDict['users'][userID];
                 }
                 ref.$emit('cancelled', '');
             });
@@ -214,7 +214,7 @@ export default {
 			let country = $('#edit_client_country').val();
 			let contact = $('#edit_client_contact').val();
 
-			this.masterDict['clients'][clientID] = {'client': client, 'name': name, 'addOne': addOne, 'addTwo': addTwo, 'city': city, 'country': country, 'contact': contact};
+			userDict['clients'][clientID] = {'client': client, 'name': name, 'addOne': addOne, 'addTwo': addTwo, 'city': city, 'country': country, 'contact': contact};
 			this.$emit('cancelled', '');
         },
         deleteClient(){
@@ -222,7 +222,7 @@ export default {
             let ref = this;
             confirm(`Are you sure you want to delete ${userDict['clients'][clientID]['client']}?`).then(function(outcome) {
                 if(outcome){
-                    delete this.masterDict['clients'][clientID];
+                    delete userDict['clients'][clientID];
                 }
                 ref.$emit('cancelled', '');
             });
