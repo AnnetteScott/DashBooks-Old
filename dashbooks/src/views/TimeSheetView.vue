@@ -47,7 +47,10 @@
                             <template v-if="col == `Z`">
                                 <div  v-for="(time, index) in infoList" :key="time" :cellID="`Z${index + timeList.length + colourList.length}`" class="dateCell">{{ time }}</div>
                             </template>
-                            <template v-if="col == `A` || col == `H`">
+                            <template v-if="col == `A`">
+                                <div  v-for="(time, index) in infoList" :key="time" :cellID="`${col}${index + timeList.length + colourList.length}`" class="infoCellA"></div>
+                            </template>
+                            <template v-if="col == `H`">
                                 <div  v-for="(time, index) in infoList" :key="time" :cellID="`${col}${index + timeList.length + colourList.length}`" class="infoCell"></div>
                             </template>
                             <!-- Total TimeSheet Cells -->
@@ -608,6 +611,19 @@ export default {
 .infoCell{
 	background-color: white;
 	width: calc(700% + 6px);
+	height: 25px;
+	min-height: 25px;
+	max-height: 25px;
+	border-bottom: 1px solid black;
+	border-right: 1px solid black;
+    font-weight: bold;
+    color: black;
+    user-select: none;
+}
+
+.infoCellA{
+	background-color: white;
+	width: calc(700% + 7px);
 	height: 25px;
 	min-height: 25px;
 	max-height: 25px;
