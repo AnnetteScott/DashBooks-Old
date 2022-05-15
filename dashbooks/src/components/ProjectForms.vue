@@ -261,14 +261,13 @@ export default {
         },
         deleteProject(){
             const projectID = $(`#edit_projectID`).attr('projectid');
+            let ref = this;
             confirm(`Are you sure you want to delete ${userDict['projects'][projectID]['name']}?`).then(function(outcome) {
                 if(outcome){
                     delete userDict['projects'][projectID];
                 }
+                ref.$emit('cancelled', '');
             });
-            setTimeout(() => {
-                this.$emit('cancelled', '');
-            }, 4000)
         },
         createColour(){
             let colourName = $("#create_colour_name").val();
@@ -307,10 +306,11 @@ export default {
         },
         deleteColour(){
             const colourID = $(`#edit_colourID`).attr('colourid');
-            confirm(`Are you sure you want to delete ${userDict['projects'][projectID]['name']}?`).then(function(outcome) {
+            let ref = this;
+            confirm(`Are you sure you want to delete ${userDict['colours'][colourID]['name']}?`).then(function(outcome) {
                 if(outcome){
-                    delete this.masterDict['colours'][colourID];
-                    for(const[projectID, projectDict] of Object.entries(this.masterDict['projects'])){
+                    delete userDict['colours'][colourID];
+                    for(const[projectID, projectDict] of Object.entries(userDict['projects'])){
                         const index = projectDict['colours'].indexOf(colourID);
                         if (index > -1) {
                             projectDict['colours'].splice(index, 1);
@@ -319,16 +319,14 @@ export default {
                             for(const [projColour, colouredCell] of Object.entries(weekDict['colouredCells'])){
                                 if(projColour === colourID){
                                     colouredCell;
-                                    delete this.masterDict['projects'][projectID]['weeks'][weekID]['colouredCells'][colourID]
+                                    delete userDict['projects'][projectID]['weeks'][weekID]['colouredCells'][colourID]
                                 }
                             }
                         }
                     }
                 }
+                ref.$emit('cancelled', '');
             });
-            setTimeout(() => {
-                this.$emit('cancelled', '');
-            }, 4000)
         }
     }
 }
