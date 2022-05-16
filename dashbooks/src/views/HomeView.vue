@@ -27,7 +27,7 @@
 						</div>
                         <div class="bar_grapgh" style="overflow-y: auto; justify-content: flex-start; margin-top: 10px;">
                             <template v-for="(item, keys) in incomeSum" :key="keys">
-                                <div class="incomeBar" :style="{width: `${(260 * Math.abs(item / netData.income))}px`}">{{ keys }}: {{ item }}</div>
+                                <div class="incomeBar" :style="{width: `${(350 * Math.abs(item / netData.income))}px`}">{{ keys }}: {{ item }}</div>
                             </template>
 						</div>
                     </div>
@@ -54,7 +54,7 @@
 						</div>
                         <div class="bar_grapgh" style="overflow-y: auto; justify-content: flex-start; margin-top: 10px;">
                             <template v-for="(item, keys) in expenseSum" :key="keys">
-                                <div class="expenseBar" :style="{width: `${(260 * Math.abs(item / netData.expenses))}px`}">{{ keys }}: {{ item }}</div>
+                                <div class="expenseBar" :style="{width: `${(350 * Math.abs(item / netData.expenses))}px`}">{{ keys }}: {{ item }}</div>
                             </template>
 						</div>
                     </div>
@@ -79,9 +79,9 @@
 							<p style="font-size: large">${{ numberWithCommas(netData.income + netData.expenses) }}</p>
                             <p>Net Profit for {{ currentYear }}</p>
 						</div>
-						<div class="bar_grapgh">
-                            <div class="incomeBar" :style="{width: `${(Math.min(275 * Math.abs(netData.income / netData.expenses), 275))}px`}">Income: &nbsp; &nbsp; ${{ numberWithCommas(netData.income) }}</div>
-                            <div class="expenseBar" :style="{width: `${(Math.min(275 * Math.abs(netData.expenses / netData.income), 275))}px`}">Expenses: ${{ numberWithCommas(netData.expenses) }}</div>
+						<div class="bar_grapgh" style="height: 160px">
+                            <div class="incomeBar" :style="{width: `${(Math.min(370 * Math.abs(netData.income / netData.expenses), 370))}px`}">Income: &nbsp; &nbsp; ${{ numberWithCommas(netData.income) }}</div>
+                            <div class="expenseBar" :style="{width: `${(Math.min(370 * Math.abs(netData.expenses / netData.income), 370))}px`}">Expenses: ${{ numberWithCommas(netData.expenses) }}</div>
 						</div>
 					</div>
 				</div>
@@ -104,7 +104,7 @@
                                                 <template v-else>
                                                     <p style="font-size:large">{{ week }} : {{ weekDict.startDate }}</p>
                                                 </template>
-                                                <p v-if="!weekDict.invoiced && checkDate(weekDict.startDate)">Invoice Is Due</p>
+                                                <p v-if="!weekDict.invoiced && checkDate(weekDict.startDate)" style="color: #FF4F00">Invoice Is Due!</p>
                                                 <p v-else="" style="width: 88px"></p>
                                             </div>
                                         </template>
@@ -231,11 +231,12 @@ export default {
 
 #tile_container > div{
 	display: flex;
-    justify-content: space-evenly;
+    justify-content: center;
     margin-bottom: 15px;
-    height: 335px;
+    height: 420px;
     width: 100%;
     overflow-x: auto;
+    gap: 40px;
 }
 
 #tile_container > #project_container{
@@ -245,9 +246,10 @@ export default {
 
 .inner_project_tiles{
     display: flex;
-    justify-content: space-evenly;
+    justify-content: center;
     width: fit-content;
     min-width: 100%;
+    gap: 40px;
 }
 
 h4{
@@ -255,9 +257,9 @@ h4{
 }
 
 .tile{
-	width: 300px;
-	min-width: 300px;
-	height: 300px;
+	width: 400px;
+	min-width: 400px;
+	height: 400px;
     margin: 0px 15px;
 	background-color: white;
 	box-shadow: 2px 4px 10px -4px #000000a4;
@@ -283,7 +285,7 @@ p{
 }
 .bar_grapgh{
     width: 100%;
-    height: 160px;
+    height: 260px;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -325,8 +327,9 @@ p{
 .week{
     display: flex;
     flex-direction: row;
-    justify-content: space-around;
-    align-items: center
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
 }
 .week > p:first-child{
     display: flex;

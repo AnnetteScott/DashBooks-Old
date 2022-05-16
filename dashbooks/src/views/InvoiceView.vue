@@ -17,11 +17,14 @@
                     </template>
                     <template v-if="currentProjectID !== ''">
                         <label for="week_selection">Choose a Week:</label>
-                        <select id="week_selection">
+                        <select id="week_selection" @change="checkStatus">
                             <option v-for="(weekDict, weekID) in userObj['projects'][currentProjectID]['weeks']" :key="weekDict" :data="weekID">
                             {{ weekID }}
                             </option>
                         </select>
+                    </template>
+                    <template v-if="invoicedStatus">
+                        <p style="color: white">This week as already been invoiced</p>
                     </template>
                     
                     <label for="user_selection">Choose a User:</label>
@@ -169,6 +172,7 @@ export default {
             isUsers: false,
             isClients: false,
             isAccounts: false,
+            invoicedStatus: false,
 			currentProjectID: '',
 			projWeek: {},
 			includedColours: {},
@@ -181,7 +185,10 @@ export default {
     },
     mounted(){
         this.$nextTick(() => {
-            this.currentProjectID = $(`#project_selection option:selected`).attr('data'); 
+            this.currentProjectID = $(`#project_selection option:selected`).attr('data');
+            this.$nextTick(() => {
+                this.invoicedStatus = this.userObj['projects'][this.currentProjectID]['weeks'][$("#week_selection option:selected").attr('data')]['invoiced'];
+            });
         });
         this.isProjects = Object.keys(userDict['projects']).length != 0;
         this.isUsers = Object.keys(userDict['users']).length != 0;
@@ -193,6 +200,9 @@ export default {
         onchange(){
 			this.currentProjectID = $(`#project_selection option:selected`).attr('data');
 		},
+        checkStatus(){
+            this.invoicedStatus = this.userObj['projects'][this.currentProjectID]['weeks'][$("#week_selection option:selected").attr('data')]['invoiced'];
+        },
         changeState(){
             this.addToRecord = $('#invoice_add_records')[0].checked;
         },

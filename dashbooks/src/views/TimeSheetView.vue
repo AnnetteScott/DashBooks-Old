@@ -16,10 +16,10 @@
             <div id="weeks_container">
                 <template v-for="(weekDict, weekID) in projectDict['weeks']" :key="weekDict">
                     <template v-if="weekDict['invoiced'] == true">
-                        <div class="week_button" :label="weekID" @click="weekButton" :data="weekID" style="background: radial-gradient(circle, #35a2ff 0%, #014a88 100%); color: white;}">{{ weekID }}</div>
+                        <div class="week_button" :label="weekID" @click="weekButton" :data="weekID" style="background: radial-gradient(circle, #35a2ff 0%, #014a88 100%); color: white;}" @contextmenu="rightClickWeek">{{ weekID }}</div>
                     </template>
                     <template v-else>
-                        <div class="week_button" :label="weekID" @click="weekButton" :data="weekID" style="background: radial-gradient(circle, rgb(209 53 255) 0%, rgb(93 26 120) 100%); color: white;}">{{ weekID }}</div>
+                        <div class="week_button" :label="weekID" @click="weekButton" :data="weekID" style="background: radial-gradient(circle, rgb(209 53 255) 0%, rgb(93 26 120) 100%); color: white;}" @contextmenu="rightClickWeek">{{ weekID }}</div>
                     </template>
                 </template>
                 <div class="week_button" color="secondary" @click="addWeek" style="background: radial-gradient(circle, #35a2ff 0%, #014a88 100%); color: white;}">+</div>
@@ -76,6 +76,9 @@
                     <p style="color: #fff">+</p>
                 </div>
             </div>
+            <div id="week_button_menu">
+                <div class="context_option" @click="toggleCheckMark">Toggle Invoice Status</div>
+            </div>
         </div>
     </div>
 </template>
@@ -118,6 +121,28 @@ export default {
 		document.addEventListener('mousemove', onMouseMove);
     },
     methods: {
+        rightClickWeek(e) {
+            e.preventDefault();
+			let position = $(e.target).position();  
+			$(`#week_button_menu`).removeClass('visible');
+			setTimeout(() => {
+				$(`#week_button_menu`).addClass('visible');
+				this.week = $(e.target).attr('data')
+			}, 1)
+			$('#week_button_menu').css({
+				left: position.left + 128.25 +'px', //16.75 should be 145
+				top: position.top + 5 + 'px' //95 should be 100
+			})
+			const scope = document.getElementById("app");
+			scope.addEventListener("click", (e) => {
+				if(e.target.offsetParent != $('#week_button_menu')){
+					$(`#week_button_menu`).removeClass('visible');
+				}
+			}) 
+		},
+		toggleCheckMark(){
+			this.projectDict['weeks'][this.week]['invoiced'] ? this.projectDict['weeks'][this.week]['invoiced'] = false : this.projectDict['weeks'][this.week]['invoiced'] = true;
+		},
         pickTextColorBasedOnBgColor(bgColor) {
             let color = (bgColor.charAt(0) === '#') ? bgColor.substring(1, 7) : bgColor;
             let r = parseInt(color.substring(0, 2), 16); // hexToR
@@ -682,5 +707,32 @@ export default {
 
 .hidden {
 	display: none !important;
+}
+
+#week_button_menu{
+	position: fixed;
+	z-index: 500;
+	width: 200px;
+	background: #1b1a1a;
+	border-radius: 10px;
+	transform: scale(0);
+	transform-origin: top left;
+}
+
+#week_button_menu.visible{
+	transform: scale(1);
+	transition: transform 200ms ease-in-out;
+}
+
+#week_button_menu .context_option{
+	padding: 8px 10px;
+	font-size: 15px;
+	color: #eee;
+	cursor: pointer;
+	border-radius: inherit;
+}
+
+#week_button_menu .context_option:hover{
+	box-shadow: 0px 0px 10px -5px white inset, 0px 4px 16px -16px black;
 }
 </style>
