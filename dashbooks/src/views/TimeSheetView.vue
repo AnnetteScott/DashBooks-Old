@@ -434,21 +434,40 @@ export default {
             $(`#hours_left`).text(neededHours)
 		},
         colourCell(event){
+            let today = new Date();
+            let dd = String(today.getDate()).padStart(2, '0');
+            let mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+            let yyyy = today.getFullYear();
+
+            today = mm + '/' + dd + '/' + yyyy;
+            if(!(today in userDict['timeLogged'])){
+                userDict['timeLogged'] = {}
+                userDict['timeLogged'][today] = 0
+            }
+            let totalTime = userDict['timeLogged'][today]
 			const colourID = $(event.target).attr('colourid');
 			this.selectedCellsList.forEach(cellID => {
 				for(const colourIDm of Object.keys(userDict['colours'])){
 					if(colourIDm != 'colourWhite'){
 						if(this.weekDict['colouredCells'][colourIDm].includes(cellID)){
 							this.weekDict['colouredCells'][colourIDm].splice(this.weekDict['colouredCells'][colourIDm].indexOf(cellID), 1)
+                            totalTime -= Math.round((1/(60/this.projectDict['timeInterval'])) * 1000) / 1000;
 						}
 					}
 				}
-				if(colourID != 'colourWhite'){
+                if(colourID == 'colourWhite'){
+                    totalTime -= this.selectedCellsList.length * Math.round((1/(60/this.projectDict['timeInterval'])) * 1000) / 1000;
+                }
+				else if(colourID != 'colourWhite'){
 					this.weekDict['colouredCells'][colourID].push(cellID);
+                    totalTime += this.selectedCellsList.length * Math.round((1/(60/this.projectDict['timeInterval'])) * 1000) / 1000;
+                    console.log(totalTime)
 				}
 				$(`[cellid=${cellID}]`).css({"background-color": userDict['colours'][colourID]['colour'], "border-color": "black"});
 			});
-
+            console.log(totalTime)
+            userDict['timeLogged'][today] = totalTime;
+            console.log(userDict)
 			this.selectedCellsList = [];
 			this.loadTimeSheet();
 		},

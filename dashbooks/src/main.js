@@ -9,7 +9,7 @@ import { reactive } from 'vue';
 const path = window.__TAURI__.path;
 const fs = window.__TAURI__.fs;
 let pjson = require('../package.json');
-const userDictMaster = {"projects": {}, "clients": {}, "colours": {'colourWhite':{'name': 'Clear', 'colour': '#ffffff'}}, "users": {}, "records": {"accounts": [],"payee": [], "categories": {}, 'savedTransactions': {}}, "saveVersion": 16, "showGST": true, "version": pjson.version}
+const userDictMaster = {"projects": {}, "clients": {}, "colours": {'colourWhite':{'name': 'Clear', 'colour': '#ffffff'}}, "users": {}, "records": {"accounts": [],"payee": [], "categories": {}, 'savedTransactions': {}}, "saveVersion": 17, "showGST": true, "version": pjson.version, "timeLogged": {"01/01/1970": 0}}
 let userDictRead = {}
 
 
@@ -128,6 +128,10 @@ export function saveChecker(saveFile){
             }
         }
         saveFile['saveVersion'] = 16;
+    }
+    if(saveFile['saveVersion'] == 16){
+        userDict['timeLogged'] = {"01/01/1970": 0}
+        saveFile['saveVersion'] = 17
     }
     saveFile['version'] = pjson.version;
     return saveFile
