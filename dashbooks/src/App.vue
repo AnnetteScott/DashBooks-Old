@@ -47,6 +47,7 @@ export default {
                         for(const[key, entry] of Object.entries(userContents)){
                             userDict[key] = entry;
                         }
+                        window.location.reload();
                         ref.saveUserDict()
                     })
                 }
