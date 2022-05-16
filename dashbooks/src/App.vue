@@ -2,6 +2,9 @@
     <nav>
         <div>
             <q-toolbar class="bg-primary text-white shadow-2 glossy">
+            <q-btn flat label="Load" @click="loadUser"/>
+            <q-btn flat label="Manual Save" @click="manualSave"/>
+            <q-btn flat label="Save" @click="saveUserDict"/>
             <q-space />
 
             <q-tabs v-model="tab" shrink>
@@ -20,6 +23,9 @@
 
 <script>
 import { ref } from 'vue'
+import { settingsDict, userDict, saveChecker } from './main.js';
+const dialog = window.__TAURI__.dialog;
+const fs = window.__TAURI__.fs;
 export default {
     name: 'HomeView',
     components: {
@@ -28,6 +34,35 @@ export default {
     setup () {
         return {
             tab: ref('')
+        }
+    },
+    methods: {
+        loadUser(){
+            let ref = this;
+            dialog.open().then(function(userFilePath) {
+                if(userFilePath != null){
+                    fs.readTextFile(userFilePath).then(function(userFileContents) {
+                        let userContents = JSON.parse(userFileContents)
+                        userContents = saveChecker(userContents)
+                        for(const[key, entry] of Object.entries(userContents)){
+                            userDict[key] = entry;
+                        }
+                        ref.saveUserDict()
+                    })
+                }
+                
+            });
+        },
+        saveUserDict(){
+            fs.writeFile({path: settingsDict['saveFilePath'], contents: JSON.stringify(userDict)})
+        },
+        manualSave(){
+            dialog.save().then(function(userFilePath) {
+                if(userFilePath != null){
+                    fs.writeFile({path: userFilePath, contents: JSON.stringify(userDict)})
+                }
+                
+            });
         }
     }
 }

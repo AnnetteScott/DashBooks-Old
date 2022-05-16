@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
+    "@tauri-apps/api": "^1.0.0-rc.3",
+    "@tauri-apps/cli": "^1.0.0-rc.8",
     "jquery": "^3.6.0",
     "quasar": "^2.0.0",
     "vue": "^3.2.13",

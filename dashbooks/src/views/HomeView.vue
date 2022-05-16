@@ -130,7 +130,7 @@ export default {
 	},
 	data(){
 		return{
-			currentYear: '2022 - 2023',
+			currentYear: '',
 			netData: {'income': 0, 'expenses': 0},
             expenseSum: {},
             incomeSum: {},
@@ -140,6 +140,14 @@ export default {
 		}
 	},
 	mounted(){
+        let date = new Date();
+        let month = date.getMonth();
+        let thisYear = date.getFullYear();
+        if(month < 3){
+            this.currentYear = `${thisYear - 1} - ${thisYear}`;
+        }else{
+            this.currentYear = `${thisYear} - ${thisYear + 1}`;
+        }
 		for(const objKey of Object.keys(userDict['records'])){
 			if(objKey != 'accounts' && objKey != 'categories' && objKey != 'payee' && objKey != 'savedTransactions'){
 				this.years.push(objKey)
@@ -151,18 +159,19 @@ export default {
         this.netData.expenses = 0;
         this.expenseSum = {};
         this.incomeSum = {};
-        for(const [objKey, objDict] of Object.entries(userDict['records'][this.currentYear]['transactions'])){
-            if(objDict.type == 'Credit'){
-                this.netData.income += objDict.amount;
-                objDict.category in this.incomeSum ? this.incomeSum[objDict.category] += 0: this.incomeSum[objDict.category] = 0;
-                this.incomeSum[objDict.category] += objDict.amount;
-            }else if(objDict.type == 'Debit'){
-                this.netData.expenses += objDict.amount;
-                objDict.category in this.expenseSum ? this.expenseSum[objDict.category] += 0: this.expenseSum[objDict.category] = 0;
-                this.expenseSum[objDict.category] += objDict.amount;
+        if (this.currentYear in userDict['records']){
+            for(const [objKey, objDict] of Object.entries(userDict['records'][this.currentYear]['transactions'])){
+                if(objDict.type == 'Credit'){
+                    this.netData.income += objDict.amount;
+                    objDict.category in this.incomeSum ? this.incomeSum[objDict.category] += 0: this.incomeSum[objDict.category] = 0;
+                    this.incomeSum[objDict.category] += objDict.amount;
+                }else if(objDict.type == 'Debit'){
+                    this.netData.expenses += objDict.amount;
+                    objDict.category in this.expenseSum ? this.expenseSum[objDict.category] += 0: this.expenseSum[objDict.category] = 0;
+                    this.expenseSum[objDict.category] += objDict.amount;
+                }
             }
         }
-        console.log(userDict)
 	},
 	methods: {
         numberWithCommas(num) {
