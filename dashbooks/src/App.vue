@@ -13,6 +13,7 @@
                 <q-route-tab name="Projects" label="TimeSheets" to="/projects"/>
                 <q-route-tab name="Invoicing" label="Invoicing" to="/invoice"/>
                 <q-route-tab name="Records" label="Records" to="/records"/>
+                <q-route-tab name="To Do" label="To Do" to="/todo"/>
                 <q-route-tab name="Help" label="Help" to="/help"/>
             </q-tabs>
             </q-toolbar>

@@ -6,6 +6,7 @@ import RecordView from '../views/RecordView.vue';
 import ProjectView from '../views/ProjectView.vue';
 import InvoiceView from '../views/InvoiceView.vue';
 import TimeSheetView from '../views/TimeSheetView.vue';
+import ToDo from '../views/ToDo.vue';
 
 const routes = [
   {
@@ -42,6 +43,11 @@ const routes = [
     path: '/timesheet',
     name: 'timesheet',
     component: TimeSheetView
+  },
+  {
+    path: '/todo',
+    name: 'todo',
+    component: ToDo
   }
 ]
 

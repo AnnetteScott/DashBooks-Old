@@ -1,5 +1,5 @@
 <template>
-  <div class="about">
+  <div class="pageHome">
     Welcome To DashBooks About
   </div>
 </template>

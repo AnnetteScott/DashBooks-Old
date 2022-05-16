@@ -206,7 +206,7 @@ export default {
 
             this.$nextTick(() => {
                 $('.column').each(function(i, obj) {
-                    if(i == 13){
+                    if(i == 14){
                         $(obj).css("border-right", "1px solid black");
                         $(obj).css("margin-right", "5px");
                     }
