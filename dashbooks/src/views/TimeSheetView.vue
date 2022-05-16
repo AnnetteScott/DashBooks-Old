@@ -455,19 +455,15 @@ export default {
 						}
 					}
 				}
-                if(colourID == 'colourWhite'){
-                    totalTime -= this.selectedCellsList.length * Math.round((1/(60/this.projectDict['timeInterval'])) * 1000) / 1000;
-                }
-				else if(colourID != 'colourWhite'){
+				if(colourID != 'colourWhite'){
 					this.weekDict['colouredCells'][colourID].push(cellID);
-                    totalTime += this.selectedCellsList.length * Math.round((1/(60/this.projectDict['timeInterval'])) * 1000) / 1000;
-                    console.log(totalTime)
 				}
 				$(`[cellid=${cellID}]`).css({"background-color": userDict['colours'][colourID]['colour'], "border-color": "black"});
 			});
-            console.log(totalTime)
-            userDict['timeLogged'][today] = totalTime;
-            console.log(userDict)
+            if(colourID != 'colourWhite'){
+                totalTime += this.selectedCellsList.length * Math.round((1/(60/this.projectDict['timeInterval'])) * 1000) / 1000;
+            }
+            userDict['timeLogged'][today] = parseFloat(totalTime.toFixed(2));
 			this.selectedCellsList = [];
 			this.loadTimeSheet();
 		},
