@@ -130,7 +130,7 @@ export function saveChecker(saveFile){
         saveFile['saveVersion'] = 16;
     }
     if(saveFile['saveVersion'] == 16){
-        userDict['timeLogged'] = {"01/01/1970": 0}
+        saveFile['timeLogged'] = {"01/01/1970": 0}
         saveFile['saveVersion'] = 17
     }
     saveFile['version'] = pjson.version;
