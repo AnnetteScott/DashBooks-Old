@@ -48,6 +48,7 @@ import { ref } from 'vue'
 import { settingsDict, userDict, saveChecker } from './main.js';
 const dialog = window.__TAURI__.dialog;
 const fs = window.__TAURI__.fs;
+const path = window.__TAURI__.path;
 export default {
     name: 'HomeView',
     components: {
@@ -96,6 +97,9 @@ export default {
                 if(userFilePath != null){
                     userFilePath = userFilePath + "/userData.ssdb"
                     settingsDict['saveFilePath'] = userFilePath;
+                    path.dataDir().then(function(dataPath) {
+                        fs.writeFile({path: dataPath + "DashBooks/settings.ssdb", contents: JSON.stringify(settingsDict)})
+                    })
                 }
             })
         }
