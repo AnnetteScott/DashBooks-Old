@@ -5,7 +5,7 @@
                 <template v-if="weekID !== ''">
                     <p>Complete </p>
                     <p id="hours_left" style="font-weight: bold;"></p>
-                    <p>more hours to reach {{ projectDict['targetHours'] }}H</p>
+                    <p>more hours to reach {{ projectDict['targetHours'] }}H for {{ projectDict['name']}}</p>
                 </template>
                 <template v-else>
                     Click on a week to get started!
@@ -187,6 +187,10 @@ export default {
         },
         weekButton(event){
             this.weekID = $(event.target).attr('data')
+            $('.week_button').each((index, weekButton) => {
+				$(weekButton).removeClass('active_button');
+			});
+			$(event.target).addClass('active_button')
             this.loadTimeSheet();
         },
         loadTimeSheet(){
@@ -703,7 +707,7 @@ export default {
 	position: absolute;
 	transform: translate(-50%,-50%);
 	height: 40px;
-	width: 120px;
+	min-width: 120px;
 	background-color: #FFFFFF;
 	border-radius: 5px;
 	box-shadow: 0px 0px 10px -5px white inset,
@@ -749,5 +753,9 @@ export default {
 
 #week_button_menu .context_option:hover{
 	box-shadow: 0px 0px 10px -5px white inset, 0px 4px 16px -16px black;
+}
+
+.active_button{
+    border: 3px solid black;
 }
 </style>
