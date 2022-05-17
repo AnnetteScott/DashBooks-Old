@@ -1,6 +1,6 @@
 <template>
     <h4>TimeSheets:</h4>
-    <p>You have logged {{ userObj['timeLogged'][today] }} hours today</p>
+    <p>You have logged {{ userObj['timeLogged'][today]['hours'] }}H and earnt ${{ userObj['timeLogged'][today]['pay'] }} today</p>
     <div class="pageHome">
         <div class="item_container">
             <div class="items">
@@ -28,17 +28,17 @@ export default {
             today: ''
         }
     },
-    mounted(){
-        let today = new Date();
-        let dd = String(today.getDate()).padStart(2, '0');
-        let mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
-        let yyyy = today.getFullYear();
-
+    beforeMount(){
+        let date = new Date();
+        let dd = String(date.getDate()).padStart(2, '0');
+        let mm = String(date.getMonth() + 1).padStart(2, '0'); //January is 0!
+        let yyyy = date.getFullYear();
         this.today = mm + '/' + dd + '/' + yyyy;
         if(!(this.today in userDict['timeLogged'])){
             userDict['timeLogged'] = {}
-            userDict['timeLogged'][this.today] = 0
+            userDict['timeLogged'][this.today] = {'hours': 0, 'pay': 0};
         }
+        console.log(userDict)
     },
     methods: {
         

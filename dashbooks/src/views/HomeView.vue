@@ -140,6 +140,7 @@ export default {
 		}
 	},
 	mounted(){
+        console.log(userDict)
         let date = new Date();
         let month = date.getMonth();
         let thisYear = date.getFullYear();
@@ -250,6 +251,7 @@ export default {
     width: fit-content;
     min-width: 100%;
     gap: 40px;
+    height: 100%;
 }
 
 h4{
@@ -259,7 +261,8 @@ h4{
 .tile{
 	width: 400px;
 	min-width: 400px;
-	height: 400px;
+	height: 100%;
+    min-height: 320px;
     margin: 0px 15px;
 	background-color: white;
 	box-shadow: 2px 4px 10px -4px #000000a4;
@@ -285,11 +288,12 @@ p{
 }
 .bar_grapgh{
     width: 100%;
-    height: 260px;
+    height: calc(100% - 110px);
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     justify-content: space-evenly;
+    overflow-y: auto;
 }
 .incomeBar{
     margin-left: 13px;
@@ -315,7 +319,7 @@ p{
 }
 
 .weeks_container{
-    height: 220px;
+    height: calc(100% - 80px);
     overflow-y: auto;
     
 }

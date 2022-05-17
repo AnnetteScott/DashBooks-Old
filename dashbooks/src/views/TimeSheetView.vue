@@ -446,9 +446,10 @@ export default {
             today = mm + '/' + dd + '/' + yyyy;
             if(!(today in userDict['timeLogged'])){
                 userDict['timeLogged'] = {}
-                userDict['timeLogged'][today] = 0
+                userDict['timeLogged'][today] = {'hours': 0, 'pay': 0}
             }
-            let totalTime = userDict['timeLogged'][today]
+            let totalTime = 0
+            let totalPay = userDict['timeLogged'][today]['pay']
 			const colourID = $(event.target).attr('colourid');
 			this.selectedCellsList.forEach(cellID => {
 				for(const colourIDm of Object.keys(userDict['colours'])){
@@ -456,6 +457,7 @@ export default {
 						if(this.weekDict['colouredCells'][colourIDm].includes(cellID)){
 							this.weekDict['colouredCells'][colourIDm].splice(this.weekDict['colouredCells'][colourIDm].indexOf(cellID), 1)
                             totalTime -= Math.round((1/(60/this.projectDict['timeInterval'])) * 1000) / 1000;
+                            totalPay -= userDict['colours'][colourIDm]['rate'] * Math.round((1/(60/this.projectDict['timeInterval'])) * 1000) / 1000;
 						}
 					}
 				}
@@ -466,8 +468,10 @@ export default {
 			});
             if(colourID != 'colourWhite'){
                 totalTime += this.selectedCellsList.length * Math.round((1/(60/this.projectDict['timeInterval'])) * 1000) / 1000;
+                totalPay += totalTime * userDict['colours'][colourID]['rate'];
             }
-            userDict['timeLogged'][today] = parseFloat(totalTime.toFixed(2));
+            userDict['timeLogged'][today]['hours'] = totalTime + userDict['timeLogged'][today]['hours'];
+            userDict['timeLogged'][today]['pay'] = totalPay;
 			this.selectedCellsList = [];
 			this.loadTimeSheet();
 		},
@@ -707,7 +711,8 @@ export default {
 	position: absolute;
 	transform: translate(-50%,-50%);
 	height: 40px;
-	min-width: 120px;
+	min-width: 130px;
+	width: 130px;
 	background-color: #FFFFFF;
 	border-radius: 5px;
 	box-shadow: 0px 0px 10px -5px white inset,

@@ -9,7 +9,7 @@ import { reactive } from 'vue';
 const path = window.__TAURI__.path;
 const fs = window.__TAURI__.fs;
 let pjson = require('../package.json');
-const userDictMaster = {"projects": {}, "clients": {}, "colours": {'colourWhite':{'name': 'Clear', 'colour': '#ffffff'}}, "users": {}, "records": {"accounts": [],"payee": [], "categories": {}, 'savedTransactions': {}}, "saveVersion": 17, "showGST": true, "version": pjson.version, "timeLogged": {"01/01/1970": 0}}
+const userDictMaster = {"projects": {}, "clients": {}, "colours": {'colourWhite':{'name': 'Clear', 'colour': '#ffffff'}}, "users": {}, "records": {"accounts": [],"payee": [], "categories": {}, 'savedTransactions': {}}, "saveVersion": 18, "showGST": true, "version": pjson.version, "timeLogged": {"01/01/1970": {'hours': 0, 'pay': 0}}}
 let userDictRead = {}
 
 
@@ -133,10 +133,17 @@ export function saveChecker(saveFile){
         saveFile['timeLogged'] = {"01/01/1970": 0}
         saveFile['saveVersion'] = 17
     }
+    if(saveFile['saveVersion'] == 18){
+        for(const[objKey, objDict] of Object.entries(saveFile['timeLogged'])){
+            saveFile['timeLogged'][objKey] = {'hours': objDict, 'pay': 0}
+        }
+        saveFile['saveVersion'] = 18
+    }
     saveFile['version'] = pjson.version;
     return saveFile
 }
 userDictRead = saveChecker(userDictRead);
+console.log(userDictRead)
 
 export const userDict = reactive({...userDictRead})
 export const settingsDict = reactive({...settingsObj})
