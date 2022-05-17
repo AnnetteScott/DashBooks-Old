@@ -25,11 +25,22 @@ for(const[objKey, objDict] of Object.entries(roaming)){
 
 if(!foundDashBooks){
     fs.createDir(dataPath + "DashBooks")
-    fs.writeFile({path: dataPath + "DashBooks/settings.json", contents: JSON.stringify({'saveFilePath': `${dataPath + "DashBooks/userData.json"}`})})
-    fs.writeFile({path: dataPath + "DashBooks/userData.json", contents: JSON.stringify(userDictMaster)})
+    fs.writeFile({path: dataPath + "DashBooks/settings.ssdb", contents: JSON.stringify({'saveFilePath': `${dataPath + "DashBooks/userData.ssdb"}`})})
+    fs.writeFile({path: dataPath + "DashBooks/userData.ssdb", contents: JSON.stringify(userDictMaster)})
+}else if(foundDashBooks){
+    let dashBookFiles = await fs.readDir(dataPath + "DashBooks");
+    for(const[objKey, objDict] of Object.entries(dashBookFiles)){
+        if(objDict['name'] == 'settings.json'){
+            fs.writeFile({path: dataPath + "DashBooks/settings.json", contents: JSON.stringify({'saveFilePath': `${dataPath + "DashBooks/userData.ssdb"}`})})
+            fs.renameFile(dataPath + "DashBooks/settings.json", dataPath + "DashBooks/settings.ssdb")
+        }
+        else if(objDict['name'] == 'userData.json'){
+            fs.renameFile(dataPath + "DashBooks/userData.json", dataPath + "DashBooks/userData.ssdb")
+        }
+    }
 }
 
-let settingsObjs = await fs.readTextFile(dataPath + "DashBooks/settings.json");
+let settingsObjs = await fs.readTextFile(dataPath + "DashBooks/settings.ssdb");
 const settingsObj = JSON.parse(settingsObjs);
 let rawUser = await fs.readTextFile(settingsObj['saveFilePath'])
 userDictRead = JSON.parse(rawUser)
@@ -133,7 +144,7 @@ export function saveChecker(saveFile){
         saveFile['timeLogged'] = {"01/01/1970": 0}
         saveFile['saveVersion'] = 17
     }
-    if(saveFile['saveVersion'] == 18){
+    if(saveFile['saveVersion'] == 17){
         for(const[objKey, objDict] of Object.entries(saveFile['timeLogged'])){
             saveFile['timeLogged'][objKey] = {'hours': objDict, 'pay': 0}
         }
@@ -151,7 +162,7 @@ export const settingsDict = reactive({...settingsObj})
 
 import { appWindow } from '@tauri-apps/api/window'
 appWindow.listen('tauri://close-requested', ({ event, payload }) => {
-    fs.writeFile({path: dataPath + "DashBooks/userData.json", contents: JSON.stringify(userDict)});
+    fs.writeFile({path: settingsObj['saveFilePath'], contents: JSON.stringify(userDict)});
     appWindow.close();
 })
 

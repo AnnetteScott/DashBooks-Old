@@ -2,8 +2,29 @@
     <nav>
         <div>
             <q-toolbar class="bg-primary text-white shadow-2 glossy">
-            <q-btn flat label="Load" @click="loadUser"/>
-            <q-btn flat label="Manual Save" @click="manualSave"/>
+            <q-btn-dropdown stretch flat label="More">
+                <q-list>
+                    <q-item clickable v-close-popup tabindex="0">
+                        <q-item-section>
+                        <q-item-label @click="loadUser">Load</q-item-label>
+                        </q-item-section>
+                        <q-item-section side>
+                        </q-item-section>
+                    </q-item>
+                    <q-item clickable v-close-popup tabindex="0">
+                        <q-item-section>
+                        <q-item-label @click="manualSave">Manual Save</q-item-label>
+                        </q-item-section>
+                        <q-item-section side>
+                        </q-item-section>
+                    </q-item>
+                    <q-item clickable v-close-popup tabindex="0">
+                        <q-item-section>
+                            <q-item-label @click="changeSaveLocation">Change Save Location</q-item-label>
+                        </q-item-section>
+                    </q-item>
+                </q-list>
+            </q-btn-dropdown>
             <q-btn flat label="Save" @click="saveUserDict"/>
             <q-space />
 
@@ -57,14 +78,26 @@ export default {
         },
         saveUserDict(){
             fs.writeFile({path: settingsDict['saveFilePath'], contents: JSON.stringify(userDict)})
+            path.dataDir().then(function(dataPath) {
+                fs.writeFile({path: dataPath + "DashBooks/userData.ssdb", contents: JSON.stringify(userDict)})
+            })
         },
         manualSave(){
+            this.saveUserDict();
             dialog.save().then(function(userFilePath) {
                 if(userFilePath != null){
                     fs.writeFile({path: userFilePath, contents: JSON.stringify(userDict)})
                 }
                 
             });
+        },
+        changeSaveLocation(){
+            dialog.open({"directory": true}).then(function(userFilePath) {
+                if(userFilePath != null){
+                    userFilePath = userFilePath + "/userData.ssdb"
+                    settingsDict['saveFilePath'] = userFilePath;
+                }
+            })
         }
     }
 }
