@@ -46,7 +46,7 @@
             "https://gist.github.com/NotNatural21/26769149799325d2e27d23b92986d348/raw"
         ],
         "dialog": false,
-        "pubkey": "YOUR_UPDATER_SIGNATURE_PUBKEY_HERE"
+        "pubkey": ""
     },
     "allowlist": {
       "all": true,
