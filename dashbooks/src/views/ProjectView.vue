@@ -38,7 +38,6 @@ export default {
             userDict['timeLogged'] = {}
             userDict['timeLogged'][this.today] = {'hours': 0, 'pay': 0};
         }
-        console.log(userDict)
     },
     methods: {
         

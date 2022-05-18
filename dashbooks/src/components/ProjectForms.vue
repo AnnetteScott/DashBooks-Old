@@ -306,8 +306,6 @@ export default {
         },
         deleteColour(){
             const colourID = $(`#edit_colourID`).attr('colourid');
-            console.log(colourID)
-            console.log(userDict['colours'][colourID]['name'])
             let ref = this;
             confirm(`Are you sure you want to delete ${userDict['colours'][colourID]['name']}?`).then(function(outcome) {
                 if(outcome){

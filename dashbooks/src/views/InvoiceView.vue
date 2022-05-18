@@ -194,7 +194,6 @@ export default {
         this.isUsers = Object.keys(userDict['users']).length != 0;
         this.isClients = Object.keys(userDict['clients']).length != 0;
         this.isAccounts = userDict['records']['accounts'].length != 0;
-        console.log(userDict)
     },
     methods: {
         onchange(){

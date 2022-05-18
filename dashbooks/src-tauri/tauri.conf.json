@@ -41,7 +41,12 @@
       }
     },
     "updater": {
-      "active": false
+        "active": true,
+        "endpoints": [
+            "https://gist.github.com/NotNatural21/26769149799325d2e27d23b92986d348/raw"
+        ],
+        "dialog": false,
+        "pubkey": "YOUR_UPDATER_SIGNATURE_PUBKEY_HERE"
     },
     "allowlist": {
       "all": true,
@@ -70,8 +75,8 @@
     "windows": [
       {
         "title": "DashBooks",
-        "width": 800,
-        "height": 600,
+        "width": 1440,
+        "height": 800,
         "resizable": true,
         "fullscreen": false,
         "maximized": true

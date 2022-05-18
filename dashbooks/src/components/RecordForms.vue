@@ -195,8 +195,6 @@ export default {
 			if (index > -1) {
 				userDict['records']['accounts'].splice(index, 1);
 			}
-            console.log(account)
-            console.log(userDict['records'])
 			let newAccount = $(`#edit_account`).val()
 			if(newAccount == ''){ //If no category was provided
 				$("#edit_account").addClass('form_error');

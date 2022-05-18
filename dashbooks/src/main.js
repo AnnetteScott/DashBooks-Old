@@ -5,35 +5,34 @@ import { Quasar } from 'quasar';
 import quasarUserOptions from './quasar-user-options';
 import { reactive } from 'vue';
 
-
+//Set variables for getting and process user data
 const path = window.__TAURI__.path;
 const fs = window.__TAURI__.fs;
 let pjson = require('../package.json');
 const userDictMaster = {"projects": {}, "clients": {}, "colours": {'colourWhite':{'name': 'Clear', 'colour': '#ffffff'}}, "users": {}, "records": {"accounts": [],"payee": [], "categories": {}, 'savedTransactions': {}}, "saveVersion": 18, "showGST": true, "version": pjson.version, "timeLogged": {"01/01/1970": {'hours': 0, 'pay': 0}}}
 let userDictRead = {}
 
-
+//Check a dashbooks directory is present in appdata/roaming and create it if not
 let dataPath = await path.dataDir();
 let foundDashBooks = false;
-
 let roaming = await fs.readDir(dataPath);
 for(const[objKey, objDict] of Object.entries(roaming)){
     if(objDict['name'] == 'DashBooks'){
         foundDashBooks = true;
     }
 }
-
 if(!foundDashBooks){
     fs.createDir(dataPath + "DashBooks")
     fs.writeFile({path: dataPath + "DashBooks/settings.ssdb", contents: JSON.stringify({'saveFilePath': `${dataPath + "DashBooks/userData.ssdb"}`})})
     fs.writeFile({path: dataPath + "DashBooks/userData.ssdb", contents: JSON.stringify(userDictMaster)})
 }
 
+//Get the user data
 let settingsObjs = await fs.readTextFile(dataPath + "DashBooks/settings.ssdb");
 const settingsObj = JSON.parse(settingsObjs);
 let saveFileDirectory = settingsObj['saveFilePath'].split('/')[0]
 let saveFiles = await fs.readDir(saveFileDirectory);
-
+//Check the save file is present otherwise read from backup
 let saveFileFound = false;
 for(const[objKey, objDict] of Object.entries(saveFiles)){
     if(objDict['name'] == 'userData.ssdb'){
@@ -162,7 +161,7 @@ userDictRead = saveChecker(userDictRead);
 export const userDict = reactive({...userDictRead})
 export const settingsDict = reactive({...settingsObj})
 
-
+//Save on exit
 import { appWindow } from '@tauri-apps/api/window'
 appWindow.listen('tauri://close-requested', ({ event, payload }) => {
     fs.writeFile({path: settingsObj['saveFilePath'], contents: JSON.stringify(userDict)});
@@ -171,6 +170,22 @@ appWindow.listen('tauri://close-requested', ({ event, payload }) => {
     })
     appWindow.close();
 })
+
+//Auto updater
+import { emit } from '@tauri-apps/api/event'
+import { listen } from '@tauri-apps/api/event'
+
+emit('tauri://update')
+listen('tauri://update-available', function (res) {
+    console.log('New version available: ', res)
+    emit('tauri://update-install')
+    listen('tauri://update-status', function (res) {
+        console.log('New status: ', res)
+    })
+})
+
+
+
 
 
 let myApp = createApp(App)

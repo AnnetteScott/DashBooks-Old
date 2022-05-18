@@ -156,7 +156,6 @@ export default {
     methods: {
         editProject(event, form){
             const ID = $(event.target).attr('data');
-            console.log(ID)
             this.projectRequest = form;
             this.$nextTick(() => {
                 if(form.includes('Project')){
