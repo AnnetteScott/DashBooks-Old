@@ -41,12 +41,7 @@
       }
     },
     "updater": {
-        "active": true,
-        "endpoints": [
-            "https://gist.github.com/NotNatural21/26769149799325d2e27d23b92986d348/raw"
-        ],
-        "dialog": false,
-        "pubkey": ""
+        "active": false
     },
     "allowlist": {
       "all": true,

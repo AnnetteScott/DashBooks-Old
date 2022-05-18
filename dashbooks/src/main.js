@@ -171,22 +171,5 @@ appWindow.listen('tauri://close-requested', ({ event, payload }) => {
     appWindow.close();
 })
 
-//Auto updater
-import { emit } from '@tauri-apps/api/event'
-import { listen } from '@tauri-apps/api/event'
-
-emit('tauri://update')
-listen('tauri://update-available', function (res) {
-    console.log('New version available: ', res)
-    emit('tauri://update-install')
-    listen('tauri://update-status', function (res) {
-        console.log('New status: ', res)
-    })
-})
-
-
-
-
-
 let myApp = createApp(App)
 myApp.use(Quasar, quasarUserOptions).use(router).mount('#app')
