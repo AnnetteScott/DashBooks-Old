@@ -16,15 +16,15 @@
             <div id="weeks_container">
                 <template v-for="(weekDict, weekID) in projectDict['weeks']" :key="weekDict">
                     <template v-if="weekDict['invoiced'] == true">
-                        <div class="week_button" :label="weekID" @click="weekButton" :data="weekID" style="background: radial-gradient(circle, #35a2ff 0%, #014a88 100%); color: white;}" @contextmenu="rightClickWeek">{{ weekID }}</div>
+                        <div class="week_button" :label="weekID" @click="weekButton" :data="weekID" style="background: radial-gradient(circle, #35a2ff 0%, #014a88 100%); color: white;" @contextmenu="rightClickWeek">{{ weekID }}</div>
                     </template>
                     <template v-else>
-                        <div class="week_button" :label="weekID" @click="weekButton" :data="weekID" style="background: radial-gradient(circle, rgb(209 53 255) 0%, rgb(93 26 120) 100%); color: white;}" @contextmenu="rightClickWeek">{{ weekID }}</div>
+                        <div class="week_button" :label="weekID" @click="weekButton" :data="weekID" style="background: radial-gradient(circle, rgb(209 53 255) 0%, rgb(93 26 120) 100%); color: white;" @contextmenu="rightClickWeek">{{ weekID }}</div>
                     </template>
                 </template>
-                <div class="week_button" color="secondary" @click="addWeek" style="background: radial-gradient(circle, #35a2ff 0%, #014a88 100%); color: white;}">+</div>
+                <div class="week_button" color="secondary" @click="addWeek" style="background: radial-gradient(circle, #35a2ff 0%, #014a88 100%); color: white;">+</div>
             </div>
-            <div id="time_sheet_container" style="background: radial-gradient(circle, #35a2ff 0%, #014a88 100%); color: white;}">
+            <div id="time_sheet_container" style="background: radial-gradient(circle, #35a2ff 0%, #014a88 100%); color: white;">
                 <template v-if="weekID != ``">
                     <template v-for="(col, index) in columnLetter" :key="col">
                         <div :colID="col" class="column">
@@ -758,9 +758,5 @@ export default {
 
 #week_button_menu .context_option:hover{
 	box-shadow: 0px 0px 10px -5px white inset, 0px 4px 16px -16px black;
-}
-
-.active_button{
-    border: 3px solid black;
 }
 </style>
