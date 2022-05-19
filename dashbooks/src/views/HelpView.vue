@@ -24,3 +24,6 @@ export default {
     }
 }
 </script>
+<style scoped lan="scss">
+
+</style>

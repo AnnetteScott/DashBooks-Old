@@ -9,7 +9,7 @@ import { reactive } from 'vue';
 const path = window.__TAURI__.path;
 const fs = window.__TAURI__.fs;
 let pjson = require('../package.json');
-const userDictMaster = {"projects": {}, "clients": {}, "colours": {'colourWhite':{'name': 'Clear', 'colour': '#ffffff'}}, "users": {}, "records": {"accounts": [],"payee": [], "categories": {}, 'savedTransactions': {}}, "saveVersion": 18, "showGST": true, "version": pjson.version, "timeLogged": {"01/01/1970": {'hours': 0, 'pay': 0}}}
+const userDictMaster = {"projects": {}, "clients": {}, "colours": {'colourWhite':{'name': 'Clear', 'colour': '#ffffff'}}, "users": {}, "budgets": {}, "records": {"accounts": [],"payee": [], "categories": {}, 'savedTransactions': {}}, "saveVersion": 18, "showGST": true, "version": pjson.version, "timeLogged": {"01/01/1970": {'hours': 0, 'pay': 0}}}
 let userDictRead = {}
 
 //Check a dashbooks directory is present in appdata/roaming and create it if not
@@ -152,6 +152,10 @@ export function saveChecker(saveFile){
             saveFile['timeLogged'][objKey] = {'hours': objDict, 'pay': 0}
         }
         saveFile['saveVersion'] = 18
+    }
+    if(saveFile['saveVersion'] == 18){
+        saveFile['budgets'] = {}
+        saveFile['saveVersion'] = 19
     }
     saveFile['version'] = pjson.version;
     return saveFile
