@@ -501,7 +501,7 @@ export default {
 	flex-direction: row;
 	align-items: center;
 	justify-content: center;
-    width: 400px;
+    width: 650px;
     box-shadow: 0px 0px 10px -5px white inset, 0px 4px 16px -16px black;
     border-radius: 10px;
     background-color: #ffffff56;
