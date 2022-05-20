@@ -6,7 +6,6 @@ import RecordView from '../views/RecordView.vue';
 import ProjectView from '../views/ProjectView.vue';
 import InvoiceView from '../views/InvoiceView.vue';
 import TimeSheetView from '../views/TimeSheetView.vue';
-import BudgetView from '../views/BudgetView.vue';
 
 const routes = [
   {
@@ -43,11 +42,6 @@ const routes = [
     path: '/timesheet',
     name: 'timesheet',
     component: TimeSheetView
-  },
-  {
-    path: '/budget',
-    name: 'budget',
-    component: BudgetView
   }
 ]
 

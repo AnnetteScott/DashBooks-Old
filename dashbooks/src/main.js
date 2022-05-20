@@ -153,10 +153,6 @@ export function saveChecker(saveFile){
         }
         saveFile['saveVersion'] = 18
     }
-    if(saveFile['saveVersion'] == 18){
-        saveFile['budgets'] = {}
-        saveFile['saveVersion'] = 19
-    }
     saveFile['version'] = pjson.version;
     return saveFile
 }
