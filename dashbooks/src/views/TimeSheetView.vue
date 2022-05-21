@@ -432,6 +432,7 @@ export default {
 				}
 				
 			}
+            this.weekDict['total'] = timeMoney.toFixed(2)
             $(`[cellid=A${cellTotal + 4}]`).text(`${timeTotal.toFixed(2)}H`);
 			$(`[cellid=A${cellTotal + 5}]`).text(`$${timeMoney.toFixed(2)}`);
             let neededHours = this.projectDict['targetHours'] - timeTotal <= 0 ? 0 : this.projectDict['targetHours'] - timeTotal;

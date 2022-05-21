@@ -164,7 +164,7 @@ export default {
 			
 			if(weekInterval == 1){
 				for(let w = 1; w <= duration; w++){
-					userDict['projects'][projectID]['weeks'][`${w}`] = {'startDate': date, 'colouredCells': {}, 'invoiced': false};
+					userDict['projects'][projectID]['weeks'][`${w}`] = {'startDate': date, 'colouredCells': {}, 'invoiced': false, 'total': ''};
 					colourIds.forEach(colourID => {
 						if(colourID != 'colourWhite'){
 							userDict['projects'][projectID]['weeks'][`${w}`]['colouredCells'][colourID] = [];
@@ -178,7 +178,7 @@ export default {
 					userDict['projects'][projectID]['duration'] = duration;
 				}   
 				for(let w = 1; w <= duration; w+= 2){
-					userDict['projects'][projectID]['weeks'][`${w} - ${w + 1}`] = {'startDate': date, 'colouredCells': {}, 'invoiced': false};
+					userDict['projects'][projectID]['weeks'][`${w} - ${w + 1}`] = {'startDate': date, 'colouredCells': {}, 'invoiced': false, 'total': ''};
 					colourIds.forEach(colourID => {
 						if(colourID != 'colourWhite'){
 							userDict['projects'][projectID]['weeks'][`${w} - ${w + 1}`]['colouredCells'][colourID] = [];
@@ -225,7 +225,7 @@ export default {
 					let date = userDict['projects'][projectID]['weeks'][`${previousDur}`]['startDate'];
 					for(let w = previousDur + 1; w <= duration; w++){
 						date = addToDate(date, 14);
-						userDict['projects'][projectID]['weeks'][`${w}`] = {'startDate': date, 'colouredCells': {}, 'invoiced': false};
+						userDict['projects'][projectID]['weeks'][`${w}`] = {'startDate': date, 'colouredCells': {}, 'invoiced': false, 'total': ''};
 						colourIds.forEach(colourID => {
 							if(colourID != 'colourWhite'){
 									userDict['projects'][projectID]['weeks'][`${w}`]['colouredCells'][colourID] = [];
@@ -240,7 +240,7 @@ export default {
 					let date = userDict['projects'][projectID]['weeks'][lastKey]['startDate'];
 					for(let w = previousDur + 1; w <= duration; w+= 2){
 						date = addToDate(date, 14);
-						userDict['projects'][projectID]['weeks'][`${w} - ${w + 1}`] = {'startDate': date, 'colouredCells': {}, 'invoiced': false};
+						userDict['projects'][projectID]['weeks'][`${w} - ${w + 1}`] = {'startDate': date, 'colouredCells': {}, 'invoiced': false, 'total': ''};
 						colourIds.forEach(colourID => {
 							if(colourID != 'colourWhite'){
 									userDict['projects'][projectID]['weeks'][`${w} - ${w + 1}`]['colouredCells'][colourID] = [];

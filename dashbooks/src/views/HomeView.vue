@@ -100,12 +100,15 @@
                                             <div class="week">
                                                 <template v-if="weekDict.invoiced">
                                                     <p style="font-size:large; color: #53b700">{{ week }} : {{ weekDict.startDate }}</p>
+                                                    <p style="width: 65px; color: #53b700">${{ numberWithCommas(weekDict.total) }}</p>
                                                 </template>
                                                 <template v-else>
                                                     <p style="font-size:large">{{ week }} : {{ weekDict.startDate }}</p>
+                                                    <p style="width: 65px">${{ numberWithCommas(weekDict.total) }}</p>
                                                 </template>
+                                                
                                                 <p v-if="!weekDict.invoiced && checkDate(weekDict.startDate)" style="color: #FF4F00">Invoice Is Due!</p>
-                                                <p v-else="" style="width: 88px"></p>
+                                                <p v-else="" style="width: 92.61px"></p>
                                             </div>
                                         </template>
                                     </div>
@@ -172,6 +175,7 @@ export default {
                 }
             }
         }
+        console.log(userDict)
 	},
 	methods: {
         numberWithCommas(num) {
@@ -337,6 +341,6 @@ p{
 .week > p:first-child{
     display: flex;
     justify-content: flex-end;
-    width: 50%;
+    width: 37%;
 }
 </style>
