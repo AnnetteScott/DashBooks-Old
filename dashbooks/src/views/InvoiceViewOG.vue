@@ -4,36 +4,29 @@
         <div class="form" style="background: radial-gradient(circle, #35a2ff 0%, #014a88 100%);">
             <div id="top">
                 <div class="side">
-                    <label for="amount_projects_invoice">Number of Projects To Invoice:</label>
+                    <label for="project_selection">Choose a Project:</label>
                     <template v-if="isProjects">
-                        <select id="amount_projects_invoice" @change="changeProjectNum" style="margin: 0px 0px 10px;">
-                            <option v-for="(projID, index) in projectKeys" :key="projID">
-                                {{ index + 1 }}
+                        <select id="project_selection" @change="onchange">
+                            <option v-for="(projDict, projID) in userObj['projects']" :key="projDict" :data="projID">
+                                {{ projDict['name'] }}
                             </option>
                         </select>
                     </template>
                     <template v-else>
                         <div class="advisory">Go To Settings To Create A Project</div>
                     </template>
-                    <div class="project_selection_container">
-                        <template v-if="isProjects">
-                            <template v-for="(n, index) in parseInt(amountOfProjects)" :key="index">
-                                <div class="selection_select">
-                                    <label :for="`project_selection_${n}`">Choose a Project and Week:</label>
-                                    <select :id="`project_selection_${n}`" @change="checkInvoice">
-                                        <template v-for="(projDict, projID) in userObj['projects']" :key="projDict" >
-                                            <template v-for="(weekDict, weekID) in projDict['weeks']" :key="weekID">
-                                                <option :data="projID" :weekid="weekID">{{ projDict.name }} : {{ weekID }}</option>
-                                            </template>
-                                        </template>
-                                    </select>
-                                    <p style="color: white" :id="`invoice_selection_alert_${n}`"></p>
-                                </div>
-                            </template>
-                        </template>
-                    </div>
-                </div>
-                <div class="side">
+                    <template v-if="currentProjectID !== ''">
+                        <label for="week_selection">Choose a Week:</label>
+                        <select id="week_selection" @change="checkStatus">
+                            <option v-for="(weekDict, weekID) in userObj['projects'][currentProjectID]['weeks']" :key="weekDict" :data="weekID">
+                            {{ weekID }}
+                            </option>
+                        </select>
+                    </template>
+                    <template v-if="invoicedStatus">
+                        <p style="color: white">This week as already been invoiced</p>
+                    </template>
+                    
                     <label for="user_selection">Choose a User:</label>
                     <template v-if="isUsers">
                         <select id="user_selection">
@@ -92,7 +85,7 @@
                     </template>
                 </div>
             </div>
-        <q-btn class="glossy" rounded color="primary" label="Print Invoice" @click="generateInvoice"/>
+            <q-btn class="glossy" rounded color="primary" label="Print Invoice" @click="generateInvoice"/>
         </div>	
 	</div>
 
@@ -183,9 +176,7 @@ export default {
 			currentProjectID: '',
 			projWeek: {},
 			includedColours: {},
-			amountOfProjects: 1,
 			invoiceTotal: 0,
-			projectKeys: [],
 			columnLetter: ['A', 'B', 'C', 'D'],
 			columnHeadings: ['Description', 'Rate', 'Quantity', 'Total $'],
 			keys: ['name', 'rate', 'QTY', 'Total'],
@@ -194,45 +185,22 @@ export default {
     },
     mounted(){
         this.$nextTick(() => {
-            this.projectKeys.forEach((projectID, index) => {
-                let weekID = Object.keys(userDict['projects'][projectID]['weeks'])[0]
-                if(userDict['projects'][projectID]['weeks'][weekID]['invoiced']){
-                    $(`#invoice_selection_alert_${index + 1}`).text('This week as already been invoiced')
-                }else{
-                    $(`#invoice_selection_alert_${index + 1}`).text('')
-                }
-            })
+            this.currentProjectID = $(`#project_selection option:selected`).attr('data');
+            this.$nextTick(() => {
+                this.invoicedStatus = this.userObj['projects'][this.currentProjectID]['weeks'][$("#week_selection option:selected").attr('data')]['invoiced'];
+            });
         });
         this.isProjects = Object.keys(userDict['projects']).length != 0;
         this.isUsers = Object.keys(userDict['users']).length != 0;
         this.isClients = Object.keys(userDict['clients']).length != 0;
         this.isAccounts = userDict['records']['accounts'].length != 0;
-        if(this.isProjects){
-            this.projectKeys = Object.keys(userDict['projects'])
-        }
     },
     methods: {
-        changeProjectNum(){
-            this.amountOfProjects = $(`#amount_projects_invoice option:selected`).val();
-            this.$nextTick(() => {
-                this.projectKeys.forEach((projectID, index) => {
-                    let weekID = Object.keys(userDict['projects'][projectID]['weeks'])[0]
-                    if(userDict['projects'][projectID]['weeks'][weekID]['invoiced']){
-                        $(`#invoice_selection_alert_${index + 1}`).text('This week as already been invoiced')
-                    }else{
-                        $(`#invoice_selection_alert_${index + 1}`).text('')
-                    }
-                })
-            });
-        },
-        checkInvoice(event){
-            let projectID = $(`#${event.target.id} option:selected`).attr('data')
-            let weekID = $(`#${event.target.id} option:selected`).attr('weekid')
-            if(userDict['projects'][projectID]['weeks'][weekID]['invoiced']){
-                $(`#invoice_selection_alert_${event.target.id.split('_')[2]}`).text('This week as already been invoiced')
-            }else{
-                $(`#invoice_selection_alert_${event.target.id.split('_')[2]}`).text('')
-            }
+        onchange(){
+			this.currentProjectID = $(`#project_selection option:selected`).attr('data');
+		},
+        checkStatus(){
+            this.invoicedStatus = this.userObj['projects'][this.currentProjectID]['weeks'][$("#week_selection option:selected").attr('data')]['invoiced'];
         },
         changeState(){
             this.addToRecord = $('#invoice_add_records')[0].checked;
@@ -389,7 +357,6 @@ input {
 }
 
 .form{
-    height: 55%;
 	display: flex;
 	position: relative;
 	flex-direction: column;
@@ -407,15 +374,13 @@ input {
 #top{
     display: flex;
     flex-direction: row;
-    overflow-y: auto;
 }
 
 .side{
-    height: 100%;
     display: flex;
 	position: relative;
 	flex-direction: column;
-	justify-content: flex-start;
+	justify-content: center;
 	align-items: center;
 }
 
@@ -424,8 +389,9 @@ input {
 }
 
 select{
-	width: 230px;
+	width: 200px;
 	height: 35px;
+	margin: 0px 0px 10px;
 	padding: 5px;
 	border-radius: 10px;
 	outline: none;
@@ -448,12 +414,5 @@ input[type="checkbox"]{
 
 .button_link{
     width: 100% !important;
-}
-.selection_select{
-    padding-bottom: 20px;
-}
-.selection_select > p{
-    height: 21px;
-    font-style: italic;
 }
 </style>

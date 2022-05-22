@@ -27,7 +27,7 @@
             <div id="time_sheet_container" style="background: radial-gradient(circle, #35a2ff 0%, #014a88 100%); color: white;">
                 <template v-if="weekID != ``">
                     <template v-for="(col, index) in columnLetter" :key="col">
-                        <div :colID="col" class="column">
+                        <div :colID="col" class="timesheet_column">
                             <div :cellID="`${col}-2`" class="dateCell">{{ dayList[index] }}</div>
                             <div :cellID="`${col}-1`" class="dateCell">{{ dateList[index] }}</div>
                             <template v-if="col == `Z`">
@@ -164,7 +164,7 @@ export default {
             if(this.projectDict['weekInterval'] == 1){
                 let date = this.projectDict['weeks'][`${duration}`]['startDate'];
                 date = addToDate(date, 14);
-                this.projectDict['weeks'][`${duration + 1}`] = {'startDate': date, 'colouredCells': {}, 'invoiced': false};
+                this.projectDict['weeks'][`${duration + 1}`] = {'startDate': date, 'colouredCells': {}, 'invoiced': false, 'total': 0};
                 colourIds.forEach(colourID => {
                     if(colourID != 'colourWhite'){
                         this.projectDict['weeks'][`${duration}`]['colouredCells'][colourID] = [];
@@ -176,7 +176,7 @@ export default {
                 let lastKey = `${duration - 1} - ${duration}`;
                 let date = this.projectDict['weeks'][lastKey]['startDate'];
                 date = addToDate(date, 14);
-                this.projectDict['weeks'][`${duration + 1} - ${duration + 2}`] = {'startDate': date, 'colouredCells': {}, 'invoiced': false};
+                this.projectDict['weeks'][`${duration + 1} - ${duration + 2}`] = {'startDate': date, 'colouredCells': {}, 'invoiced': false, 'total': 0};
                 colourIds.forEach(colourID => {
                     if(colourID != 'colourWhite'){
                         this.projectDict['weeks'][`${duration + 1} - ${duration + 2}`]['colouredCells'][colourID] = [];
@@ -234,8 +234,8 @@ export default {
             this.timeInterval = this.projectDict['timeInterval'];
 
             this.$nextTick(() => {
-                $('.column').each(function(i, obj) {
-                    if(i == 14){
+                $('.timesheet_column').each(function(i, obj) {
+                    if(i == 7){
                         $(obj).css("border-right", "1px solid black");
                         $(obj).css("margin-right", "5px");
                     }
@@ -247,11 +247,11 @@ export default {
 					});
 				}
                 //Set border for bottom of timelist timesheet section
-				$(`.column > div:nth-child(${this.projectDict['timeList'].length + 2})`).css("margin-bottom", "7px");
-                $(`.column > div:nth-child(${this.projectDict['timeList'].length + 2})`).css("border-bottom", "1px solid black");
+				$(`.timesheet_column > div:nth-child(${this.projectDict['timeList'].length + 2})`).css("margin-bottom", "7px");
+                $(`.timesheet_column > div:nth-child(${this.projectDict['timeList'].length + 2})`).css("border-bottom", "1px solid black");
 
-                $(`.column > div:nth-child(${this.timeList.length + this.colourList.length})`).css("margin-bottom", "5px");
-				$(`.column > div:nth-child(${this.timeList.length + this.colourList.length})`).css("border-bottom", "1px solid black");
+                $(`.timesheet_column > div:nth-child(${this.timeList.length + this.colourList.length})`).css("margin-bottom", "5px");
+				$(`.timesheet_column > div:nth-child(${this.timeList.length + this.colourList.length})`).css("border-bottom", "1px solid black");
                 this.updateColourTotals();
             });
             
@@ -532,6 +532,7 @@ export default {
 #weeks_container > div{
 	width: 90%;
 	height: 30px;
+    min-height: 30px;
 }
 
 #time_sheet_container{
@@ -601,7 +602,7 @@ export default {
 	box-shadow: 0 14px 28px rgba(0, 0, 0, 0.082), 0 10px 10px rgba(0, 0, 0, 0.11);
 }
 
-.column{
+.timesheet_column{
 	width: 100%;
 	z-index: 2;
 	min-width: 90px;
@@ -609,7 +610,7 @@ export default {
 	border-top: 1px solid black;
     margin-top: 10px;
 }
-.column:nth-child(1){
+.timesheet_column:nth-child(1){
 	left: 0px;
 	z-index: 10;
 	position: sticky;
@@ -618,7 +619,7 @@ export default {
 	border: 1px solid black;
 	pointer-events: none;
 }
-.column:nth-child(1){
+.timesheet_column:nth-child(1){
 	left: 0px;
 	z-index: 10;
 	position: sticky;
@@ -627,14 +628,14 @@ export default {
 	border: 1px solid black;
 	pointer-events: none;
 }
-.column > div:nth-child(1){
+.timesheet_column > div:nth-child(1){
 	top: 0px;
 	position: sticky;
 	pointer-events: none;
 	user-select: none;
 }
 
-.column > div:nth-child(2){
+.timesheet_column > div:nth-child(2){
 	top: 26px;
 	position: sticky;
 	pointer-events: none;
