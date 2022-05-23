@@ -179,9 +179,6 @@ export default {
             isUsers: false,
             isClients: false,
             isAccounts: false,
-            invoicedStatus: false,
-			currentProjectID: '',
-			projWeek: {},
 			includedColours: {},
 			amountOfProjects: 1,
 			invoiceTotal: 0,
@@ -242,6 +239,30 @@ export default {
         changeState(){
             this.addToRecord = $('#invoice_add_records')[0].checked;
         },
+        getFirstLastDate(arr){
+            let dateObjArr = [];
+            let firstDate = new Date(0);
+            let lastDate = new Date(0);
+            arr.forEach((date, index) => {
+                let newDate = date.split('/');
+                newDate = `${newDate[1]}/${newDate[0]}/${newDate[2]}`;
+                let d = new Date(newDate);
+                dateObjArr.push(d)
+            })
+            dateObjArr.forEach((date, index) => {
+                if(index = 1){
+                    firstDate = date;
+                    lastDate = date;
+                }
+                if(date.getTime() < firstDate.getTime()){
+                    firstDate = date
+                }
+                if(date.getTime() > lastDate.getTime()){
+                    lastDate = date
+                }
+            })
+            return [firstDate, lastDate]
+        },
 		generateInvoice(){
 			//Invoice Date. Uses todays date if none is selected.
             let today = new Date();
@@ -252,26 +273,79 @@ export default {
             let invoiceDate = $('#invoice_date').val() ? $('#invoice_date').val().split('-')[2] + '/' + $('#invoice_date').val().split('-')[1] + '/' + $('#invoice_date').val().split('-')[0] : today;
 			$('#invoice_date_invoice').text(invoiceDate);
 			
-			//Invoice Period
-			let invoice_period = this.userObj['projects'][this.currentProjectID]['weeks'][$('#week_selection').val()]['startDate'];
-			invoice_period += ' to ';
-			invoice_period += addToDate(this.userObj['projects'][this.currentProjectID]['weeks'][$('#week_selection').val()]['startDate'], 13);
-			$('#invoice_date_period').text(invoice_period);
+            //Process All Data
+            this.invoiceData = {}
+            let allStartDates = []
+            let includeAllColours = $('#invoice_include_colours')[0].checked
+            for(let i = 1; i <= this.amountOfProjects; i++){
+                let projectID = $(`#project_selection_${i} option:selected`).attr('data')
+                let weekID = $(`#project_selection_${i} option:selected`).attr('weekid')
+                this.invoiceData[projectID] = []
+                allStartDates.push(userDict['projects'][projectID]['weeks'][weekID]['startDate'])
+                if($('#invoice_check_invoice')[0].checked){
+                    userDict['projects'][projectID]['weeks'][weekID]['invoiced'] = true
+                }
+                for(const [colourID, cellList] of Object.entries(userDict['projects'][projectID]['weeks'][weekID]['colouredCells'])){
+                    if(cellList.length != 0 || includeAllColours){
+                        let qty = (Math.round((1/(60/userDict['projects'][projectID]['timeInterval'])) * 1000) / 1000) * cellList.length;
+                        let total = qty * parseFloat(userDict['colours'][colourID]['rate'])
+                        this.invoiceData[projectID].push({'name': userDict['colours'][colourID]['name'], 'rate': userDict['colours'][colourID]['rate'], 'QTY': qty, 'Total': total.toFixed(2)});
+                        this.invoiceTotal += total
+
+                    }
+                }
+                //Add To Records
+                if($('#invoice_add_records')[0].checked){
+                    const transID = generateID(userDict);
+
+                    let date = new Date();
+                    let month = date.getMonth();
+                    let thisYear = date.getFullYear();
+                    let yearID;
+                    if(month < 3){
+                        yearID = `${thisYear - 1} - ${thisYear}`;
+                    }else{
+                        yearID = `${thisYear} - ${thisYear + 1}`;
+                    }
+                    if(Object.keys(userDict['records']).length == 3){
+                        let date = new Date();
+                        let thisYear = date.getFullYear();
+                        userDict['records'][`${thisYear - 1} - ${thisYear}`] = {'transactions': {}, 'assets': {}};
+                        userDict['records'][`${thisYear} - ${thisYear + 1}`] = {'transactions': {}, 'assets': {}};
+                    }
+                    if(!Object.keys(userDict['records']).includes(yearID)){
+                        userDict['records'][yearID] = {'transactions': {}, 'assets': {}};
+                    }
+                    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                    userDict['records'][yearID]['transactions'][transID] = {'month': monthNames[month], 'date': invoiceDate, 'account': $('#select_account option:selected').val(), 'type': 'Credit', 'item': `${clientDict['client']} - ${invoiceID}`, 'category': 'Contract Work', 'amount': parseFloat(this.invoiceTotal), 'receiptID': ''}
+                }
+            }
+
+            //Invoice Period
+            let allDate = getFirstLastDate(allStartDates)
+            let firstDate = allDate[0];
+            let lastDate = new Date();
+            lastDate.setDate(allDate[1].getDate() + 13);
+            let invoicePeriod = firstDate + ' to ' + lastDate;
+            $('#invoice_date_period').text(invoicePeriod);
+
 			//Invoice For
 			$('#invoice_for_invoice').text($('#invoice_for').val());
 			//Invoice ID
             let invoiceID = $('#invoice_ID').val()
 			$('#invoice_id_invoice').text(invoiceID);
-
-			let clientDict = this.userObj['clients'][$("#client_selection option:selected").attr('data')];
-			let userDicts = this.userObj['users'][$("#user_selection option:selected").attr('data')];
-			let projDict = this.userObj['projects'][this.currentProjectID];
-			this.projWeek = projDict['weeks'][$("#week_selection option:selected").attr('data')];
-
+            
+            //Set week as invoiced
             if($('#invoice_check_invoice')[0].checked){
-                this.projWeek['invoiced'] = true;
+                for(let[index, Dict] of Object.entries(allWeeksDict)){
+                    dict['invoiced'] = true;
+                }
             }
 
+            //Dicts
+			let clientDict = this.userObj['clients'][$("#client_selection option:selected").attr('data')];
+			let userDicts = this.userObj['users'][$("#user_selection option:selected").attr('data')];
+            
 			//User
 			$('#user_name_invoice').text(userDicts['name']);
 			$('#user_addOne_invoice').text(userDicts['addOne']);
@@ -287,57 +361,13 @@ export default {
 			$('#client_addOne_invoice').text(clientDict['addOne']);
 			$('#client_addTwo_invoice').text(clientDict['addTwo']);
 			$('#client_city_invoice').text(clientDict['city']);
-			$('#client_country_invoice').text(clientDict['country']);
-
-            this.includedColours = {};
-            let includeAllColours = $('#invoice_include_colours')[0].checked
-			this.invoiceTotal = 0;
-			for(const [colourID, cellList] of Object.entries(this.projWeek['colouredCells'])){
-				if(cellList.length != 0 || includeAllColours){
-					let qty = (Math.round((1/(60/projDict['timeInterval'])) * 1000) / 1000) * cellList.length;
-					let total = qty * parseFloat(userDict['colours'][colourID]['rate'])
-					this.includedColours[colourID] = {'name': userDict['colours'][colourID]['name'], 'rate': userDict['colours'][colourID]['rate'], 'QTY': qty, 'Total': total.toFixed(2)};
-					this.invoiceTotal += total
-				}
-			}
+			$('#client_country_invoice').text(clientDict['country']);			
 
             this.invoiceTotal = this.invoiceTotal.toFixed(2)
-
-			this.includedColours['blank1'] = {'name': '', 'rate': '', 'QTY': '', 'Total': ''};
-			this.includedColours['blank2'] = {'name': '', 'rate': '', 'QTY': '', 'Total': ''};
-			this.includedColours['blank3'] = {'name': '', 'rate': '', 'QTY': '', 'Total': ''};
-			this.includedColours['blank4'] = {'name': '', 'rate': '', 'QTY': '', 'Total': ''};
 
 			setTimeout(() => {
 				this.printInvoice();
 			}, 1)
-			if($('#invoice_add_records')[0].checked){
-                const transID = generateID(userDict);
-
-                let date = new Date();
-                let month = date.getMonth();
-                let thisYear = date.getFullYear();
-                let yearID;
-                if(month < 3){
-                    yearID = `${thisYear - 1} - ${thisYear}`;
-                }else{
-                    yearID = `${thisYear} - ${thisYear + 1}`;
-                }
-                if(Object.keys(userDict['records']).length == 3){
-                    let date = new Date();
-                    let thisYear = date.getFullYear();
-                    userDict['records'][`${thisYear - 1} - ${thisYear}`] = {'transactions': {}, 'assets': {}};
-                    userDict['records'][`${thisYear} - ${thisYear + 1}`] = {'transactions': {}, 'assets': {}};
-                }
-                if(!Object.keys(userDict['records']).includes(yearID)){
-                    userDict['records'][yearID] = {'transactions': {}, 'assets': {}};
-                }
-                const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-                userDict['records'][yearID]['transactions'][transID] = {'month': monthNames[month], 'date': invoiceDate, 'account': $('#select_account option:selected').val(), 'type': 'Credit', 'item': `${clientDict['client']} - ${invoiceID}`, 'category': 'Contract Work', 'amount': parseFloat(this.invoiceTotal), 'receiptID': ''}
-            }
-            if($('#invoice_check_invoice')[0].checked){
-                this.projWeek['invoiced'] = true;
-            }
 
 		},
 		printInvoice(id="invoice_page"){
