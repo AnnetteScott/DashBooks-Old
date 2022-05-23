@@ -1,6 +1,6 @@
 <template>
     <h4>TimeSheets:</h4>
-    <p>You have logged {{ userObj['timeLogged'][today]['hours'] }}H and earnt ${{ userObj['timeLogged'][today]['pay'] }} today</p>
+    <p>You have logged {{ userObj['timeLogged'][today]['hours'].toFixed(2) }}H and earnt ${{ userObj['timeLogged'][today]['pay'] }} today</p>
     <div class="pageHome">
         <div class="item_container">
             <div class="items">

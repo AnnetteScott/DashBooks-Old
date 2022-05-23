@@ -103,7 +103,8 @@ p {
 }
 
 
-#invoice_sheet #bottom_section{
+#invoice_sheet .bottom_section{
+	position: relative;
 	display: flex;
 	flex-flow: row nowrap;
 	justify-content: center;
@@ -111,24 +112,30 @@ p {
 	width: 100%;
 	margin-top: 1cm;
 }
+#invoice_sheet .bottom_section_title{
+	position: absolute;
+	top: -1.25em;
+	left: 0px;
+	display: block;
+}
 
 #invoice_sheet .invoice_sheet_column{
 	border-top: 1px solid black;
 	border-right: 1px solid black;
 }
-#invoice_sheet .invoice_sheet_column:nth-child(1){ /* Description */
+#invoice_sheet .invoice_sheet_column:nth-of-type(1){ /* Description */
 	width: 100%;
 	border-left: 1px solid black;
 }
-#invoice_sheet .invoice_sheet_column:nth-child(2){ /* Rate */
+#invoice_sheet .invoice_sheet_column:nth-of-type(2){ /* Rate */
 	width: 2.8cm;
 	min-width: 2.8cm;
 }
-#invoice_sheet .invoice_sheet_column:nth-child(3){  /* Quantity */
+#invoice_sheet .invoice_sheet_column:nth-of-type(3){  /* Quantity */
 	width: 2.8cm;
 	min-width: 2.8cm;
 }
-#invoice_sheet .invoice_sheet_column:nth-child(4){  /* Total */
+#invoice_sheet .invoice_sheet_column:nth-of-type(4){  /* Total */
 	width: 2.8cm;
 	min-width: 2.8cm;
 }
@@ -147,7 +154,8 @@ p {
 }
 #invoice_sheet .cell{
 	border-bottom: 1px dashed black;
-	min-height: 20px;
+	min-height: 22px;
+	padding: 2px;
 }
 #invoice_sheet .cell:last-child{
 	border-bottom: 1px solid black;
