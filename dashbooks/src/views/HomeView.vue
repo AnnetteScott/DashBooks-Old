@@ -265,7 +265,7 @@ h4{
 	width: 400px;
 	min-width: 400px;
 	height: 100%;
-    min-height: 320px;
+    min-height: 290px;
     margin: 0px 15px;
 	background-color: white;
 	box-shadow: 2px 4px 10px -4px #000000a4;

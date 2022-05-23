@@ -194,7 +194,7 @@ export default {
     },
     mounted(){
         this.$nextTick(() => {
-            this.projectKeys.forEach((projectID, index) => {
+            Object.keys(userDict['projects']).forEach((projectID, index) => {
                 let weekID = Object.keys(userDict['projects'][projectID]['weeks'])[0]
                 if(userDict['projects'][projectID]['weeks'][weekID]['invoiced']){
                     $(`#invoice_selection_alert_${index + 1}`).text('This week as already been invoiced')
@@ -208,7 +208,12 @@ export default {
         this.isClients = Object.keys(userDict['clients']).length != 0;
         this.isAccounts = userDict['records']['accounts'].length != 0;
         if(this.isProjects){
-            this.projectKeys = Object.keys(userDict['projects'])
+            this.projectKeys = []
+            Object.keys(userDict['projects']).forEach((projectID, index) => {
+                this.projectKeys.push(projectID)
+                this.projectKeys.push(projectID)
+            })
+            console.log(this.projectKeys)
         }
     },
     methods: {
@@ -389,7 +394,8 @@ input {
 }
 
 .form{
-    height: 55%;
+    height: 75%;
+    width: 75%;
 	display: flex;
 	position: relative;
 	flex-direction: column;
