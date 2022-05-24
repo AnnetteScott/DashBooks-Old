@@ -29,6 +29,9 @@
 				<option value="2">2 Weeks</option>
 			</select>
 
+            <label for="create_project_colour">Project Colour:</label>
+			<input type="color" id="create_project_colour" name="head" value="#000000">
+
 			<fieldset>
                 <q-btn class="glossy" rounded color="primary" label="Create Project" @click="createProject"/>
                 <q-btn class="glossy" rounded color="secondary" label="Cancel" @click="this.$emit('cancelled', '')"/>
@@ -48,6 +51,9 @@
 			
 			<label for="edit_project_target">Target Hours Per TimeSheet:</label>
 			<input id="edit_project_target" type="number" />
+
+            <label for="edit_project_colour">Project Colour:</label>
+			<input type="color" id="edit_project_colour" name="head" value="#000000">
 
             <label for="edit_project_archive">Archive?</label>
             <input id="edit_project_archive" type="checkbox"/>
@@ -118,6 +124,7 @@ export default {
 			let date = reDoDate($('#create_project_date').val());
 			let timeInterval = parseInt($(`#time_interval option:selected`).val())
 			let weekInterval = parseInt($(`#week_interval option:selected`).val())
+            let colour = $("#create_project_colour").val();
 
 			if(name == '' || name == null){ //If no project name was entered.
 				$("#create_project_name").addClass('form_error');
@@ -162,12 +169,11 @@ export default {
 			}
 			let colourIds = Object.keys(userDict['colours'])
 
-			userDict['projects'][projectID] = {'name': name, 'colours': colourIds, 'weeks': {}, 'timeList': timeList, 'duration': duration, 'weekInterval': weekInterval, 'timeInterval': timeInterval, 'targetHours': target};
-			
+			userDict['projects'][projectID] = {'name': name, 'weeks': {}, 'timeList': timeList, 'duration': duration, 'weekInterval': weekInterval, 'timeInterval': timeInterval, 'targetHours': target, 'colour': [colour, this.shadeColor(colour, 85)]};
 			
 			if(weekInterval == 1){
 				for(let w = 1; w <= duration; w++){
-					userDict['projects'][projectID]['weeks'][`${w}`] = {'startDate': date, 'colouredCells': {}, 'invoiced': false, 'total': ''};
+					userDict['projects'][projectID]['weeks'][`${w}`] = {'startDate': date, 'colouredCells': {}, 'invoiced': false, 'total': '0.00'};
 					colourIds.forEach(colourID => {
 						if(colourID != 'colourWhite'){
 							userDict['projects'][projectID]['weeks'][`${w}`]['colouredCells'][colourID] = [];
@@ -181,7 +187,7 @@ export default {
 					userDict['projects'][projectID]['duration'] = duration;
 				}   
 				for(let w = 1; w <= duration; w+= 2){
-					userDict['projects'][projectID]['weeks'][`${w} - ${w + 1}`] = {'startDate': date, 'colouredCells': {}, 'invoiced': false, 'total': ''};
+					userDict['projects'][projectID]['weeks'][`${w} - ${w + 1}`] = {'startDate': date, 'colouredCells': {}, 'invoiced': false, 'total': '0.00'};
 					colourIds.forEach(colourID => {
 						if(colourID != 'colourWhite'){
 							userDict['projects'][projectID]['weeks'][`${w} - ${w + 1}`]['colouredCells'][colourID] = [];
@@ -197,6 +203,7 @@ export default {
 			const name = $('#edit_project_name').val();
 			const target = parseInt($('#edit_project_target').val());
 			let duration = parseInt($('#edit_project_duration').val());
+            const colour = $("#edit_project_colour").val();
 
 			if(name == '' || name == null){ //If no project name was entered.
 				$("#edit_project_name").addClass('form_error');
@@ -260,6 +267,7 @@ export default {
 
 			userDict['projects'][projectID]['name'] = name;
 			userDict['projects'][projectID]['targetHours'] = target;
+			userDict['projects'][projectID]['colour'] = [colour, this.shadeColor(colour, 85)];
 
             if($('#edit_project_archive')[0].checked){
                 userDict['archive']['projects'][projectID] = {...userDict['projects'][projectID]}
@@ -286,8 +294,6 @@ export default {
 
 			userDict['colours'][colourID] = {'name': colourName, 'rate': colourRate, 'colour': colour};
 			for (let [projectID, projectDict] of Object.entries(userDict['projects'])) {
-				projectDict['colours'].push(colourID);
-				projectID;
 				let duration = projectDict.duration;
 				if(projectDict.weekInterval == 1){
 					for(let w = 1; w <= duration; w++){
@@ -319,10 +325,6 @@ export default {
                 if(outcome){
                     delete userDict['colours'][colourID];
                     for(const[projectID, projectDict] of Object.entries(userDict['projects'])){
-                        const index = projectDict['colours'].indexOf(colourID);
-                        if (index > -1) {
-                            projectDict['colours'].splice(index, 1);
-                        }
                         for(const [weekID, weekDict] of Object.entries(projectDict['weeks'])){
                             for(const [projColour, colouredCell] of Object.entries(weekDict['colouredCells'])){
                                 if(projColour === colourID){
@@ -335,6 +337,26 @@ export default {
                 }
                 ref.$emit('cancelled', '');
             });
+        },
+        shadeColor(color, percent) {
+
+            var R = parseInt(color.substring(1,3),16);
+            var G = parseInt(color.substring(3,5),16);
+            var B = parseInt(color.substring(5,7),16);
+
+            R = parseInt(R * (100 + percent) / 100);
+            G = parseInt(G * (100 + percent) / 100);
+            B = parseInt(B * (100 + percent) / 100);
+
+            R = (R<255)?R:255;  
+            G = (G<255)?G:255;  
+            B = (B<255)?B:255;  
+
+            var RR = ((R.toString(16).length==1)?"0"+R.toString(16):R.toString(16));
+            var GG = ((G.toString(16).length==1)?"0"+G.toString(16):G.toString(16));
+            var BB = ((B.toString(16).length==1)?"0"+B.toString(16):B.toString(16));
+
+            return "#"+RR+GG+BB;
         }
     }
 }

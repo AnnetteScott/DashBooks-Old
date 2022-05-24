@@ -73,7 +73,6 @@ export function saveChecker(saveFile){
     if(saveFile['saveVersion'] == 7){
         for(const[projectID, projectDict] of Object.entries(saveFile['projects'])){
             projectDict['targetHours'] = 0;
-            projectID;
         }
         saveFile['saveVersion'] = 8;
     }
@@ -83,7 +82,6 @@ export function saveChecker(saveFile){
                 if(recordsDict['transactions'] != undefined){
                     for(const[transID, transDict] of Object.entries(recordsDict['transactions'])){
                         transDict['receiptID'] = '';
-                        transID;
                     }
                 }
                 
@@ -173,6 +171,13 @@ export function saveChecker(saveFile){
         saveFile['archive'] = {}
         saveFile['archive']['projects'] = {}
         saveFile['saveVersion'] = 20
+    }
+    if(saveFile['saveVersion'] == 20){
+        for(const[projectID, projectDict] of Object.entries(saveFile['projects'])){
+            delete projectDict['colours'];
+            projectDict['colour'] = ["#014a88", '#35a2ff']
+        }
+        saveFile['saveVersion'] = 21
     }
     saveFile['version'] = pjson.version;
     return saveFile

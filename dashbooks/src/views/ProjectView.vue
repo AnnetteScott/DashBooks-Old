@@ -4,7 +4,7 @@
     <div class="pageHome">
         <div class="item_container">
             <div class="items">
-                <div v-for="(projectDict, projectID) in userObj['projects']" :key="projectDict" class="list_item" :data="projectID" @click="$router.push({ name: 'timesheet', params: { 'projectID': projectID } })" style="background: radial-gradient(circle, #35a2ff 0%, #014a88 100%)">
+                <div v-for="(projectDict, projectID) in userObj['projects']" :key="projectDict" class="list_item" :data="projectID" @click="$router.push({ name: 'timesheet', params: { 'projectID': projectID } })" :style="{background: `radial-gradient(circle, ${projectDict['colour'][1]} 0%, ${projectDict['colour'][0]} 100%)`, color: `${pickTextColorBasedOnBgColor(projectDict['colour'][1])}`}">
                     <div>
                         <p>{{ projectDict.name }}</p>
                         <p style="font-size: small;">Duration: {{ projectDict.duration }} Weeks</p>
@@ -40,7 +40,21 @@ export default {
         }
     },
     methods: {
-        
+        pickTextColorBasedOnBgColor(bgColor) {
+            let color = (bgColor.charAt(0) === '#') ? bgColor.substring(1, 7) : bgColor;
+            let r = parseInt(color.substring(0, 2), 16); // hexToR
+            let g = parseInt(color.substring(2, 4), 16); // hexToG
+            let b = parseInt(color.substring(4, 6), 16); // hexToB
+            let uicolors = [r / 255, g / 255, b / 255];
+            let c = uicolors.map((col) => {
+                if (col <= 0.03928) {
+                return col / 12.92;
+                }
+                return Math.pow((col + 0.055) / 1.055, 2.4);
+            });
+            let L = (0.2126 * c[0]) + (0.7152 * c[1]) + (0.0722 * c[2]);
+            return (L > 0.179) ? '#000000' : '#ffffff';
+        },
     }
 }
 </script>

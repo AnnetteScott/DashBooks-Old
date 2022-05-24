@@ -69,7 +69,7 @@
                 <div id="user_selection_tip" class ="tool_tip hidden">Time: </div>
             </div>
             <div id="colour_container">
-                <div v-for="colourID in projectDict['colours']" :key="colourID" :colourid="colourID" class="colour_item" :style="`background-color:${userObj['colours'][colourID]['colour']};`" @click="colourCell">
+                <div v-for="colourID in Object.keys(userObj['colours'])" :key="colourID" :colourid="colourID" class="colour_item" :style="`background-color:${userObj['colours'][colourID]['colour']};`" @click="colourCell">
                     <p v-bind:style="`color: ${pickTextColorBasedOnBgColor(userObj['colours'][colourID]['colour'])}`">{{ userObj['colours'][colourID]['name'] }}</p>
                 </div>
                 <div class="colour_item" style="background-color: #000" @click="current_request_form=`createColourForm`">
@@ -103,6 +103,7 @@ export default {
             colourList: [],
             columnLetter: [],
             weekDict: {},
+            colourIDList: [],
             dayList: [],
             totalList: [],
             infoList: [],
@@ -112,6 +113,8 @@ export default {
         }
     },
     mounted(){
+        this.colourIDList = [];
+        this.colourIDList = Object.keys(userDict['colours'])
         const onMouseMove = (e) =>{
 			$('#user_selection_tip').css({
 				left: e.pageX + 55 + 'px',
@@ -164,7 +167,7 @@ export default {
             if(this.projectDict['weekInterval'] == 1){
                 let date = this.projectDict['weeks'][`${duration}`]['startDate'];
                 date = addToDate(date, 14);
-                this.projectDict['weeks'][`${duration + 1}`] = {'startDate': date, 'colouredCells': {}, 'invoiced': false, 'total': 0};
+                this.projectDict['weeks'][`${duration + 1}`] = {'startDate': date, 'colouredCells': {}, 'invoiced': false, 'total': '0.00'};
                 colourIds.forEach(colourID => {
                     if(colourID != 'colourWhite'){
                         this.projectDict['weeks'][`${duration}`]['colouredCells'][colourID] = [];
@@ -176,7 +179,7 @@ export default {
                 let lastKey = `${duration - 1} - ${duration}`;
                 let date = this.projectDict['weeks'][lastKey]['startDate'];
                 date = addToDate(date, 14);
-                this.projectDict['weeks'][`${duration + 1} - ${duration + 2}`] = {'startDate': date, 'colouredCells': {}, 'invoiced': false, 'total': 0};
+                this.projectDict['weeks'][`${duration + 1} - ${duration + 2}`] = {'startDate': date, 'colouredCells': {}, 'invoiced': false, 'total': '0.00'};
                 colourIds.forEach(colourID => {
                     if(colourID != 'colourWhite'){
                         this.projectDict['weeks'][`${duration + 1} - ${duration + 2}`]['colouredCells'][colourID] = [];
@@ -201,14 +204,14 @@ export default {
 				this.dateList.push(addToDate(this.weekDict['startDate'], i))
 			}
             this.timeList = [...this.projectDict['timeList']];
-            this.colourList = [];
-            if(this.projectDict['colours'] != []){
-				for (let colourID of this.projectDict['colours']) {
-					if(colourID != 'colourWhite'){
-						this.colourList.push(userDict['colours'][colourID]['name']);  
-					}
-				}
-			}
+            this.colourList = []
+            
+            for (let colourID of Object.keys(userDict['colours'])) {
+                if(colourID != 'colourWhite'){
+                    this.colourList.push(userDict['colours'][colourID]['name']);  
+                }
+            }
+
 			this.colourList.push("Total Hours:");
 			this.colourList.push("Total Daily $:");
             this.infoList = []
@@ -410,14 +413,16 @@ export default {
 				let cellTotal = this.projectDict['timeList'].length;
 				let colTotal = 0;
 				let colMoney = 0;
-				for(let index in this.projectDict['colours']){ //Total up each colour per coloumn
-					if(this.projectDict['colours'][index] != 'colourWhite'){
-						let cellID = `${columns[i]}${cellTotal}`;
+
+                for (let colourID of Object.keys(userDict['colours'])) {
+                    if(colourID != 'colourWhite'){
+                        let cellID = `${columns[i]}${cellTotal}`;
 						colTotal += parseFloat($(`[cellid=${cellID}]`).text())
-						colMoney += parseFloat($(`[cellid=${cellID}]`).text()) * userDict['colours'][this.projectDict['colours'][index]]['rate']
-						cellTotal++;
-					}
-				}
+						colMoney += parseFloat($(`[cellid=${cellID}]`).text()) * userDict['colours'][colourID]['rate']
+						cellTotal++;  
+                    }
+                }
+
 				weekTotal += colTotal;
 				weekMoney += colMoney;
 				$(`[cellid=${columns[i]}${cellTotal}]`).text(`${colTotal}H`)
