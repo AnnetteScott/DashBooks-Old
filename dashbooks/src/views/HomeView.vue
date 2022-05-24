@@ -96,20 +96,29 @@
                                 <div class="weeks_container">
                                     <div class="inner_weeks">
                                         <template v-for="(weekDict, week) in item.weeks" :key="week">
-                                        
-                                            <div class="week">
-                                                <template v-if="weekDict.invoiced">
-                                                    <p style="font-size:large; color: #53b700">{{ week }} : {{ weekDict.startDate }}</p>
-                                                    <p style="width: 65px; color: #53b700">${{ numberWithCommas(weekDict.total) }}</p>
-                                                </template>
-                                                <template v-else>
-                                                    <p style="font-size:large">{{ week }} : {{ weekDict.startDate }}</p>
-                                                    <p style="width: 65px">${{ numberWithCommas(weekDict.total) }}</p>
-                                                </template>
-                                                
-                                                <p v-if="!weekDict.invoiced && checkDate(weekDict.startDate)" style="color: #FF4F00">Invoice Is Due!</p>
-                                                <p v-else="" style="width: 92.61px"></p>
-                                            </div>
+                                            <template v-if="weekDict.invoiced">
+                                                <div class="week" style="background-color: #53b700">
+                                                    <p style="font-size:large;">{{ week }} : {{ weekDict.startDate }}</p>
+                                                    <p style="width: 70px">${{ numberWithCommas(weekDict.total) }}</p>
+                                                    <p v-if="!weekDict.invoiced && checkDate(weekDict.startDate)" style="color: #FF4F00">Invoice Is Due!</p>
+                                                    <p v-else="" style="width: 92.61px"></p>
+                                                </div>
+                                            </template>
+                                            <template v-else-if="parseFloat(weekDict.total) == 0">
+                                                <div class="week">
+                                                    <p style="font-size:large;">{{ week }} : {{ weekDict.startDate }}</p>
+                                                    <p style="min-width: 70px">${{ numberWithCommas(weekDict.total) }}</p>
+                                                    <p style="width: 92.61px"></p>
+                                                </div>
+                                            </template>
+                                            <template v-else>
+                                                <div class="week">
+                                                    <p style="font-size:large;">{{ week }} : {{ weekDict.startDate }}</p>
+                                                    <p style="width: 70px">${{ numberWithCommas(weekDict.total) }}</p>
+                                                    <p v-if="!weekDict.invoiced && checkDate(weekDict.startDate)" style="color: #FF4F00">Invoice Is Due!</p>
+                                                    <p v-else="" style="width: 92.61px"></p>
+                                                </div>
+                                            </template>
                                         </template>
                                     </div>
                                 </div>
@@ -330,6 +339,8 @@ p{
     display: flex;
     flex-direction: column-reverse;
     justify-content: flex-end;
+    align-items: center;
+    gap: 3px;
 }
 .week{
     display: flex;
@@ -337,10 +348,11 @@ p{
     justify-content: center;
     align-items: center;
     gap: 15px;
+    width: 95%;
 }
 .week > p:first-child{
     display: flex;
     justify-content: flex-end;
-    width: 37%;
+    width: 40%;
 }
 </style>

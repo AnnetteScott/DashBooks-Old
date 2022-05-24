@@ -53,10 +53,11 @@ export default {
 }
 .items{
     display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
+    flex-direction: column-reverse;
+    justify-content: flex-end;
     align-items: center;
-    justify-content: center;
+    gap: 3px;
+    flex-wrap: wrap;
     gap: 15px;
     width: 100%;
 }

@@ -149,23 +149,23 @@
                             <div v-for="(col, index) in columnLetter" :key="col" :colID="col" class="invoice_sheet_column">
                                 <div class="cell heading">{{ columnHeadings[index] }}</div>
                                 <template v-for="(Info, colourID) in dict" :key="colourID">
-                                    <div v-if="colourID != 'projTotal' && colourID != 'projName'" class="cell">{{ keys[index] == 'rate' || keys[index] == 'Total' ? `$ ${Info[keys[index]]}` : Info[keys[index]] }}</div>
+                                    <div v-if="colourID != 'projTotal' && colourID != 'projName'" class="cell">{{ keys[index] == 'rate' || keys[index] == 'Total' ? `$ ${numberWithCommas(Info[keys[index]])}` : Info[keys[index]] }}</div>
                                 </template>
-
+                                <div class="cell"></div>
                                 <div v-if="col == 'C'" class="cell" style="border-left: 1px solid black" >Subtotal</div>
                                 <div v-if="col == 'C'" class="cell" style="border-left: 1px solid black" >Tax</div>
                                 <div v-if="col == 'C'" class="cell" style="font-weight: 600;border-left: 1px solid black" >Total</div>
 
-                                <div v-if="col == 'D'" class="cell">$ {{ dict.projTotal.toFixed(2) }}</div>
+                                <div v-if="col == 'D'" class="cell">$ {{ numberWithCommas(dict.projTotal.toFixed(2)) }}</div>
                                 <div v-if="col == 'D'" class="cell">$ 0</div>
-                                <div v-if="col == 'D'" class="cell" style="font-weight: 600;">$ {{ dict.projTotal.toFixed(2) }}</div>
+                                <div v-if="col == 'D'" class="cell" style="font-weight: 600;">$ {{ numberWithCommas(dict.projTotal.toFixed(2)) }}</div>
                             </div>
                         </div>
                     </template>
                     <div class="bottom_section">
                         <div class="invoice_sheet_column">
                             <div class="cell" style="font-weight: 600;">GRAND TOTAL (NZD)</div>
-                            <div class="cell" style="font-weight: 600;">$ {{ invoiceTotal.toFixed(2) }}</div>
+                            <div class="cell" style="font-weight: 600;">$ {{ numberWithCommas(invoiceTotal.toFixed(2)) }}</div>
                         </div>
                     </div>
 				</div>
@@ -225,6 +225,9 @@ export default {
         }
     },
     methods: {
+        numberWithCommas(num) {
+			return ((parseFloat(num).toFixed(2)).replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ","));
+		},
         changeProjectNum(){
             this.amountOfProjects = $(`#amount_projects_invoice option:selected`).val();
             this.$nextTick(() => {
@@ -271,6 +274,7 @@ export default {
             return [firstDate, lastDate]
         },
 		generateInvoice(){
+            this.invoiceTotal = 0
             //Invoice For
 			$('#invoice_for_invoice').text($('#invoice_for').val());
 			//Invoice ID
