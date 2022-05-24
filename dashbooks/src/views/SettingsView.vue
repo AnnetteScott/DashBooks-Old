@@ -6,6 +6,7 @@
                 <q-tab name="Projects" label="Projects" @click="settingsPage = `projects`"/>
                 <q-tab name="Invoicing" label="Invoicing" @click="settingsPage = `invoicing`"/>
                 <q-tab name="Records" label="Records" @click="settingsPage = `records`"/>
+                <q-tab name="Archive" label="Archive" @click="settingsPage = `archive`"/>
             </q-tabs>
             </q-toolbar>
         </div>
@@ -49,6 +50,24 @@
                 </div>
                
                 <ProjectForms :projectForm="projectRequest" @cancelled="projectRequest=``"/>
+            </div>
+            <div id="archive_container" v-if="settingsPage == `archive`">
+                <div class="settings_container">
+                    <div class="settings_bottom_control">
+                    <p>You Have {{ Object.keys(userObj['archive']['projects']).length == 1 ? Object.keys(userObj['archive']['projects']).length + ' Archived Project' : Object.keys(userObj['archive']['projects']).length + ' Archived Projects' }}</p>
+                    </div>
+                    <div class="item_container">
+                        <div class="items" style="width: 100%">
+                            <div v-for="(archiveDict, projectID) in userObj['archive']['projects']" :key="archiveDict" class="list_item" :data="projectID" @click="editArchive($event, `editArchive`)" style="background: radial-gradient(circle, #35a2ff 0%, #014a88 100%); width: 95%">
+                                <div style="pointer-events: none;">
+                                    <p style="pointer-events: none;">{{ archiveDict.name }}</p>
+                                    <p style="font-size: small; pointer-events: none;">Duration: {{ archiveDict.duration }} Weeks</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <ArchiveForms :archiveForm="archiveRequest" @cancelled="archiveRequest=``"/>
             </div>
             <div id="invoicing_container" v-if="settingsPage == `invoicing`">
                 <div class="settings_container">
@@ -133,6 +152,7 @@ import { ref } from 'vue'
 import ProjectForms from '../components/ProjectForms'
 import InvoiceForms from '../components/InvoiceForms'
 import RecordForms from '../components/RecordForms'
+import ArchiveForms from '../components/ArchiveForms'
 import $ from 'jquery'
 
 export default {
@@ -140,7 +160,8 @@ export default {
     components: {
         ProjectForms,
         InvoiceForms,
-        RecordForms
+        RecordForms,
+        ArchiveForms
     },
     data(){
         return{
@@ -148,12 +169,20 @@ export default {
             projectRequest: '',
             invoiceRequest: '',
             recordRequest: '',
+            archiveRequest: '',
             userObj: userDict
         }
     },
     mounted(){
     },
     methods: {
+        editArchive(event, form){
+            const ID = $(event.target).attr('data');
+            this.archiveRequest = form;
+            this.$nextTick(() => {
+                $(`#edit_projectID_archive`).attr(`projectid`, ID);
+            });
+        },
         editProject(event, form){
             const ID = $(event.target).attr('data');
             this.projectRequest = form;
@@ -163,6 +192,7 @@ export default {
                     $(`#edit_project_name`).val(userDict['projects'][ID]['name']);
                     $(`#edit_project_duration`).val(userDict['projects'][ID]['duration']);
                     $(`#edit_project_target`).val(userDict['projects'][ID]['targetHours']);
+                    $('#edit_project_archive').prop('checked', false);
                 }else{
                     $(`#edit_colourID`).attr(`colourid`, ID);
 					$(`#edit_colour_name`).val(userDict['colours'][ID]['name']);

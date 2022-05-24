@@ -49,6 +49,9 @@
 			<label for="edit_project_target">Target Hours Per TimeSheet:</label>
 			<input id="edit_project_target" type="number" />
 
+            <label for="edit_project_archive">Archive?</label>
+            <input id="edit_project_archive" type="checkbox"/>
+
 			<fieldset>
                 <q-btn class="glossy" rounded color="primary" label="Save Project" @click="editProject"/>
                 <q-btn class="glossy" rounded color="red" label="Delete" @click="deleteProject"/>
@@ -257,6 +260,11 @@ export default {
 
 			userDict['projects'][projectID]['name'] = name;
 			userDict['projects'][projectID]['targetHours'] = target;
+
+            if($('#edit_project_archive')[0].checked){
+                userDict['archive']['projects'][projectID] = {...userDict['projects'][projectID]}
+                delete userDict['projects'][projectID]
+            }
             this.$emit('cancelled', '');
         },
         deleteProject(){
@@ -398,5 +406,9 @@ select{
 
 fieldset > .button_link:nth-last-child(1){
 	background-color:#bb1818;
+}
+
+#edit_project_archive{
+    height: 30px;
 }
 </style>
