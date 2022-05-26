@@ -323,31 +323,6 @@ export default {
                         this.invoiceTotal += total;
                     }
                 }
-                //Add To Records
-                if($('#invoice_add_records')[0].checked){
-                    const transID = generateID(userDict);
-
-                    let date = new Date();
-                    let month = date.getMonth();
-                    let thisYear = date.getFullYear();
-                    let yearID;
-                    if(month < 3){
-                        yearID = `${thisYear - 1} - ${thisYear}`;
-                    }else{
-                        yearID = `${thisYear} - ${thisYear + 1}`;
-                    }
-                    if(Object.keys(userDict['records']).length == 3){
-                        let date = new Date();
-                        let thisYear = date.getFullYear();
-                        userDict['records'][`${thisYear - 1} - ${thisYear}`] = {'transactions': {}, 'assets': {}};
-                        userDict['records'][`${thisYear} - ${thisYear + 1}`] = {'transactions': {}, 'assets': {}};
-                    }
-                    if(!Object.keys(userDict['records']).includes(yearID)){
-                        userDict['records'][yearID] = {'transactions': {}, 'assets': {}};
-                    }
-                    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-                    userDict['records'][yearID]['transactions'][transID] = {'month': monthNames[month], 'date': invoiceDate, 'account': $('#select_account option:selected').val(), 'type': 'Credit', 'item': `${clientDict['client']} - ${invoiceID}`, 'category': 'Contract Work', 'amount': parseFloat(this.invoiceTotal), 'receiptID': ''}
-                }
             }
             //Invoice Period
             let allDate = this.getFirstLastDate(allStartDates)
@@ -380,7 +355,33 @@ export default {
 			$('#client_addOne_invoice').text(clientDict['addOne']);
 			$('#client_addTwo_invoice').text(clientDict['addTwo']);
 			$('#client_city_invoice').text(clientDict['city']);
-			$('#client_country_invoice').text(clientDict['country']);			
+			$('#client_country_invoice').text(clientDict['country']);	
+            
+            //Add To Records
+            if($('#invoice_add_records')[0].checked){
+                const transID = generateID(userDict);
+
+                let date = new Date();
+                let month = date.getMonth();
+                let thisYear = date.getFullYear();
+                let yearID;
+                if(month < 3){
+                    yearID = `${thisYear - 1} - ${thisYear}`;
+                }else{
+                    yearID = `${thisYear} - ${thisYear + 1}`;
+                }
+                if(Object.keys(userDict['records']).length == 3){
+                    let date = new Date();
+                    let thisYear = date.getFullYear();
+                    userDict['records'][`${thisYear - 1} - ${thisYear}`] = {'transactions': {}, 'assets': {}};
+                    userDict['records'][`${thisYear} - ${thisYear + 1}`] = {'transactions': {}, 'assets': {}};
+                }
+                if(!Object.keys(userDict['records']).includes(yearID)){
+                    userDict['records'][yearID] = {'transactions': {}, 'assets': {}};
+                }
+                const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                userDict['records'][yearID]['transactions'][transID] = {'month': monthNames[month], 'date': invoiceDate, 'account': $('#select_account option:selected').val(), 'type': 'Credit', 'item': `${clientDict['client']} - ${invoiceID}`, 'category': 'Contract Work', 'amount': parseFloat(this.invoiceTotal), 'receiptID': ''}
+            }
 
 			setTimeout(() => {
 				this.printInvoice();

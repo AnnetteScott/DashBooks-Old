@@ -122,7 +122,7 @@
                 </div>
 			</div>
             <div id="total_container" v-if="showTotal">
-                <p id="total_amount" style="background: radial-gradient(circle, #35a2ff 0%, #014a88 100%)" @click="removeTotal">${{ numberWithCommas(total) }}</p>
+                <p id="total_amount" style="background: radial-gradient(circle, #35a2ff 0%, #014a88 100%)" @click="removeTotal">Total: ${{ numberWithCommas(total) }}</p>
             </div>
 		</div>
 	</div>
@@ -373,20 +373,23 @@ p{
     position: absolute;
     top: 0px;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    align-items: flex-end;
+    justify-content: flex-end;
     pointer-events: none;
 }
 
 #total_amount{
-    width: 10%;
-    height: 5%;
+    width: 15%;
+    height: 7%;
+    min-height: 75px;
+    min-width: 250px;
     display: flex;
     color: white;
-    border-radius: 25px;
+    border-radius: 25px 0px 0px;
     justify-content: center;
     align-items: center;
     cursor: pointer;
     pointer-events: all;
+    font-size: larger;
 }
 </style>
