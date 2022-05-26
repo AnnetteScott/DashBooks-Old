@@ -1,11 +1,11 @@
 <template>
     <div class="pageHome">
         <div id="container">
-            <div id="top_title" style="background: radial-gradient(circle, #35a2ff 0%, #014a88 100%); color: white;}">
+            <div id="top_title" :style="{background: `${projectDict['colour'][0]}`, color: `${pickTextColorBasedOnBgColor(projectDict['colour'][0])}`}">
                 <template v-if="weekID !== ''">
-                    <p>Complete </p>
-                    <p id="hours_left" style="font-weight: bold;"></p>
-                    <p>more hours to reach {{ projectDict['targetHours'] }}H for {{ projectDict['name']}}</p>
+                    <p :style="{color: `${pickTextColorBasedOnBgColor(projectDict['colour'][0])}`}">Complete </p>
+                    <p :style="{color: `${pickTextColorBasedOnBgColor(projectDict['colour'][0])}`}" id="hours_left" style="font-weight: bold;"></p>
+                    <p :style="{color: `${pickTextColorBasedOnBgColor(projectDict['colour'][0])}`}">more hours to reach {{ projectDict['targetHours'] }}H for {{ projectDict['name']}}</p>
                 </template>
                 <template v-else>
                     Click on a week to get started!
@@ -22,9 +22,9 @@
                         <div class="week_button" :label="weekID" @click="weekButton" :data="weekID" style="background: radial-gradient(circle, rgb(209 53 255) 0%, rgb(93 26 120) 100%); color: white;" @contextmenu="rightClickWeek">{{ weekID }}</div>
                     </template>
                 </template>
-                <div class="week_button" color="secondary" @click="addWeek" style="background: radial-gradient(circle, #35a2ff 0%, #014a88 100%); color: white;">+</div>
+                <div class="week_button" color="secondary" @click="addWeek" :style="{background: `radial-gradient(circle, ${projectDict['colour'][1]} 0%, ${projectDict['colour'][0]} 100%)`, color: `${pickTextColorBasedOnBgColor(projectDict['colour'][1])}`}">+</div>
             </div>
-            <div id="time_sheet_container" style="background: radial-gradient(circle, #35a2ff 0%, #014a88 100%); color: white;">
+            <div id="time_sheet_container" :style="{background: `${projectDict['colour'][0]}`, color: `${pickTextColorBasedOnBgColor(projectDict['colour'][0])}`}">
                 <template v-if="weekID != ``">
                     <template v-for="(col, index) in columnLetter" :key="col">
                         <div :colID="col" class="timesheet_column">

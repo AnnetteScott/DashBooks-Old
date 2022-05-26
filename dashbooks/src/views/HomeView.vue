@@ -99,23 +99,16 @@
                                             <template v-if="weekDict.invoiced">
                                                 <div class="week" style="background-color: #53b700">
                                                     <p style="font-size:large;">{{ week }} : {{ weekDict.startDate }}</p>
-                                                    <p style="width: 70px">${{ numberWithCommas(weekDict.total) }}</p>
+                                                    <p class="week_total" @click="totalWeeks" :amount="weekDict.total">${{ numberWithCommas(weekDict.total) }}</p>
                                                     <p v-if="!weekDict.invoiced && checkDate(weekDict.startDate)" style="color: #FF4F00">Invoice Is Due!</p>
                                                     <p v-else="" style="width: 92.61px"></p>
-                                                </div>
-                                            </template>
-                                            <template v-else-if="parseFloat(weekDict.total) == 0">
-                                                <div class="week">
-                                                    <p style="font-size:large;">{{ week }} : {{ weekDict.startDate }}</p>
-                                                    <p style="min-width: 70px">${{ numberWithCommas(weekDict.total) }}</p>
-                                                    <p style="width: 92.61px"></p>
                                                 </div>
                                             </template>
                                             <template v-else>
                                                 <div class="week">
                                                     <p style="font-size:large;">{{ week }} : {{ weekDict.startDate }}</p>
-                                                    <p style="width: 70px">${{ numberWithCommas(weekDict.total) }}</p>
-                                                    <p v-if="!weekDict.invoiced && checkDate(weekDict.startDate)" style="color: #FF4F00">Invoice Is Due!</p>
+                                                    <p class="week_total" @click="totalWeeks" :amount="weekDict.total">${{ numberWithCommas(weekDict.total) }}</p>
+                                                    <p v-if="!weekDict.invoiced && checkDate(weekDict.startDate) && parseFloat(weekDict.total) != 0" style="color: #FF4F00">Invoice Is Due!</p>
                                                     <p v-else="" style="width: 92.61px"></p>
                                                 </div>
                                             </template>
@@ -128,6 +121,9 @@
                     
                 </div>
 			</div>
+            <div id="total_container" v-if="showTotal">
+                <p id="total_amount" style="background: radial-gradient(circle, #35a2ff 0%, #014a88 100%)" @click="removeTotal">${{ numberWithCommas(total) }}</p>
+            </div>
 		</div>
 	</div>
 </template>
@@ -146,8 +142,10 @@ export default {
 			netData: {'income': 0, 'expenses': 0},
             expenseSum: {},
             incomeSum: {},
+			total: 0,
 			years: [],
             projectDict: {},
+            showTotal: false,
             loaded: false
 		}
 	},
@@ -187,6 +185,14 @@ export default {
         console.log(userDict)
 	},
 	methods: {
+        removeTotal(){
+            this.showTotal = false;
+            this.total = 0
+        },
+        totalWeeks(event){
+            this.showTotal = true;
+            this.total += parseFloat($(event.target).attr('amount'))
+        },
         numberWithCommas(num) {
 			return ((parseFloat(num).toFixed(2)).replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ","));
 		},
@@ -354,5 +360,33 @@ p{
     display: flex;
     justify-content: flex-end;
     width: 40%;
+}
+
+.week_total{
+    cursor: pointer;
+    width: 70px;
+}
+#total_container{
+    z-index: 500;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+#total_amount{
+    width: 10%;
+    height: 5%;
+    display: flex;
+    color: white;
+    border-radius: 25px;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    pointer-events: all;
 }
 </style>

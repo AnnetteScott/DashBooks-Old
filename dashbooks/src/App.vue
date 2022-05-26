@@ -23,6 +23,11 @@
                             <q-item-label @click="changeSaveLocation">Change Save Location</q-item-label>
                         </q-item-section>
                     </q-item>
+                    <q-item clickable v-close-popup tabindex="0">
+                        <q-item-section>
+                            <q-item-label @click="changeAutoSave">Change Auto Save Time Period</q-item-label>
+                        </q-item-section>
+                    </q-item>
                 </q-list>
             </q-btn-dropdown>
             <q-btn flat label="Save" @click="saveUserDict"/>
@@ -39,26 +44,50 @@
             </q-toolbar>
         </div>
     </nav>
-  <router-view/>
+    <SavingPopup :savingStatus="saving_in_progress" />
+    <ApplicationForms :ApplicationForm="application_Form" @cancelled="application_Form=``"/>
+    <router-view />
 </template>
 
 <script>
 import { ref } from 'vue'
 import { settingsDict, userDict, saveChecker } from './main.js';
+import SavingPopup from '@/components/SavingPopup.vue';
+import ApplicationForms from '@/components/ApplicationForms.vue';
+
 const dialog = window.__TAURI__.dialog;
 const fs = window.__TAURI__.fs;
 const path = window.__TAURI__.path;
 export default {
     name: 'HomeView',
     components: {
-
+        SavingPopup,
+        ApplicationForms
+    },
+    data() {
+        return {
+			saving_in_progress: false,
+			application_Form: ''
+		}
     },
     setup () {
         return {
             tab: ref('')
         }
     },
+    mounted(){
+        console.log(settingsDict)
+        let autoSave = settingsDict['autoSaveTime'] ? settingsDict['autoSaveTime'] : 5;
+        let oneMin = 60 * 1000
+        let ref = this;
+        setInterval(function() {
+            ref.saveUserDict();
+        }, oneMin * autoSave);
+    },
     methods: {
+        changeAutoSave(){
+            this.application_Form = `changeAutoSave`
+        },
         loadUser(){
             let ref = this;
             dialog.open().then(function(userFilePath) {
@@ -77,6 +106,11 @@ export default {
             });
         },
         saveUserDict(){
+            this.saving_in_progress = true;
+			window.setTimeout(function() {
+				this.saving_in_progress = false;
+			}.bind(this), 1500);
+
             fs.writeFile({path: settingsDict['saveFilePath'], contents: JSON.stringify(userDict)})
             path.dataDir().then(function(dataPath) {
                 fs.writeFile({path: dataPath + "DashBooks/userData.ssdb", contents: JSON.stringify(userDict)})

@@ -193,8 +193,8 @@ appWindow.listen('tauri://close-requested', ({ event, payload }) => {
     fs.writeFile({path: settingsObj['saveFilePath'], contents: JSON.stringify(userDict)});
     path.dataDir().then(function(dataPaths) {
         fs.writeFile({path: dataPaths + "DashBooks/settings.ssdb", contents: JSON.stringify(settingsDict)})
+        appWindow.close();
     })
-    appWindow.close();
 })
 
 let myApp = createApp(App)
