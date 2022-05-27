@@ -16,7 +16,8 @@
     "jquery": "^3.6.0",
     "quasar": "^2.0.0",
     "vue": "^3.2.13",
-    "vue-router": "^4.0.3"
+    "vue-router": "^4.0.3",
+    "vue-select": "^4.0.0-beta.3"
   },
   "devDependencies": {
     "@vue/cli-plugin-router": "~5.0.0",

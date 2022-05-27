@@ -44,6 +44,7 @@
 				:clickable="true"
 				@dataclicked="editTransaction"
 			>
+            <q-btn class="glossy" rounded color="primary" label="Create Transaction" @click="current_request_form = 'createTransaction'"/>
 			</SortableTable>
 
 			
@@ -67,6 +68,10 @@
 					<p>{{ savedDict['item'] }}</p>
 					<p>{{ savedDict['category'] }}</p>
 					<p>{{ savedDict['amount'] }}</p>
+                    <p>
+                        <q-btn class="glossy" rounded color="primary" label="Add" @click="addSaved" :data="savedID"/>
+                        <q-btn class="glossy" rounded color="primary" label="Edit" @click="editSaved" :data="savedID"/>
+					</p>
 				</div>
 			</div>
 			<div id="assets" class="outer_table">
@@ -335,7 +340,6 @@ export default {
 		editTransaction(e){
 			this.current_request_form = 'editTransaction';
 			const ID = $(e.target).attr('data');
-            console.log("this")
 			setTimeout(() => {
 				let transDict = this.recordDict['transactions']
 				let newDate = transDict[ID]['date'].split("/").reverse().join("-");
