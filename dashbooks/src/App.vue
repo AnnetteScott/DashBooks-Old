@@ -59,7 +59,7 @@ const dialog = window.__TAURI__.dialog;
 const fs = window.__TAURI__.fs;
 const path = window.__TAURI__.path;
 export default {
-    name: 'HomeView',
+    name: 'App',
     components: {
         SavingPopup,
         ApplicationForms
