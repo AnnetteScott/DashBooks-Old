@@ -87,7 +87,7 @@
 				</div>
                 <div id="project_container">
                     <div class="inner_project_tiles">
-                        <template v-for="(item, keys) in projectDict" :key="keys">
+                        <template v-for="(item, projID) in projectDict" :key="projID">
                             <div class="tile">
                                 <div class="top_display">
                                     <p style="font-size:x-large; border-bottom: 1px solid black;">{{ item.name }}</p>
@@ -100,15 +100,14 @@
                                                 <div class="week" style="background-color: #53b700">
                                                     <p style="font-size:large;">{{ week }} : {{ weekDict.startDate }}</p>
                                                     <p class="week_total" @click="totalWeeks" :amount="weekDict.total">${{ numberWithCommas(weekDict.total) }}</p>
-                                                    <p v-if="!weekDict.invoiced && checkDate(weekDict.startDate)" style="color: #FF4F00">Invoice Is Due!</p>
-                                                    <p v-else="" style="width: 92.61px"></p>
+                                                    <p style="width: 92.61px"></p>
                                                 </div>
                                             </template>
                                             <template v-else>
                                                 <div class="week">
                                                     <p style="font-size:large;">{{ week }} : {{ weekDict.startDate }}</p>
                                                     <p class="week_total" @click="totalWeeks" :amount="weekDict.total">${{ numberWithCommas(weekDict.total) }}</p>
-                                                    <p v-if="!weekDict.invoiced && checkDate(weekDict.startDate) && parseFloat(weekDict.total) != 0" style="color: #FF4F00">Invoice Is Due!</p>
+                                                    <p v-if="!weekDict.invoiced && checkDate(projID, week) && parseFloat(weekDict.total) != 0" style="color: #FF4F00">Invoice Is Due!</p>
                                                     <p v-else="" style="width: 92.61px"></p>
                                                 </div>
                                             </template>
@@ -164,7 +163,7 @@ export default {
 			}
             
 		}
-        this.projectDict = {...userDict['projects']}
+        this.projectDict = userDict['projects']
         this.netData.income = 0;
         this.netData.expenses = 0;
         this.expenseSum = {};
@@ -196,13 +195,19 @@ export default {
         numberWithCommas(num) {
 			return ((parseFloat(num).toFixed(2)).replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ","));
 		},
-        checkDate(date){
-            let newDate = date.split('/');
+        checkDate(projectID, weekID){
+            let weekDict = userDict['projects'][projectID]['weeks'][weekID]
+            let newDate = weekDict['startDate'].split('/');
             newDate = `${newDate[1]}/${newDate[0]}/${newDate[2]}`;
             const d = new Date(newDate);
             const t = new Date();
             const date2 = new Date(d.getTime() + 12096e5);
             if(date2.getTime() <= t.getTime()){
+                console.log(projectID)
+                console.log(userDict['projects'][projectID]['name'])
+                if(parseFloat(weekDict['total']) == 0){
+                    userDict['projects'][projectID]['weeks'][weekID]['invoiced'] = true;
+                }
                 return true
             }else{
                 return false

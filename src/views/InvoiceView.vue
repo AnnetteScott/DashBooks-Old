@@ -20,10 +20,12 @@
                             <template v-for="(n, index) in parseInt(amountOfProjects)" :key="index">
                                 <div class="selection_select">
                                     <label :for="`project_selection_${n}`">Choose a Project and Week:</label>
-                                    <select :id="`project_selection_${n}`" @change="checkInvoice">
+                                    <select :id="`project_selection_${n}`" @change="checkInvoice" onchange="this.className=this.options[this.selectedIndex].className" class="blackText">>
                                         <template v-for="(projDict, projID) in userObj['projects']" :key="projDict" >
                                             <template v-for="(weekDict, weekID) in projDict['weeks']" :key="weekID">
-                                                <option :data="projID" :weekid="weekID">{{ projDict.name }} : {{ weekID }}</option>
+                                                <option :data="projID" :weekid="weekID" :class="`${!weekDict.invoiced && checkDate(weekDict.startDate) && parseFloat(weekDict.total) != 0 ? 'redText' : 'blackText'}`">
+                                                {{ projDict.name }} : {{ weekID }} {{!weekDict.invoiced && checkDate(weekDict.startDate) && parseFloat(weekDict.total) != 0 ? ': Invoice Due!' : ''}}
+                                                </option>
                                             </template>
                                         </template>
                                     </select>
@@ -225,6 +227,19 @@ export default {
         }
     },
     methods: {
+        checkDate(date){
+            let newDate = date.split('/');
+            newDate = `${newDate[1]}/${newDate[0]}/${newDate[2]}`;
+            const d = new Date(newDate);
+            const t = new Date();
+            const date2 = new Date(d.getTime() + 12096e5);
+            if(date2.getTime() <= t.getTime()){
+                return true
+            }else{
+                return false
+            }
+
+        },
         numberWithCommas(num) {
 			return ((parseFloat(num).toFixed(2)).replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ","));
 		},
@@ -509,4 +524,7 @@ input[type="checkbox"]{
     height: 21px;
     font-style: italic;
 }
+
+.redText{ color:#FF4F00; }
+.blackText{ color:black; }
 </style>

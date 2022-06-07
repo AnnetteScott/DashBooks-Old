@@ -69,8 +69,8 @@
 					<p>{{ savedDict['category'] }}</p>
 					<p>{{ savedDict['amount'] }}</p>
                     <p>
-                        <q-btn class="glossy" rounded color="primary" label="Add" @click="addSaved" :data="savedID"/>
-                        <q-btn class="glossy" rounded color="primary" label="Edit" @click="editSaved" :data="savedID"/>
+                        <div class="glossy button" @click="addSaved" :data="savedID">Add</div>
+                        <div class="glossy button" @click="editSaved" :data="savedID">Edit</div>
 					</p>
 				</div>
 			</div>
@@ -430,7 +430,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped lang="scss">
 #app {
 	font-family: Avenir, Helvetica, Arial, sans-serif;
 	-webkit-font-smoothing: antialiased;
@@ -573,6 +573,13 @@ label{
 	padding: 0px 10px;
 }
 
+.button{
+    background-color: $primary;
+    padding: 2px 10px;
+    border-radius: 10px;
+    color: white;
+    cursor: pointer;
+}
 .asset_row{
 	display: flex;
 	width: 100%;
