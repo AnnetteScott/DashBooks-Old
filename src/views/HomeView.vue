@@ -27,7 +27,7 @@
 						</div>
                         <div class="bar_grapgh" style="overflow-y: auto; justify-content: flex-start; margin-top: 10px;">
                             <template v-for="(item, keys) in incomeSum" :key="keys">
-                                <div class="incomeBar" :style="{width: `${(350 * Math.abs(item / netData.income))}px`}">{{ keys }}: {{ item }}</div>
+                                <div class="incomeBar" :style="{width: `${(350 * Math.abs(item / netData.income))}px`}">{{ keys }}: ${{ numberWithCommas(item) }}</div>
                             </template>
 						</div>
                     </div>
@@ -54,7 +54,7 @@
 						</div>
                         <div class="bar_grapgh" style="overflow-y: auto; justify-content: flex-start; margin-top: 10px;">
                             <template v-for="(item, keys) in expenseSum" :key="keys">
-                                <div class="expenseBar" :style="{width: `${(350 * Math.abs(item / netData.expenses))}px`}">{{ keys }}: {{ item }}</div>
+                                <div class="expenseBar" :style="{width: `${(350 * Math.abs(item / netData.expenses))}px`}">{{ keys }}: ${{ numberWithCommas(item) }}</div>
                             </template>
 						</div>
                     </div>

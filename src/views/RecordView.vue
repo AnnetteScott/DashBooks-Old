@@ -14,40 +14,8 @@
 		</div>
 		
 		<div class="tables">
-			<SortableTable 
-				id="transactions"
-				title="Transactions"
-				:headings="[
-					'Month',
-					'Date',
-					'Account',
-					'Type',
-					'Payee',
-					'Item',
-					'Category',
-					'Amount',
-					'Receipt'
-				]"
-				emphasis=""
-				:sort="[
-					'Month',
-					'Date',
-					'Account',
-					'Payee',
-					'Type',
-					'Item',
-					'Category',
-					'Amount'
-				]"
-				sort_default="Date"
-				:rows="all_transactions"
-				:clickable="true"
-				@dataclicked="editTransaction"
-			>
+            <q-table style="height: 400px" title="Treats" :rows="rows" :columns="columns" row-key="index" virtual-scroll v-model:pagination="pagination" :rows-per-page-options="[0]" />
             <q-btn class="glossy" rounded color="primary" label="Create Transaction" @click="current_request_form = 'createTransaction'"/>
-			</SortableTable>
-
-			
 		</div>
 		<div class="tables">
 			<div id="home" class="outer_table">
@@ -207,22 +175,54 @@
 <script>
 import TransactionForms from '@/components/TransactionForms.vue';
 import { generateID } from '../../public/generalFunctions.js';
-import $ from 'jquery';
-import SortableTable from '@/components/SortableTable.vue';
 import { userDict } from '../main.js'
+import { ref } from 'vue'
+import $ from 'jquery';
+const columns = [
+    {
+        name: 'month',
+        required: true,
+        label: 'Month',
+        align: 'left',
+        field: row => row.name,
+        format: val => `${val}`,
+        sortable: true
+    },
+    { name: 'date', label: 'Date', field: 'date', sortable: true },
+    { name: 'type', label: 'Type', field: 'type', sortable: true },
+    { name: 'account', label: 'Account', field: 'account', sortable: true },
+    { name: 'category', label: 'Category', field: 'category', sortable: true },
+    { name: 'item', label: 'Item', field: 'item', sortable: true },
+    { name: 'payee', label: 'Payee', field: 'payee', sortable: true },
+    { name: 'amount', label: '$Amount', field: 'amount', sortable: true }
+   /*  { name: 'calcium', label: 'Calcium (%)', field: 'calcium', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10) },
+    { name: 'iron', label: 'Iron (%)', field: 'iron', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10) } */
+]
+/* for(let[id, content] of Object.entries(this.recordDict['transactions'])){
+
+} */
+
+const rows = []
 
 export default {
 	name: 'RecordView',
 	components: {
-        SortableTable,
-        TransactionForms,
+        TransactionForms
+    },
+    setup () {
+        return {
+            columns,
+            rows,
+            pagination: ref({
+                rowsPerPage: 0
+            })
+        }
     },
 	data() {
 		return {
 			userObj: userDict,
 			pivotDict: {},
 			recordDict: {},
-			all_transactions: [],
 			current_request_form: '',
 			transID: '',
 			receiptID: '',
@@ -251,16 +251,12 @@ export default {
 		}
 		this.recordDict = userDict['records'][yearID];
 		this.yearID = yearID;
-		this.listAllTransactions();
 		setTimeout(() => {
 			$(`#year_selection`).val(yearID);
 			$('#show_gst_checkbox').prop('checked', userDict['showGST']);
 			this.calculatePivotTable()
 		}, 1)
 		
-	},
-	created(){
-
 	},
 	methods: {
 		changeCheckBox(){
@@ -323,19 +319,7 @@ export default {
 		},
 		onchange(){
 			this.recordDict = userDict['records'][$(`#year_selection option:selected`).attr('data')];
-			this.listAllTransactions();
 			this.calculatePivotTable();
-		},
-		listAllTransactions() {
-			this.all_transactions = []
-			if(this.recordDict['transactions'] != undefined){
-				Object.keys(this.recordDict['transactions']).forEach(function(key) {
-					let transaction = this.recordDict['transactions'][key];
-					transaction.id = key;
-					this.all_transactions.push(transaction);
-				}.bind(this));
-			}
-			
 		},
 		editTransaction(e){
 			this.current_request_form = 'editTransaction';
@@ -383,7 +367,6 @@ export default {
 				userDict['records'][`${thisYear} - ${thisYear + 1}`] = {'transactions': {}, 'assets': {}};
 			}
 			this.recordDict = userDict['records'][this.yearID];
-			this.listAllTransactions();
 			this.calculatePivotTable();
 		},
 		calculateTax(amount){

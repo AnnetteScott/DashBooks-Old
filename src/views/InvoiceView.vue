@@ -92,6 +92,32 @@
                             <div class="advisory">Go To Settings To Create An Account</div>
                         </template>
                     </template>
+                    
+                    <label for="invoice_currency_status">Currency Conversion:</label>
+                    <input id="invoice_currency_status" type="checkbox" @click="changeCurrencyStatus"/>
+                    <template v-if="currencyConversion">
+                        <label for="select_currency_from">Currency to Convert From:</label>
+                        <select id="select_currency_from">
+                            <option currency="NZD">NZD</option>
+                            <option currency="AUD">AUD</option>
+                            <option currency="CAD">CAD</option>
+                            <option currency="USD">USD</option>
+                            <option currency="EUR">EUR</option>
+                            <option currency="GBP">GBP</option>
+                            <option currency="TWD">TWD</option>
+                        </select>
+                        <label for="select_currency_to">Currency to Convert To:</label>
+                        <select id="select_currency_to">
+                            <option currency="NZD">NZD</option>
+                            <option currency="AUD">AUD</option>
+                            <option currency="CAD">CAD</option>
+                            <option currency="USD">USD</option>
+                            <option currency="EUR">EUR</option>
+                            <option currency="GBP">GBP</option>
+                            <option currency="TWD">TWD</option>
+                        </select>
+                    </template>
+                    
                 </div>
             </div>
         <q-btn class="glossy" rounded color="primary" label="Print Invoice" @click="generateInvoice"/>
@@ -166,8 +192,12 @@
                     </template>
                     <div class="bottom_section">
                         <div class="invoice_sheet_column">
-                            <div class="cell" style="font-weight: 600;">GRAND TOTAL (NZD)</div>
+                            <div class="cell" style="font-weight: 600;">GRAND TOTAL ({{ currencyFrom }})</div>
                             <div class="cell" style="font-weight: 600;">$ {{ numberWithCommas(invoiceTotal.toFixed(2)) }}</div>
+                            <template v-if="currencyConversion">
+                                <div class="cell" style="font-weight: 600;">GRAND TOTAL ({{ currencyTo }})</div>
+                                <div class="cell" style="font-weight: 600;">$ {{ numberWithCommas(exhangeCurrency(invoiceTotal, currencyFrom, currencyTo)) }}</div>
+                            </template>
                         </div>
                     </div>
 				</div>
@@ -200,7 +230,10 @@ export default {
 			columnLetter: ['A', 'B', 'C', 'D'],
 			columnHeadings: ['Description', 'Rate', 'Quantity', 'Total $'],
 			keys: ['name', 'rate', 'QTY', 'Total'],
-            addToRecord: true
+            addToRecord: true,
+            currencyConversion: false,
+            currencyFrom: 'NZD',
+            currencyTo: ''
         }
     },
     mounted(){
@@ -227,6 +260,30 @@ export default {
         }
     },
     methods: {
+        changeCurrencyStatus(){
+            this.currencyConversion = $('#invoice_currency_status')[0].checked;
+        },
+        exhangeCurrency(amount, from, to){
+            let url = `https://api.exchangerate-api.com/v4/latest/${from}`;
+            let exchangedAmount;
+            let toRate = 1;
+            $.ajax({
+                url: url,
+                async: false,
+                method: 'GET',
+                dataType: 'JSON',
+                success: function (data) {
+                    // Do the currency conversion.
+                    toRate = data['rates'][to];
+                    exchangedAmount = parseFloat(amount) * parseFloat(toRate);
+                },
+                error: function (xhr) {
+                    console.log('Error:', xhr);
+                }
+            });
+
+            return exchangedAmount;
+        },
         checkDate(date){
             let newDate = date.split('/');
             newDate = `${newDate[1]}/${newDate[0]}/${newDate[2]}`;
@@ -289,6 +346,15 @@ export default {
             return [firstDate, lastDate]
         },
 		generateInvoice(){
+            if(this.currencyConversion){
+                this.currencyFrom = $("#select_currency_from option:selected").attr('currency')
+                this.currencyTo = $("#select_currency_to option:selected").attr('currency')
+                if(this.currencyFrom == this.currencyTo){
+                    this.currencyConversion = false;
+                }
+            }
+
+
             this.invoiceTotal = 0
             //Invoice For
 			$('#invoice_for_invoice').text($('#invoice_for').val());
