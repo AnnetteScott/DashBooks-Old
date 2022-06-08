@@ -179,6 +179,20 @@ export function saveChecker(saveFile){
         }
         saveFile['saveVersion'] = 21
     }
+    if(saveFile['saveVersion'] == 21){
+        for(const[yearID, recordsDict] of Object.entries(saveFile['records'])){
+            if(yearID != 'accounts' && yearID != 'categories' && yearID != 'homeExpenses'){
+                if(recordsDict['transactions'] != undefined){
+                    for(const[transID, transDict] of Object.entries(recordsDict['transactions'])){
+                        transDict['receiptID'] = '';
+                        transDict['id'] = transID;
+                    }
+                }
+                
+            }
+        }
+        saveFile['saveVersion'] = 22
+    }
     saveFile['version'] = pjson.version;
     return saveFile
 }

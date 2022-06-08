@@ -240,7 +240,7 @@ export default {
 				userDict['records'][yearID] = {'transactions': {}, 'assets': {}};
 			}
 
-			userDict['records'][yearID]['transactions'][transID] = {'month': monthNames[month], 'date': date, 'account': account, 'payee': payee, 'type': type, 'item': item, 'category': category, 'amount': amount, 'receiptID': ''}
+			userDict['records'][yearID]['transactions'][transID] = {'month': monthNames[month], 'date': date, 'account': account, 'payee': payee, 'type': type, 'item': item, 'category': category, 'amount': amount, 'receiptID': '', 'id': transID}
 
 			this.$emit('cancelled', '');
 		},
@@ -275,7 +275,7 @@ export default {
 			}
 
 			delete this.recordDict['transactions'][ID]
-			userDict['records'][yearID]['transactions'][ID] = {'month': monthNames[month], 'date': date, 'account': account, 'payee': payee, 'type': type, 'item': item, 'category': category, 'amount': amount}
+			userDict['records'][yearID]['transactions'][ID] = {'month': monthNames[month], 'date': date, 'account': account, 'payee': payee, 'type': type, 'item': item, 'category': category, 'amount': amount, 'id': ID}
 			this.$emit('cancelled', '');
 		},
 		deleteTransaction(){
@@ -352,7 +352,7 @@ export default {
 			if(!Object.keys(userDict['records']).includes(yearID)){
 				userDict['records'][yearID] = {'transactions': {}, 'assets': {}};
 			}
-			userDict['records'][yearID]['transactions'][transID] = {'month': monthNames[month], 'date': date, 'account': account, 'type': type, 'item': item, 'category': category, 'amount': amount, 'receiptID': ''}
+			userDict['records'][yearID]['transactions'][transID] = {'month': monthNames[month], 'date': date, 'account': account, 'type': type, 'item': item, 'category': category, 'amount': amount, 'receiptID': '', 'id': transID}
 
 			this.$emit('cancelled', '');
         },

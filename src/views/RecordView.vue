@@ -14,8 +14,31 @@
 		</div>
 		
 		<div class="tables">
-            <q-table style="height: 400px" title="Treats" :rows="rows" :columns="columns" row-key="index" virtual-scroll v-model:pagination="pagination" :rows-per-page-options="[0]" />
-            <q-btn class="glossy" rounded color="primary" label="Create Transaction" @click="current_request_form = 'createTransaction'"/>
+            <q-table 
+            style="height: 85%; width: 95%;" 
+            title="Transactions" 
+            :rows="rows" 
+            :columns="columns" 
+            row-key="index" 
+            virtual-scroll 
+            v-model:pagination="pagination"
+            :rows-per-page-options="[0]">
+            <template v-slot:top-right>
+                <q-btn class="glossy" rounded color="primary" label="Create Transaction" @click="current_request_form = 'createTransaction'"/>
+            </template>
+                <template v-slot:body="props">
+                    <q-tr :props="props" :class="props.row.type" style="cursor: pointer">
+                        <q-td key="month" :props="props" :transid="props.row.id" @click="editTransaction">{{ props.row.month }}</q-td>
+                        <q-td key="date" :props="props" :transid="props.row.id" @click="editTransaction">{{ props.row.date }}</q-td>
+                        <q-td key="type" :props="props" :transid="props.row.id" @click="editTransaction">{{ props.row.type }}</q-td>
+                        <q-td key="account" :props="props" :transid="props.row.id" @click="editTransaction">{{ props.row.account }}</q-td>
+                        <q-td key="category" :props="props" :transid="props.row.id" @click="editTransaction">{{ props.row.category }}</q-td>
+                        <q-td key="item" :props="props" :transid="props.row.id" @click="editTransaction">{{ props.row.item }}</q-td>
+                        <q-td key="payee" :props="props" :transid="props.row.id" @click="editTransaction">{{ props.row.payee }}</q-td>
+                        <q-td key="amount" :props="props" :transid="props.row.id" @click="editTransaction">${{ props.row.amount }}</q-td>
+                    </q-tr>
+                </template>
+            </q-table>
 		</div>
 		<div class="tables">
 			<div id="home" class="outer_table">
@@ -168,97 +191,112 @@
 				</template>
 			</div>
 		</div>		
-		<TransactionForms :transform="current_request_form" @cancelled="current_request_form=``" />
+		<TransactionForms :transform="current_request_form" @cancelled="cancelForm" />
 	</div>
 </template>
 
 <script>
 import TransactionForms from '@/components/TransactionForms.vue';
+import { reactive } from "vue";
 import { generateID } from '../../public/generalFunctions.js';
 import { userDict } from '../main.js'
 import { ref } from 'vue'
 import $ from 'jquery';
+import { date } from 'quasar';
 const columns = [
-    {
-        name: 'month',
-        required: true,
-        label: 'Month',
-        align: 'left',
-        field: row => row.name,
-        format: val => `${val}`,
-        sortable: true
-    },
-    { name: 'date', label: 'Date', field: 'date', sortable: true },
-    { name: 'type', label: 'Type', field: 'type', sortable: true },
-    { name: 'account', label: 'Account', field: 'account', sortable: true },
-    { name: 'category', label: 'Category', field: 'category', sortable: true },
-    { name: 'item', label: 'Item', field: 'item', sortable: true },
-    { name: 'payee', label: 'Payee', field: 'payee', sortable: true },
-    { name: 'amount', label: '$Amount', field: 'amount', sortable: true }
-   /*  { name: 'calcium', label: 'Calcium (%)', field: 'calcium', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10) },
-    { name: 'iron', label: 'Iron (%)', field: 'iron', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10) } */
+    { name: 'month', align: 'center', label: 'Month', field: 'month', sortable: true },
+    { name: 'date', align: 'center', label: 'Date', field: 'date', sortable: true, sort: (a, b) => parseInt(a.split('/').reverse().join('')) - parseInt(b.split('/').reverse().join(''))},
+    { name: 'type', align: 'center', label: 'Type', field: 'type', sortable: true },
+    { name: 'account', align: 'center', label: 'Account', field: 'account', sortable: true },
+    { name: 'category', align: 'center', label: 'Category', field: 'category', sortable: true },
+    { name: 'item', align: 'center', label: 'Item', field: 'item', sortable: true },
+    { name: 'payee', align: 'center', label: 'Payee', field: 'payee', sortable: true },
+    { name: 'amount', align: 'center', label: 'Amount', field: 'amount', sortable: true }
 ]
-/* for(let[id, content] of Object.entries(this.recordDict['transactions'])){
 
-} */
-
-const rows = []
+let rows;
 
 export default {
 	name: 'RecordView',
 	components: {
         TransactionForms
     },
-    setup () {
+    data() {
         return {
-            columns,
-            rows,
-            pagination: ref({
-                rowsPerPage: 0
-            })
+            userObj: userDict,
+            pivotDict: {},
+            recordDict: {},
+            current_request_form: '',
+            transID: '',
+            receiptID: '',
+            loaded: false,
+            yearID: '',
+            colNamesGST: ["Category", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Total w/o GST", "Total w/ GST"],
+            colNames: ["Category", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Total"]
         }
     },
-	data() {
-		return {
-			userObj: userDict,
-			pivotDict: {},
-			recordDict: {},
-			current_request_form: '',
-			transID: '',
-			receiptID: '',
-			loaded: false,
-			yearID: '',
-			colNamesGST: ["Category", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Total w/o GST", "Total w/ GST"],
-			colNames: ["Category", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Total"]
-		}
-	},
 	mounted() {
-		let date = new Date();
+        let date = new Date();
 		let thisYear = date.getFullYear();
 		let month = date.getMonth();
 		let yearID;
 		if(month < 3){ //April is 3rd month
 			yearID = `${thisYear - 1} - ${thisYear}`;
 		}else{
-			yearID = `${thisYear} - ${thisYear + 1}`;
+            yearID = `${thisYear} - ${thisYear + 1}`;
 		}
 		if(Object.keys(userDict['records']).length == 4){
-			userDict['records'][`${thisYear - 1} - ${thisYear}`] = {'transactions': {}, 'assets': {}};
+            userDict['records'][`${thisYear - 1} - ${thisYear}`] = {'transactions': {}, 'assets': {}};
 			userDict['records'][`${thisYear} - ${thisYear + 1}`] = {'transactions': {}, 'assets': {}};
 		}
 		if(!Object.keys(userDict['records']).includes(yearID)){
-			userDict['records'][`${thisYear} - ${thisYear + 1}`] = {'transactions': {}, 'assets': {}};
+            userDict['records'][`${thisYear} - ${thisYear + 1}`] = {'transactions': {}, 'assets': {}};
 		}
 		this.recordDict = userDict['records'][yearID];
 		this.yearID = yearID;
 		setTimeout(() => {
-			$(`#year_selection`).val(yearID);
+            $(`#year_selection`).val(yearID);
 			$('#show_gst_checkbox').prop('checked', userDict['showGST']);
 			this.calculatePivotTable()
 		}, 1)
 		
 	},
+    setup() {
+        let date = new Date();
+		let thisYear = date.getFullYear();
+		let month = date.getMonth();
+		let yearID;
+		if(month < 3){ //April is 3rd month
+			yearID = `${thisYear - 1} - ${thisYear}`;
+		}else{
+            yearID = `${thisYear} - ${thisYear + 1}`;
+		}
+		if(Object.keys(userDict['records']).length == 4){
+            userDict['records'][`${thisYear - 1} - ${thisYear}`] = {'transactions': {}, 'assets': {}};
+			userDict['records'][`${thisYear} - ${thisYear + 1}`] = {'transactions': {}, 'assets': {}};
+		}
+		if(!Object.keys(userDict['records']).includes(yearID)){
+            userDict['records'][`${thisYear} - ${thisYear + 1}`] = {'transactions': {}, 'assets': {}};
+		}
+        rows = reactive([
+            Object.values(userDict['records'][yearID]['transactions'])
+        ]);
+        console.log(rows)
+        return {
+            columns,
+            rows: rows[0],
+            pagination: ref({
+                rowsPerPage: 0,
+                'sortBy': 'date',
+                'descending': true
+            })
+        }
+    },
 	methods: {
+        cancelForm(){
+            this.current_request_form=``;
+            this.rows = Object.values(userDict['records'][this.yearID]['transactions'])
+        },
 		changeCheckBox(){
 			userDict['showGST'] = $('#show_gst_checkbox')[0].checked;
 		},
@@ -320,10 +358,11 @@ export default {
 		onchange(){
 			this.recordDict = userDict['records'][$(`#year_selection option:selected`).attr('data')];
 			this.calculatePivotTable();
+            this.rows = Object.values(this.recordDict['transactions'])
 		},
 		editTransaction(e){
 			this.current_request_form = 'editTransaction';
-			const ID = $(e.target).attr('data');
+			const ID = $(e.target).attr('transid');
 			setTimeout(() => {
 				let transDict = this.recordDict['transactions']
 				let newDate = transDict[ID]['date'].split("/").reverse().join("-");
@@ -660,6 +699,14 @@ label{
 }
 .with_GST:nth-last-child(2){
 	min-width: calc((100% - 30ch) / 14);
+}
+
+.Debit{
+    background-color: #db0b0b5c;
+}
+
+.Credit{
+    background-color: #00c5005e;
 }
 
 </style>
