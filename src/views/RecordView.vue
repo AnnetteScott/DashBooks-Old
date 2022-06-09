@@ -322,7 +322,6 @@ export default {
         rows = reactive([
             Object.values(userDict['records'][yearID]['transactions'])
         ]); 
-        /* userDict['records']['headingStates'] = [ 'month', 'date', 'type', 'account', 'category', 'item', 'payee', 'amount' ]; */
         return {
             visibleColumns: ref(userDict['records']['headingStates']),
             filter,
