@@ -187,7 +187,7 @@ export default {
                 }
             }
         }
-        console.log(userDict)
+        userDict['records']['headingStates'] = [ 'month', 'date', 'type', 'account', 'category', 'item', 'payee', 'amount' ]
         this.checkForUpdates();
 	},
 	methods: {
@@ -245,7 +245,7 @@ export default {
             let ref = this;
             $.ajax({
                 dataType: "json",
-                url: 'https://api.github.com/repos/Scott-Studios/Wyvern/releases',
+                url: 'https://api.github.com/repos/NotNatural21/DashBooks/releases',
                 cache: false,
                 success: function (data){
                     update_data = data;
