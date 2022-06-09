@@ -151,7 +151,7 @@ export default {
             projectDict: {},
             showTotal: false,
             loaded: false,
-            update: true,
+            update: false,
 		}
 	},
 	mounted(){
