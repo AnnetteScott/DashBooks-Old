@@ -187,7 +187,6 @@ export default {
                 }
             }
         }
-        userDict['records']['headingStates'] = [ 'month', 'date', 'type', 'account', 'category', 'item', 'payee', 'amount' ]
         this.checkForUpdates();
 	},
 	methods: {
