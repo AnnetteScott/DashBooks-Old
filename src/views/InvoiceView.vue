@@ -264,7 +264,8 @@ export default {
             this.currencyConversion = $('#invoice_currency_status')[0].checked;
         },
         exhangeCurrency(amount, from, to){
-            let url = `https://api.exchangerate-api.com/v4/latest/${from}`;
+            //Remove API key
+            let url = `https://v6.exchangerate-api.com/v6/${process.env.CURRENCY_API_KEY}/latest/${from}`;
             let exchangedAmount;
             let toRate = 1;
             $.ajax({
@@ -274,7 +275,7 @@ export default {
                 dataType: 'JSON',
                 success: function (data) {
                     // Do the currency conversion.
-                    toRate = data['rates'][to];
+                    toRate = data['conversion_rates'][to];
                     exchangedAmount = parseFloat(amount) * parseFloat(toRate);
                 },
                 error: function (xhr) {

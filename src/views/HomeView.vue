@@ -174,7 +174,7 @@ export default {
                     this.netData.income += objDict.amount;
                     objDict.category in this.incomeSum ? this.incomeSum[objDict.category] += 0: this.incomeSum[objDict.category] = 0;
                     this.incomeSum[objDict.category] += objDict.amount;
-                }else if(objDict.type == 'Debit'){
+                }else if(objDict.type == 'Debit' && userDict['records']['categories'][objDict.category]){
                     this.netData.expenses += objDict.amount;
                     objDict.category in this.expenseSum ? this.expenseSum[objDict.category] += 0: this.expenseSum[objDict.category] = 0;
                     this.expenseSum[objDict.category] += objDict.amount;

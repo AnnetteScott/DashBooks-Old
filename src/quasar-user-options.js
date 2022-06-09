@@ -7,8 +7,8 @@ import '@quasar/extras/material-icons-round/material-icons-round.css'
 
 // To be used on app.use(Quasar, { ... })
 export default {
-  config: {},
-  plugins: {
-  },
-  iconSet: iconSet
+    config: {},
+    plugins: {
+    },
+    iconSet: iconSet
 }

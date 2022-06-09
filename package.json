@@ -1,6 +1,6 @@
 {
   "name": "DashBooks",
-  "version": "0.9.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -22,6 +22,7 @@
   "devDependencies": {
     "@vue/cli-plugin-router": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
+    "dotenv-webpack": "^7.1.0",
     "sass": "1.32.12",
     "sass-loader": "^12.0.0",
     "vue-cli-plugin-quasar": "~5.0.1",

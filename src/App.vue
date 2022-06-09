@@ -183,6 +183,7 @@ nav {
 	display: flex;
 	justify-content: center;
     min-width: 1438px;
+    overflow-y: auto;
 }
 
 p{

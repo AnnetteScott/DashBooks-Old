@@ -1,17 +1,19 @@
-const { defineConfig } = require('@vue/cli-service')
+const { defineConfig } = require('@vue/cli-service');
+const Dotenv = require('dotenv-webpack');
 module.exports = defineConfig({
     configureWebpack: {
         experiments: {
             topLevelAwait: true,
-          },
-  },
-  pluginOptions: {
-    quasar: {
-      importStrategy: 'kebab',
-      rtlSupport: false,
-    }
-  },
-  transpileDependencies: [
-    'quasar'
-  ]
+        },
+        plugins: [
+            new Dotenv()
+        ]
+    },
+    pluginOptions: {
+        quasar: {
+            importStrategy: 'kebab',
+            rtlSupport: false,
+        }
+    },
+    transpileDependencies: ['quasar']
 })

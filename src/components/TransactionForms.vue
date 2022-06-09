@@ -116,7 +116,7 @@
 		<div class="form">
 			<label for="create_savedTrans_account">Account:</label>
 			<select id="create_savedTrans_account">
-				<option v-for="account in masterDict['records']['accounts']" :key="account" :data="account">
+				<option v-for="account in userObj['records']['accounts']" :key="account" :data="account">
 					{{ account }}
 				</option>
 			</select>
@@ -129,7 +129,7 @@
 
 			<label for="create_savedTrans_category">Category:</label>
 			<select id="create_savedTrans_category">
-				<option v-for="(status, category) in masterDict['records']['categories']" :key="category" :data="category">
+				<option v-for="(status, category) in userObj['records']['categories']" :key="category" :data="category">
 					{{ category }}
 				</option>
 			</select>
@@ -153,7 +153,7 @@
             <div id="edit_savedID" savedid="invalid"></div>
 			<label for="edit_savedTrans_account">Account:</label>
 			<select id="edit_savedTrans_account">
-				<option v-for="account in masterDict['records']['accounts']" :key="account" :data="account">
+				<option v-for="account in userObj['records']['accounts']" :key="account" :data="account">
 					{{ account }}
 				</option>
 			</select>
@@ -166,7 +166,7 @@
 
 			<label for="edit_savedTrans_category">Category:</label>
 			<select id="edit_savedTrans_category">
-				<option v-for="(status, category) in masterDict['records']['categories']" :key="category" :data="category">
+				<option v-for="(status, category) in userObj['records']['categories']" :key="category" :data="category">
 					{{ category }}
 				</option>
 			</select>
@@ -184,6 +184,66 @@
 			</fieldset>
 		</div>
 	</div>
+
+    <!-- Create Asset -->
+	<div class="form_container" v-if="transform == `createAsset`">
+		<div class="form">
+			<label for="create_asset_date">Purchased Date:</label>
+			<input id="create_asset_date" type="date" />
+
+			<label for="create_asset_item">Item Description:</label>
+			<input id="create_asset_item" type="text" />
+
+			<label for="create_asset_vendor">Vendor:</label>
+			<input id="create_asset_vendor" type="text" />
+
+			<label for="create_asset_unit_cost">Unit Cost:</label>
+			<input id="create_asset_unit_cost" type="number" step="0.01" />
+
+			<label for="create_asset_units">Units:</label>
+			<input id="create_asset_units" type="number" step="0.01" />
+
+			<label for="create_asset_total">Total:</label>
+			<input id="create_asset_total" type="number" step="0.01" />
+
+			<fieldset>
+                <q-btn class="glossy" rounded color="primary" label="Save Asset" @click="createAsset"/>
+                <q-btn class="glossy" rounded color="secondary" label="Cancel" @click="this.$emit('cancelled', '')"/>
+			</fieldset>
+		</div>
+	</div>
+
+	<!-- Edit Asset -->
+	<div class="form_container" v-if="transform == `editAsset`">
+		<div class="form">
+			<div id="edit_assetID" assetid="invalid" assetyear="invalid"></div>
+
+			<label for="edit_asset_date">Purchased Date:</label>
+			<input id="edit_asset_date" type="date" />
+
+			<label for="edit_asset_item">Item Description:</label>
+			<input id="edit_asset_item" type="text" />
+
+			<label for="edit_asset_vendor">Vendor:</label>
+			<input id="edit_asset_vendor" type="text" />
+
+			<label for="edit_asset_unit_cost">Unit Cost:</label>
+			<input id="edit_asset_unit_cost" type="number" step="0.01" />
+
+			<label for="edit_asset_units">Units:</label>
+			<input id="edit_asset_units" type="number" step="0.01" />
+
+			<label for="edit_asset_total">Total:</label>
+			<input id="edit_asset_total" type="number" step="0.01" />
+
+			<fieldset>
+                <q-btn class="glossy" rounded color="primary" label="Save Transaction" @click="editAsset"/>
+                <q-btn class="glossy" rounded color="red" label="Delete" @click="deleteAsset"/>
+                <q-btn class="glossy" rounded color="secondary" label="Cancel" @click="this.$emit('cancelled', '')"/>
+			</fieldset>
+		</div>
+	</div>
+
 
 </template>
 
@@ -356,6 +416,84 @@ export default {
 
 			this.$emit('cancelled', '');
         },
+        createAsset(){
+			let item = $('#create_asset_item').val();
+			let vendor = $('#create_asset_vendor').val();
+			let date = ($('#create_asset_date').val()).split("-");
+			let month = parseInt(date[1]) - 1;
+			let thisYear = parseInt(date[0]);
+			date = date.reverse().join("/");
+            if(date == '' || date == 'NaN/NaN/NaN'){ //If no date was provided
+				$("#create_asset_date").addClass('form_error');
+				return false;
+			}
+            $("#create_asset_date").removeClass('form_error');
+            let yearID;
+			if(month < 3){
+				yearID = `${thisYear - 1} - ${thisYear}`;
+			}else{
+				yearID = `${thisYear} - ${thisYear + 1}`;
+			}
+
+			if(!Object.keys(userDict['records']).includes(yearID)){
+				userDict['records'][yearID] = {'transactions': {}, 'assets': {}};
+			}
+
+			let unitCost = parseFloat($(`#create_asset_unit_cost`).val());
+			let units = parseFloat($(`#create_asset_units`).val());
+			let total = parseFloat($(`#create_asset_total`).val());
+            isNaN(unitCost) ? unitCost = 0 : '';
+            isNaN(units) ? units = 0 : '';
+            isNaN(total) ? total = 0 : '';
+            console.log(isNaN(unitCost))
+            console.log(unitCost)
+
+			const assetID = generateID(userDict);
+			userDict['records'][yearID]['assets'][assetID] = {'item': item, 'vendor': vendor, 'date': date, 'unitCost': unitCost, 'units': units, 'total': total}
+			this.$emit('cancelled', '');
+		},
+        editAsset(){
+            let date = ($('#edit_asset_date').val()).split("-");
+			let month = parseInt(date[1]) - 1;
+			let thisYear = parseInt(date[0]);
+			date = date.reverse().join("/");
+            if(date == '' || date == 'NaN/NaN/NaN'){ //If no date was provided
+				$("#edit_asset_date").addClass('form_error');
+				return false;
+			}
+            $("#edit_asset_date").removeClass('form_error');
+            let yearID;
+			if(month < 3){
+                yearID = `${thisYear - 1} - ${thisYear}`;
+			}else{
+                yearID = `${thisYear} - ${thisYear + 1}`;
+			}
+
+			if(!Object.keys(userDict['records']).includes(yearID)){
+                userDict['records'][yearID] = {'transactions': {}, 'assets': {}};
+			}
+
+            let item = $('#edit_asset_item').val();
+			let vendor = $('#edit_asset_vendor').val();
+            let unitCost = parseInt($(`#edit_asset_unit_cost`).val());
+			let units = parseInt($(`#edit_asset_units`).val());
+			let total = parseInt($(`#edit_asset_total`).val());
+            const assetID = $('#edit_assetID').attr('assetid');
+
+            userDict['records'][yearID]['assets'][assetID] = {'item': item, 'vendor': vendor, 'date': date, 'unitCost': unitCost, 'units': units, 'total': total}
+			this.$emit('cancelled', '');
+		},
+		deleteAsset(){
+            const ID = $('#edit_assetID').attr('assetid');
+			const YEAR = $('#edit_assetID').attr('assetyear');
+            let ref = this;
+            confirm(`Are you sure you want to delete this Asset?`).then(function(outcome) {
+                if(outcome){
+                    delete userDict['records'][YEAR]['assets'][ID];
+                }
+                ref.$emit('cancelled', '');
+            });
+		}
     }
 }
 </script>

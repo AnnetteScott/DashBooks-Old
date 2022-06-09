@@ -15,16 +15,41 @@
 		
 		<div class="tables">
             <q-table 
-            style="height: 85%; width: 95%;" 
+            style="height: 85%; width: 95%;"
+            class="my-sticky-virtscroll-table"
+            :virtual-scroll-sticky-size-start="48"
             title="Transactions" 
             :rows="rows" 
             :columns="columns" 
             row-key="index" 
             virtual-scroll 
             v-model:pagination="pagination"
-            :rows-per-page-options="[0]">
+            :rows-per-page-options="[0]"
+            :visible-columns="visibleColumns"
+            :filter="filter"
+            >
+            <template v-slot:top-left>
+                <div class="col-2 q-table__title">Transactions</div>
+                <div v-if="$q.screen.gt.xs" class="col">
+                    <q-toggle v-model="visibleColumns" val="date" label="Date" @click="rememberChoice('date')"/>
+                    <q-toggle v-model="visibleColumns" val="type" label="Type" @click="rememberChoice('type')"/>
+                    <q-toggle v-model="visibleColumns" val="account" label="Account" @click="rememberChoice('account')"/>
+                    <q-toggle v-model="visibleColumns" val="category" label="Category" @click="rememberChoice('category')"/>
+                    <q-toggle v-model="visibleColumns" val="item" label="Item" @click="rememberChoice('item')"/>
+                    <q-toggle v-model="visibleColumns" val="payee" label="Payee" @click="rememberChoice('payee')"/>
+                    <q-toggle v-model="visibleColumns" val="amount" label="Amount" @click="rememberChoice('amount')"/>
+                </div>
+            </template>
             <template v-slot:top-right>
-                <q-btn class="glossy" rounded color="primary" label="Create Transaction" @click="current_request_form = 'createTransaction'"/>
+                <div class="top_right_trans">
+                    <q-input dense debounce="300" color="primary" v-model="filter">
+                        <template v-slot:append>
+                            <q-icon name="o_search" />
+                        </template>
+                    </q-input>
+                    <q-btn class="glossy" rounded color="primary" label="Create Transaction" @click="current_request_form = 'createTransaction'"/>
+                    <q-btn class="glossy" rounded color="secondary" label="Export to CSV" no-caps @click="exportTable" icon-right="o_archive"/>
+                </div>
             </template>
                 <template v-slot:body="props">
                     <q-tr :props="props" :class="props.row.type" style="cursor: pointer">
@@ -40,34 +65,40 @@
                 </template>
             </q-table>
 		</div>
+
+       <!--  Saved Transactions Table -->
 		<div class="tables">
 			<div id="home" class="outer_table">
 				<div class="title">
 					<p>Saved Transactions</p>
+                    <q-btn class="glossy" rounded color="primary" label="Create Saved Transaction" @click="current_request_form = 'createSaved'"/>
 				</div>
 				<div class="saved_row pivot_heading">
 					<p>Account</p>
 					<p>Type</p>
 					<p>Item</p>
 					<p>Category</p>
-					<p>$</p>
+					<p>Amount</p>
 					<p>Add &nbsp;&nbsp;| &nbsp;&nbsp;Edit</p>
 				</div>
-				<div v-for="(savedDict, savedID) in userObj['records']['savedTransactions']" :key="savedID" class="saved_row">
-					<p>{{ savedDict['account'] }}</p>
-					<p>{{ savedDict['type'] }}</p>
-					<p>{{ savedDict['item'] }}</p>
-					<p>{{ savedDict['category'] }}</p>
-					<p>{{ savedDict['amount'] }}</p>
-                    <p>
-                        <div class="glossy button" @click="addSaved" :data="savedID">Add</div>
-                        <div class="glossy button" @click="editSaved" :data="savedID">Edit</div>
-					</p>
-				</div>
+                <div class="outer_container">
+                    <div v-for="(savedDict, savedID) in userObj['records']['savedTransactions']" :key="savedID" class="saved_row">
+                        <p>{{ savedDict['account'] }}</p>
+                        <p>{{ savedDict['type'] }}</p>
+                        <p>{{ savedDict['item'] }}</p>
+                        <p>{{ savedDict['category'] }}</p>
+                        <p>${{ numberWithCommas(savedDict['amount']) }}</p>
+                        <p>
+                            <div class="glossy button" @click="addSaved" :data="savedID">Add</div>
+                            <div class="glossy button" @click="editSaved" :data="savedID">Edit</div>
+                        </p>
+                    </div>
+                </div>
 			</div>
 			<div id="assets" class="outer_table">
 				<div class="title">
 					<p>Assets</p>
+                    <q-btn class="glossy" rounded color="primary" label="Create Asset" @click="current_request_form = 'createAsset'"/>
 				</div>
 				<div class="asset_row pivot_heading">
 					<p>Date</p>
@@ -78,15 +109,17 @@
 					<p>Total</p>
 					<p>Attached</p>
 				</div>
-				<div v-for="(assetDict, assetID) in recordDict['assets']" :key="assetID" class="asset_row" :data="assetID" @click="editAsset">
-					<p>{{ assetDict['date'] }}</p>
-					<p>{{ assetDict['item'] }}</p>
-					<p>{{ assetDict['vendor'] }}</p>
-					<p>{{ assetDict['unitCost'] }}</p>
-					<p>{{ assetDict['units'] }}</p>
-					<p>${{ assetDict['total'] }}</p>
-					<p></p>
-				</div>
+                <div class="outer_container">
+                    <div v-for="(assetDict, assetID) in recordDict['assets']" :key="assetID" class="asset_row" :data="assetID" @click="editAsset">
+                        <p>{{ assetDict['date'] }}</p>
+                        <p>{{ assetDict['item'] }}</p>
+                        <p>{{ assetDict['vendor'] }}</p>
+                        <p>{{ assetDict['unitCost'] }}</p>
+                        <p>{{ assetDict['units'] }}</p>
+                        <p>${{ assetDict['total'] }}</p>
+                        <p></p>
+                    </div>
+                </div>
 			</div>
 		</div>
 		<div class="tables">
@@ -166,7 +199,7 @@
 				<div class="pivot_row pivot_heading">
 					<template v-if="loaded">
 						<template v-if="userObj['showGST']">
-							<p>Take Home w/o GST</p>
+							<p>Take Home</p>
 						</template>
 						<template v-else>
 							<p>Take Home:</p>
@@ -175,14 +208,14 @@
 					</template>
 				</div>
 				<template v-if="userObj['showGST']">
-					<div class="pivot_row pivot_heading" style="margin-top: 5px;">
+					<div class="pivot_row pivot_heading" style="margin-top: 5px; background-color: #41cde0">
 						<template v-if="loaded">
 							<p>Tax To Pay inc. GST</p>
 							<p>${{ numberWithCommas(calculateTax(pivotDict['months']['grandTotal']) * 1.15) }}</p>
 							<p>Effective Tax Rate: {{ ((calculateTax(pivotDict['months']['grandTotal'])  * 1.15) / (pivotDict['months']['grandTotal'] * 1.15) * 100).toFixed(2) }}%</p>
 						</template>
 					</div>
-					<div class="pivot_row pivot_heading">
+					<div class="pivot_row pivot_heading" style="background-color: #41cde0">
 						<template v-if="loaded">
 							<p>Take Home w/ GST</p>
 							<p>${{ numberWithCommas(pivotDict['months']['grandTotal'] * 1.15 - calculateTax(pivotDict['months']['grandTotal']) * 1.15) }}</p>
@@ -198,6 +231,7 @@
 <script>
 import TransactionForms from '@/components/TransactionForms.vue';
 import { reactive } from "vue";
+import { exportFile, useQuasar } from 'quasar'
 import { generateID } from '../../public/generalFunctions.js';
 import { userDict } from '../main.js'
 import { ref } from 'vue'
@@ -213,8 +247,13 @@ const columns = [
     { name: 'payee', align: 'center', label: 'Payee', field: 'payee', sortable: true },
     { name: 'amount', align: 'center', label: 'Amount', field: 'amount', sortable: true }
 ]
-
 let rows;
+function wrapCsvValue (val, formatFn, row) {
+    let formatted = formatFn !== void 0 ? formatFn(val, row) : val
+    formatted = formatted === void 0 || formatted === null ? '' : String(formatted)
+    formatted = formatted.split('"').join('""')
+    return `"${formatted}"`
+}
 
 export default {
 	name: 'RecordView',
@@ -262,6 +301,8 @@ export default {
 		
 	},
     setup() {
+        const $q = useQuasar()
+        const filter = ref('')
         let date = new Date();
 		let thisYear = date.getFullYear();
 		let month = date.getMonth();
@@ -280,11 +321,39 @@ export default {
 		}
         rows = reactive([
             Object.values(userDict['records'][yearID]['transactions'])
-        ]);
-        console.log(rows)
+        ]); 
+        /* userDict['records']['headingStates'] = [ 'month', 'date', 'type', 'account', 'category', 'item', 'payee', 'amount' ]; */
         return {
+            visibleColumns: ref(userDict['records']['headingStates']),
+            filter,
             columns,
             rows: rows[0],
+            exportTable () {
+                // naive encoding to csv format
+                const content = [columns.map(col => wrapCsvValue(col.label))].concat(
+                rows[0].map(row => columns.map(col => wrapCsvValue(
+                    typeof col.field === 'function'
+                    ? col.field(row)
+                    : row[ col.field === void 0 ? col.name : col.field ],
+                    col.format,
+                    row
+                )).join(','))
+                ).join('\r\n')
+
+                const status = exportFile(
+                'DashBooks Records.csv',
+                content,
+                'text/csv'
+                )
+
+                if (status !== true) {
+                $q.notify({
+                    message: 'Browser denied file download...',
+                    color: 'negative',
+                    icon: 'warning'
+                })
+                }
+            },
             pagination: ref({
                 rowsPerPage: 0,
                 'sortBy': 'date',
@@ -293,6 +362,14 @@ export default {
         }
     },
 	methods: {
+        rememberChoice(heading){
+            const index = userDict['records']['headingStates'].indexOf(heading);
+            if (index > -1) {
+                userDict['records']['headingStates'].splice(index, 1); // 2nd parameter means remove one item only
+            }else{
+                userDict['records']['headingStates'].push(heading)
+            }
+        },
         cancelForm(){
             this.current_request_form=``;
             this.rows = Object.values(userDict['records'][this.yearID]['transactions'])
@@ -526,6 +603,7 @@ label{
 	border-radius: 10px;
 	box-shadow: 2px 4px 10px -7px black;
 	backdrop-filter: blur(10px);
+    overflow-y: auto;
 }
 
 .outer_table > .title{
@@ -542,6 +620,11 @@ label{
 }
 .outer_table > .title .button_link{
 	margin: 0px 10px;
+}
+
+.outer_container{
+    width: 100%;
+    height: 100%;
 }
 
 .saved_row{
@@ -570,11 +653,13 @@ label{
 }
 
 .saved_row > p:nth-child(2){
-	min-width: 6ch;
+    min-width: 7ch;
+    max-width: 7ch;
+	width: 7ch;
 }
 
 .saved_row > p:nth-child(3){
-	min-width: 17ch;
+	min-width: 35ch;
 }
 
 .saved_row > p:nth-child(4){
@@ -709,4 +794,9 @@ label{
     background-color: #00c5005e;
 }
 
+.top_right_trans{
+    width: 625px;
+    display: flex;
+    justify-content: space-between;
+}
 </style>
