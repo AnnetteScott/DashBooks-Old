@@ -285,11 +285,12 @@ export default {
 }
 #tile_container{
 	width: 100%;
-	height: 95%;
-	padding-top: 10px;
+    height: 95%;
+    padding-top: 10px;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    justify-content: space-around;
 }
 
 #tile_container > div{

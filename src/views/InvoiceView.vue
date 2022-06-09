@@ -553,11 +553,9 @@ input {
 	flex-direction: column;
 	justify-content: flex-start;
 	align-items: center;
-}
-
-.side:nth-child(1){
     margin-right: 30px;
 }
+
 
 select{
 	width: 230px;
