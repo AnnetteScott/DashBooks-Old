@@ -2,6 +2,11 @@
 	<div class="pageHome">
 		<div class="inner">
 			<h4>Welcome To DashBooks!</h4>
+            <template v-if="update">
+                <div id="update">
+                    There is an update available. Go to&nbsp;<a href="https://github.com/NotNatural21/DashBooks/releases/latest/" target="_blank">DashBooks latest release</a> to get the latest version.
+                </div>
+            </template>
 			<div id="tile_container">
 				<div id="records_container">
 				    <div class="tile">
@@ -145,7 +150,8 @@ export default {
 			years: [],
             projectDict: {},
             showTotal: false,
-            loaded: false
+            loaded: false,
+            update: true,
 		}
 	},
 	mounted(){
@@ -182,6 +188,7 @@ export default {
             }
         }
         console.log(userDict)
+        this.checkForUpdates();
 	},
 	methods: {
         removeTotal(){
@@ -231,7 +238,40 @@ export default {
                     this.expenseSum[objDict.category] += objDict.amount 
 				}
 			}
-		}
+		},
+        checkForUpdates(){
+            let masterDict = {...userDict}
+            let update_data = undefined;
+            let ref = this;
+            $.ajax({
+                dataType: "json",
+                url: 'https://api.github.com/repos/Scott-Studios/Wyvern/releases',
+                cache: false,
+                success: function (data){
+                    update_data = data;
+                    let current_version = [
+                        parseInt(masterDict['version'].split('.')[0]), 
+                        parseInt(masterDict['version'].split('.')[1]), 
+                        parseInt(masterDict['version'].split('.')[2])
+                    ];
+                    let latest_version = [
+                        parseInt(update_data[0].tag_name.split('v')[1].split('.')[0]), 
+                        parseInt(update_data[0].tag_name.split('v')[1].split('.')[1]), 
+                        parseInt(update_data[0].tag_name.split('v')[1].split('.')[2])
+                    ];
+                    if(latest_version[0] > current_version[0] || latest_version[1] > current_version[1] || latest_version[2] > current_version[2]){
+                        ref.updateVar();
+                    }
+
+                },
+                error: function (xhr){
+                    console.log("Error " + xhr.status + ", could not check for updates.");
+                }
+            });
+        },
+        updateVar(){
+            this.update = true;
+        }
 	}
 }
 </script>
@@ -396,5 +436,13 @@ p{
     cursor: pointer;
     pointer-events: all;
     font-size: larger;
+}
+
+#update > a{
+    color: blue;
+}
+
+#update{
+    color: #e61010;
 }
 </style>
