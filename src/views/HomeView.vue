@@ -4,7 +4,7 @@
 			<h4>Welcome To DashBooks!</h4>
             <template v-if="update">
                 <div id="update">
-                    There is an update available. Go to&nbsp;<a href="https://github.com/NotNatural21/DashBooks/releases/latest/" target="_blank">DashBooks latest release</a> to get the latest version.
+                    There is an update available. Go to&nbsp;<a href="https://github.com/NotNatural21/DashBooks/releases/latest/" target="_blank">DashBooks latest release</a> to get the {{updateVersion}}.
                 </div>
             </template>
 			<div id="tile_container">
@@ -152,6 +152,7 @@ export default {
             showTotal: false,
             loaded: false,
             update: false,
+            updateVersion: ''
 		}
 	},
 	mounted(){
@@ -240,26 +241,27 @@ export default {
 		},
         checkForUpdates(){
             let masterDict = {...userDict}
-            let update_data = undefined;
+            let updateData = undefined;
             let ref = this;
             $.ajax({
                 dataType: "json",
                 url: 'https://api.github.com/repos/NotNatural21/DashBooks/releases',
                 cache: false,
                 success: function (data){
-                    update_data = data;
+                    updateData = data[0];
                     let current_version = [
                         parseInt(masterDict['version'].split('.')[0]), 
                         parseInt(masterDict['version'].split('.')[1]), 
                         parseInt(masterDict['version'].split('.')[2])
                     ];
                     let latest_version = [
-                        parseInt(update_data[0].tag_name.split('v')[1].split('.')[0]), 
-                        parseInt(update_data[0].tag_name.split('v')[1].split('.')[1]), 
-                        parseInt(update_data[0].tag_name.split('v')[1].split('.')[2])
+                        parseInt(updateData.tag_name.split('v')[1].split('.')[0]), 
+                        parseInt(updateData.tag_name.split('v')[1].split('.')[1]), 
+                        parseInt(updateData.tag_name.split('v')[1].split('.')[2])
                     ];
                     if(latest_version[0] > current_version[0] || latest_version[1] > current_version[1] || latest_version[2] > current_version[2]){
                         ref.updateVar();
+                        ref.updateVersion = updateData.tag_name
                     }
 
                 },
