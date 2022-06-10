@@ -32,8 +32,13 @@ if(!foundDashBooks){
 let settingsObjs = await fs.readTextFile(dataPath + "DashBooks/settings.ssdb");
 const settingsObj = JSON.parse(settingsObjs);
 let saveFileDirectory = settingsObj['saveFilePath'].split('/')[0]
-let saveFiles = await fs.readDir(saveFileDirectory);
+let saveFiles = {}
 //Check the save file is present otherwise read from backup
+try {
+    saveFiles = await fs.readDir(saveFileDirectory);
+} catch (error) {
+    console.error(error);
+}
 let saveFileFound = false;
 for(const[objKey, objDict] of Object.entries(saveFiles)){
     if(objDict['name'] == 'userData.ssdb'){
