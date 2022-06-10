@@ -23,7 +23,8 @@ for(const[objKey, objDict] of Object.entries(roaming)){
 }
 if(!foundDashBooks){
     fs.createDir(dataPath + "DashBooks")
-    fs.writeFile({path: dataPath + "DashBooks/settings.ssdb", contents: JSON.stringify({'saveFilePath': `${dataPath + "DashBooks/userData.ssdb"}`})})
+    fs.createDir(dataPath + "DashBooks/Receipts")
+    fs.writeFile({path: dataPath + "DashBooks/settings.ssdb", contents: JSON.stringify({'saveFilePath': `${dataPath + "DashBooks/"}`, 'autoSaveTime': 5})})
     fs.writeFile({path: dataPath + "DashBooks/userData.ssdb", contents: JSON.stringify(userDictMaster)})
 }
 
@@ -40,12 +41,12 @@ for(const[objKey, objDict] of Object.entries(saveFiles)){
     }
 }
 if(saveFileFound){
-    let rawUser = await fs.readTextFile(settingsObj['saveFilePath'])
+    let rawUser = await fs.readTextFile(settingsObj['saveFilePath'] + 'userData.ssdb')
     userDictRead = JSON.parse(rawUser)
 }else{
     let rawUser = await fs.readTextFile(dataPath + "DashBooks/userData.ssdb")
     userDictRead = JSON.parse(rawUser)
-    settingsObj['saveFilePath'] = dataPath + "DashBooks/userData.ssdb";
+    settingsObj['saveFilePath'] = dataPath + "DashBooks/";
 }
 
 
@@ -205,7 +206,9 @@ export const settingsDict = reactive({...settingsObj})
 //Save on exit
 import { appWindow } from '@tauri-apps/api/window'
 appWindow.listen('tauri://close-requested', ({ event, payload }) => {
-    fs.writeFile({path: settingsObj['saveFilePath'], contents: JSON.stringify(userDict)});
+    //Only save data file.
+    fs.writeFile({path: settingsObj['saveFilePath'] + 'userData.ssdb', contents: JSON.stringify(userDict)});
+    //Save Settings File
     path.dataDir().then(function(dataPaths) {
         fs.writeFile({path: dataPaths + "DashBooks/settings.ssdb", contents: JSON.stringify(settingsDict)})
         appWindow.close();
