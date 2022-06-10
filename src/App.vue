@@ -90,19 +90,49 @@ export default {
         },
         loadUser(){
             let ref = this;
-            dialog.open().then(function(userFilePath) {
-                if(userFilePath != null){
-                    fs.readTextFile(userFilePath).then(function(userFileContents) {
-                        let userContents = JSON.parse(userFileContents)
-                        userContents = saveChecker(userContents)
-                        for(const[key, entry] of Object.entries(userContents)){
-                            userDict[key] = entry;
+            confirm(`Are you sure you want to proceed? This will replace all you current data. Please use the manual save function to avoid data loss.`).then(function(outcome) {
+                if(outcome){
+                    dialog.open({"directory": true}).then(function(userFilePath) {
+                        console.log(`${userFilePath}/`)
+                        console.log(settingsDict['saveFilePath'])
+                        if(userFilePath != null && `${userFilePath}/` != settingsDict['saveFilePath']){
+                            fs.readDir(userFilePath).then(function(dataPath) {
+                                for(const[objKey, objDict] of Object.entries(dataPath)){
+                                    if(objDict['name'] == "userData.ssdb"){
+                                        fs.readTextFile(objDict['path']).then(function(loadContent) {
+                                            let userContents = JSON.parse(loadContent)
+                                            userContents = saveChecker(userContents)
+                                            for(const[key, entry] of Object.entries(userContents)){
+                                                userDict[key] = entry;
+                                            }
+                                            window.location.reload();
+                                            ref.saveUserDict()
+                                        })
+                                    }else if(objDict['name'] == 'Receipts'){
+                                        fs.readDir(objDict['path']).then(function(receiptPath) {
+                                            path.dataDir().then(function(roaming) {
+                                                //Reset Romaing Dir
+                                                fs.removeDir(roaming + `DashBooks/Receipts/`, {recursive: true})
+                                                fs.createDir(roaming + `DashBooks/Receipts`)
+                                                if(roaming + `DashBooks/Receipts` != settingsDict['saveFilePath'] + `Receipts`){
+                                                    fs.removeDir(settingsDict['saveFilePath'] + `Receipts`, {recursive: true})
+                                                    fs.createDir(settingsDict['saveFilePath'] + `Receipts`)
+                                                }
+                                                for(const[objKey, objDict] of Object.entries(receiptPath)){
+                                                    fs.copyFile(objDict['path'], roaming + `DashBooks/Receipts/${objDict['name']}`)
+                                                    if(roaming + `DashBooks/Receipts` != settingsDict['saveFilePath'] + `Receipts`){
+                                                        fs.copyFile(objDict['path'], settingsDict['saveFilePath'] + `Receipts/${objDict['name']}`)
+                                                    }
+                                                }
+                                            });
+                                        });
+                                    }
+                                }
+                            });
                         }
-                        window.location.reload();
-                        ref.saveUserDict()
-                    })
+                        
+                    });
                 }
-                
             });
         },
         saveUserDict(){
@@ -111,28 +141,53 @@ export default {
 				this.saving_in_progress = false;
 			}.bind(this), 1500);
 
-            fs.writeFile({path: settingsDict['saveFilePath'], contents: JSON.stringify(userDict)})
+            fs.writeFile({path: settingsDict['saveFilePath'] + 'userData.ssdb', contents: JSON.stringify(userDict)})
             path.dataDir().then(function(dataPath) {
                 fs.writeFile({path: dataPath + "DashBooks/userData.ssdb", contents: JSON.stringify(userDict)})
             })
         },
         manualSave(){
             this.saveUserDict();
-            dialog.save().then(function(userFilePath) {
+            dialog.open({"directory": true}).then(function(userFilePath) {
                 if(userFilePath != null){
-                    fs.writeFile({path: userFilePath, contents: JSON.stringify(userDict)})
+                    fs.createDir(`${userFilePath}/DashBooks Save`)
+                    fs.createDir(`${userFilePath}/DashBooks Save/Receipts`)
+                    fs.writeFile({path: `${userFilePath}/DashBooks Save/userSave.ssdb`, contents: JSON.stringify(userDict)});
+                    path.dataDir().then(function(roaming) {
+                        fs.readDir(`${roaming}DashBooks/Receipts`).then(function(DashBooks) {
+                            for(const[objKey, objDict] of Object.entries(DashBooks)){
+                                fs.copyFile(objDict['path'], `${`${userFilePath}/DashBooks Save/Receipts/`}${objDict['name']}`)
+                            }
+                        })
+                    })
                 }
                 
             });
         },
         changeSaveLocation(){
+            let ref = this;
             dialog.open({"directory": true}).then(function(userFilePath) {
                 if(userFilePath != null){
-                    userFilePath = userFilePath + "/userData.ssdb"
-                    settingsDict['saveFilePath'] = userFilePath;
-                    path.dataDir().then(function(dataPath) {
-                        fs.writeFile({path: dataPath + "DashBooks/settings.ssdb", contents: JSON.stringify(settingsDict)})
-                    })
+                    let filePath = userFilePath + "\\DashBooks Data/"
+                    settingsDict['saveFilePath'] = filePath;
+                    let foundDashBooks = false;
+                    fs.readDir(userFilePath).then(function(dataPath) {
+                        for(const[objKey, objDict] of Object.entries(dataPath)){
+                            if(objDict['name'] == 'DashBooks'){
+                                foundDashBooks = true;
+                            }
+                        }
+                        if(!foundDashBooks){
+                            fs.createDir(userFilePath + "/DashBooks Data")
+                            fs.createDir(userFilePath + "/DashBooks Data/Receipts")
+                        }
+                        path.dataDir().then(function(dataPath) {
+                            fs.writeFile({path: dataPath + "DashBooks/settings.ssdb", contents: JSON.stringify(settingsDict)})
+                            ref.saveUserDict();
+                            console.log(settingsDict)
+
+                        })
+                    });
                 }
             })
         }
