@@ -16,8 +16,7 @@
 			<v-select 
 				:options="userObj['records']['payee']" 
 				style="width: 200px" 
-				id="create_trans_payee" 
-				:v-model="selected" 
+				id="create_trans_payee"
 				:value="``"
 			/>
 
@@ -40,14 +39,14 @@
 			<label for="create_trans_amount">Amount:</label>
 			<input id="create_trans_amount" type="number" step="0.01" />
 			<template v-if="fileUploaded === false">
-				<p>Add upload function</p>
+				<q-btn class="glossy" rounded color="positive" label="Upload Receipt" @click="getReceiptPath"/>
 			</template>
 			<template v-else>
 				Your receipt has been uploaded
 			</template>
 			<fieldset>
 				<q-btn class="glossy" rounded color="primary" label="Create Transaction" @click="createTransaction"/>
-                <q-btn class="glossy" rounded color="secondary" label="Cancel" @click="this.$emit('cancelled', '')"/>
+                <q-btn class="glossy" rounded color="secondary" label="Cancel" @click="cancel"/>
 			</fieldset>
 		</div>
 	</div>
@@ -87,6 +86,13 @@
 
 			<label for="edit_trans_amount">Amount:</label>
 			<input id="edit_trans_amount" type="number" step="0.01" />
+
+            <template v-if="hasReceipt === false">
+				<q-btn class="glossy" rounded color="positive" label="Upload Receipt" @click="getReceiptPath"/>
+			</template>
+			<template v-else>
+				This transaction has a receipt
+			</template>
 
 			<fieldset>
 				<q-btn class="glossy" rounded color="primary" label="Save Transaction" @click="editTransaction"/>
@@ -248,12 +254,14 @@
 </template>
 
 <script>
-import { userDict } from '../main.js'
+import { userDict, settingsDict } from '../main.js'
 import { generateID, reDoDate, addToDate } from '../../public/generalFunctions.js';
 import $ from 'jquery';
 import vSelect from 'vue-select';
 import 'vue-select/dist/vue-select.css';
-
+const dialog = window.__TAURI__.dialog;
+const fs = window.__TAURI__.fs;
+const path = window.__TAURI__.path;
 export default {
     name: 'RecordForms',
     emits: ["cancelled"],
@@ -262,13 +270,24 @@ export default {
 	},
     props: {
         transform: String,
+        hasReceipt: Boolean
     },
     data() {
         return {
-            userObj: userDict
+            userObj: userDict,
+            fileUploaded: false,
+            filePath: '',
         }
     },
     methods: {
+        getReceiptPath(){
+            let ref = this;
+            dialog.open().then(function(file) {
+                ref.filePath = file;
+                ref.fileUploaded = true;
+                console.log(file)
+            });
+        },
         createTransaction(){
 			const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 			let date = ($('#create_trans_date').val()).split("-");
@@ -300,7 +319,20 @@ export default {
 				userDict['records'][yearID] = {'transactions': {}, 'assets': {}};
 			}
 
-			userDict['records'][yearID]['transactions'][transID] = {'month': monthNames[month], 'date': date, 'account': account, 'payee': payee, 'type': type, 'item': item, 'category': category, 'amount': amount, 'receiptID': '', 'id': transID}
+            let fileName = '';
+            let ref = this;
+            if(this.fileUploaded){
+                const receiptID = generateID(userDict);
+                fileName = `${receiptID}-${ref.filePath.split('\\').at(-1)}`;
+                path.dataDir().then(function(roaming) {
+                    fs.copyFile(ref.filePath, roaming + `DashBooks/Receipts/${fileName}`)
+                    if(roaming + `DashBooks/Receipts` != settingsDict['saveFilePath'] + `Receipts`){
+                        fs.copyFile(ref.filePath, settingsDict['saveFilePath'] + `Receipts/${fileName}`)
+                    }
+                });
+            }
+
+			userDict['records'][yearID]['transactions'][transID] = {'month': monthNames[month], 'date': date, 'account': account, 'payee': payee, 'type': type, 'item': item, 'category': category, 'amount': amount, 'receiptID': fileName, 'id': transID}
 
 			this.$emit('cancelled', '');
 		},
@@ -334,8 +366,21 @@ export default {
 				yearID = `${year} - ${year + 1}`;
 			}
 
+            let fileName = '';
+            let ref = this;
+            if(this.fileUploaded){
+                const receiptID = generateID(userDict);
+                fileName = `${receiptID}-${ref.filePath.split('\\').at(-1)}`;
+                path.dataDir().then(function(roaming) {
+                    fs.copyFile(ref.filePath, roaming + `DashBooks/Receipts/${fileName}`)
+                    if(roaming + `DashBooks/Receipts` != settingsDict['saveFilePath'] + `Receipts`){
+                        fs.copyFile(ref.filePath, settingsDict['saveFilePath'] + `Receipts/${fileName}`)
+                    }
+                });
+            }
+
 			delete this.recordDict['transactions'][ID]
-			userDict['records'][yearID]['transactions'][ID] = {'month': monthNames[month], 'date': date, 'account': account, 'payee': payee, 'type': type, 'item': item, 'category': category, 'amount': amount, 'id': ID}
+			userDict['records'][yearID]['transactions'][ID] = {'month': monthNames[month], 'date': date, 'account': account, 'payee': payee, 'type': type, 'item': item, 'category': category, 'amount': amount, 'id': ID, 'receiptID': fileName}
 			this.$emit('cancelled', '');
 		},
 		deleteTransaction(){
@@ -493,7 +538,12 @@ export default {
                 }
                 ref.$emit('cancelled', '');
             });
-		}
+		},
+        cancel(){
+            this.$emit('cancelled', '');
+            this.fileUploaded = false;
+            this.filePath = '';
+        }
     }
 }
 </script>

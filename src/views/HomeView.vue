@@ -156,6 +156,7 @@ export default {
 		}
 	},
 	mounted(){
+        console.log(userDict)
         let date = new Date();
         let month = date.getMonth();
         let thisYear = date.getFullYear();

@@ -83,6 +83,7 @@ export default {
         setInterval(function() {
             ref.saveUserDict();
         }, oneMin * autoSave);
+        console.log(userDict)
     },
     methods: {
         changeAutoSave(){

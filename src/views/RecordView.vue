@@ -38,6 +38,7 @@
                     <q-toggle v-model="visibleColumns" val="item" label="Item" @click="rememberChoice('item')"/>
                     <q-toggle v-model="visibleColumns" val="payee" label="Payee" @click="rememberChoice('payee')"/>
                     <q-toggle v-model="visibleColumns" val="amount" label="Amount" @click="rememberChoice('amount')"/>
+                    <q-toggle v-model="visibleColumns" val="receiptID" label="Receipt" @click="rememberChoice('receiptID')"/>
                 </div>
             </template>
             <template v-slot:top-right>
@@ -60,11 +61,20 @@
                         <q-td key="category" :props="props" :transid="props.row.id" @click="editTransaction">{{ props.row.category }}</q-td>
                         <q-td key="item" :props="props" :transid="props.row.id" @click="editTransaction">{{ props.row.item }}</q-td>
                         <q-td key="payee" :props="props" :transid="props.row.id" @click="editTransaction">{{ props.row.payee }}</q-td>
-                        <q-td key="amount" :props="props" :transid="props.row.id" @click="editTransaction">${{ props.row.amount }}</q-td>
+                        <q-td key="amount" :props="props" :transid="props.row.id" @click="editTransaction">${{ numberWithCommas(props.row.amount) }}</q-td>
+                        <q-td v-if="props.row.receiptID != ''" key="receiptID" :props="props" :transid="props.row.id" style="color: blue;text-decoration: underline;" @click="viewImage">View</q-td>
+                        <q-td v-else key="amount" :props="props"></q-td>
                     </q-tr>
                 </template>
             </q-table>
 		</div>
+
+        <template v-if="imageToShow != ''">
+            <div id="receiptViewer">
+                <img src="" id="ItemPreview"/>
+                <div style="height: 80%"><q-btn icon="o_close" @click="cancelImage"/></div>
+            </div>
+        </template>
 
        <!--  Saved Transactions Table -->
 		<div class="tables">
@@ -224,7 +234,7 @@
 				</template>
 			</div>
 		</div>		
-		<TransactionForms :transform="current_request_form" @cancelled="cancelForm" />
+		<TransactionForms :transform="current_request_form" :hasReceipt="receiptStatus" @cancelled="cancelForm" />
 	</div>
 </template>
 
@@ -232,11 +242,10 @@
 import TransactionForms from '@/components/TransactionForms.vue';
 import { reactive } from "vue";
 import { exportFile, useQuasar } from 'quasar'
-import { generateID } from '../../public/generalFunctions.js';
-import { userDict } from '../main.js'
+import { userDict, settingsDict } from '../main.js'
 import { ref } from 'vue'
 import $ from 'jquery';
-import { date } from 'quasar';
+const fs = window.__TAURI__.fs;
 const columns = [
     { name: 'month', align: 'center', label: 'Month', field: 'month', sortable: true },
     { name: 'date', align: 'center', label: 'Date', field: 'date', sortable: true, sort: (a, b) => parseInt(a.split('/').reverse().join('')) - parseInt(b.split('/').reverse().join(''))},
@@ -245,7 +254,8 @@ const columns = [
     { name: 'category', align: 'center', label: 'Category', field: 'category', sortable: true },
     { name: 'item', align: 'center', label: 'Item', field: 'item', sortable: true },
     { name: 'payee', align: 'center', label: 'Payee', field: 'payee', sortable: true },
-    { name: 'amount', align: 'center', label: 'Amount', field: 'amount', sortable: true }
+    { name: 'amount', align: 'center', label: 'Amount', field: 'amount', sortable: true },
+    { name: 'receiptID', align: 'center', label: 'Receipt', field: 'receiptID', sortable: true }
 ]
 let rows;
 function wrapCsvValue (val, formatFn, row) {
@@ -266,8 +276,10 @@ export default {
             pivotDict: {},
             recordDict: {},
             current_request_form: '',
+            imageToShow: '',
             transID: '',
             receiptID: '',
+            receiptStatus: false,
             loaded: false,
             yearID: '',
             colNamesGST: ["Category", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Total w/o GST", "Total w/ GST"],
@@ -423,14 +435,6 @@ export default {
 			
 			this.loaded = true;
 		},
-		uploadReceipt(event){
-			this.transID = $(event.target).attr('data');
-			const receiptID = generateID(userDict);
-			this.receiptID = receiptID;
-		},
-		downloadReceipt(event){
-			const receiptID = $(event.target).attr('data');
-		},
 		onchange(){
 			this.recordDict = userDict['records'][$(`#year_selection option:selected`).attr('data')];
 			this.calculatePivotTable();
@@ -439,8 +443,9 @@ export default {
 		editTransaction(e){
 			this.current_request_form = 'editTransaction';
 			const ID = $(e.target).attr('transid');
+			let transDict = this.recordDict['transactions']
+			transDict[ID]['receiptID'] != '' ? this.receiptStatus = true : this.receiptStatus = false
 			setTimeout(() => {
-				let transDict = this.recordDict['transactions']
 				let newDate = transDict[ID]['date'].split("/").reverse().join("-");
 				$(`#edit_transID`).attr('transid', ID)
 				$(`#edit_transID`).attr('transyear', $(`#year_selection option:selected`).attr('data'))
@@ -453,6 +458,38 @@ export default {
 				$(`#edit_trans_category`).val(transDict[ID]['category']);
 			}, 1)
 		},
+        viewImage(e){
+            const ID = $(e.target).attr('transid');
+            let receiptID = this.recordDict['transactions'][ID]['receiptID'];
+            let ref = this;
+            fs.readBinaryFile(`${settingsDict['saveFilePath']}Receipts/${receiptID}`).then(function(imageArr) {
+                console.log(imageArr)
+                console.log(receiptID)
+                let b64encoded = ref.bytesToBase64(imageArr);
+                let fileExt = receiptID.split('.').at(-1);
+                if(fileExt == 'pdf'){
+                    ref.imageToShow = 'this';
+                    ref.$nextTick(() => {
+                        $('#ItemPreview').attr('src', `data:application/pdf;base64,${b64encoded}`);
+                    });
+                }else if(fileExt == 'png'){
+                    ref.imageToShow = 'this';
+                    ref.$nextTick(() => {
+                        $('#ItemPreview').attr('src', `data:image/png;base64,${b64encoded}`);
+                    });
+                }else if(fileExt == 'jpeg' || fileExt == 'jpg'){
+                    ref.imageToShow = 'this'
+                    ref.$nextTick(() => {
+                        $('#ItemPreview').attr('src', `data:image/jpeg;base64,${b64encoded}`);
+                    });
+                }
+                
+            })
+        },
+        cancelImage(){
+            this.imageToShow = ''
+            $('#ItemPreview').attr('src', ``);
+        },
 		editAsset(e){
 			this.current_request_form = 'editAsset';
 			const ID = $(e.target).attr('data');
@@ -523,7 +560,31 @@ export default {
 		},
 		numberWithCommas(num) {
 			return ((parseFloat(num).toFixed(2)).replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ","));
-		}
+		},
+        bytesToBase64(bytes){
+            const base64abc = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "+", "/"];
+            const base64codes = [ 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 62, 255, 255, 255, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 255, 255, 255, 0, 255, 255, 255, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 255, 255, 255, 255, 255, 255, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51];
+            let result = '', i, l = bytes.length;
+            for (i = 2; i < l; i += 3) {
+                result += base64abc[bytes[i - 2] >> 2];
+                result += base64abc[((bytes[i - 2] & 0x03) << 4) | (bytes[i - 1] >> 4)];
+                result += base64abc[((bytes[i - 1] & 0x0F) << 2) | (bytes[i] >> 6)];
+                result += base64abc[bytes[i] & 0x3F];
+            }
+            if (i === l + 1) { // 1 octet yet to write
+                result += base64abc[bytes[i - 2] >> 2];
+                result += base64abc[(bytes[i - 2] & 0x03) << 4];
+                result += "==";
+            }
+            if (i === l) { // 2 octets yet to write
+                result += base64abc[bytes[i - 2] >> 2];
+                result += base64abc[((bytes[i - 2] & 0x03) << 4) | (bytes[i - 1] >> 4)];
+                result += base64abc[(bytes[i - 1] & 0x0F) << 2];
+                result += "=";
+            }
+            return result;
+
+        }
 	}
 }
 </script>
@@ -798,4 +859,24 @@ label{
     display: flex;
     justify-content: space-between;
 }
+
+#receiptViewer{
+    position: fixed;
+    z-index: 500;
+    width: 101vw;
+    height: calc(100vh - var(--navbar_height));
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#receiptViewer img{
+    width: 80%;
+    height: 80%;
+    border: 1px solid black;
+    border-radius: 10px;
+}
+
+
 </style>
