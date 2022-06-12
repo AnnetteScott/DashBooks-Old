@@ -285,7 +285,6 @@ export default {
             dialog.open().then(function(file) {
                 ref.filePath = file;
                 ref.fileUploaded = true;
-                console.log(file)
             });
         },
         createTransaction(){
@@ -326,9 +325,9 @@ export default {
                 fileName = `${receiptID}-${ref.filePath.split('\\').at(-1)}`;
                 path.dataDir().then(function(roaming) {
                     fs.copyFile(ref.filePath, roaming + `DashBooks/Receipts/${fileName}`)
-                    if(roaming + `DashBooks/Receipts` != settingsDict['saveFilePath'] + `Receipts`){
+                    /* if(roaming + `DashBooks/Receipts` != settingsDict['saveFilePath'] + `Receipts`){ TODO fix this
                         fs.copyFile(ref.filePath, settingsDict['saveFilePath'] + `Receipts/${fileName}`)
-                    }
+                    } */
                 });
             }
 
@@ -490,8 +489,6 @@ export default {
             isNaN(unitCost) ? unitCost = 0 : '';
             isNaN(units) ? units = 0 : '';
             isNaN(total) ? total = 0 : '';
-            console.log(isNaN(unitCost))
-            console.log(unitCost)
 
 			const assetID = generateID(userDict);
 			userDict['records'][yearID]['assets'][assetID] = {'item': item, 'vendor': vendor, 'date': date, 'unitCost': unitCost, 'units': units, 'total': total}

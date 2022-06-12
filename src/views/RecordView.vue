@@ -62,7 +62,9 @@
                         <q-td key="item" :props="props" :transid="props.row.id" @click="editTransaction">{{ props.row.item }}</q-td>
                         <q-td key="payee" :props="props" :transid="props.row.id" @click="editTransaction">{{ props.row.payee }}</q-td>
                         <q-td key="amount" :props="props" :transid="props.row.id" @click="editTransaction">${{ numberWithCommas(props.row.amount) }}</q-td>
-                        <q-td v-if="props.row.receiptID != ''" key="receiptID" :props="props" :transid="props.row.id" style="color: blue;text-decoration: underline;" @click="viewImage">View</q-td>
+                        <q-td v-if="props.row.receiptID != ''" key="receiptID" :props="props">
+                            <q-btn class="glossy" rounded color="secondary" label="View" :props="props" :transid="props.row.id" @click="viewImage($event, props.row.id)"/>
+                        </q-td>
                         <q-td v-else key="amount" :props="props"></q-td>
                     </q-tr>
                 </template>
@@ -71,8 +73,9 @@
 
         <template v-if="imageToShow != ''">
             <div id="receiptViewer">
-                <img src="" id="ItemPreview"/>
-                <div style="height: 80%"><q-btn icon="o_close" @click="cancelImage"/></div>
+                <embed v-if="pdf64" src="" id="ItemPreviewPDF"/>
+                <img v-if="image64" src="" id="ItemPreview"/>
+                <div style="height: 99%"><q-btn icon="o_close" @click="cancelImage"/></div>
             </div>
         </template>
 
@@ -277,6 +280,8 @@ export default {
             recordDict: {},
             current_request_form: '',
             imageToShow: '',
+            pdf64: false,
+            image64: false,
             transID: '',
             receiptID: '',
             receiptStatus: false,
@@ -458,27 +463,27 @@ export default {
 				$(`#edit_trans_category`).val(transDict[ID]['category']);
 			}, 1)
 		},
-        viewImage(e){
-            const ID = $(e.target).attr('transid');
+        viewImage(e, ID){
             let receiptID = this.recordDict['transactions'][ID]['receiptID'];
             let ref = this;
             fs.readBinaryFile(`${settingsDict['saveFilePath']}Receipts/${receiptID}`).then(function(imageArr) {
-                console.log(imageArr)
-                console.log(receiptID)
                 let b64encoded = ref.bytesToBase64(imageArr);
                 let fileExt = receiptID.split('.').at(-1);
                 if(fileExt == 'pdf'){
                     ref.imageToShow = 'this';
+                    ref.pdf64 = true;
                     ref.$nextTick(() => {
-                        $('#ItemPreview').attr('src', `data:application/pdf;base64,${b64encoded}`);
+                        $('#ItemPreviewPDF').attr('src', `data:application/pdf;base64,${b64encoded}`);
                     });
                 }else if(fileExt == 'png'){
                     ref.imageToShow = 'this';
+                    ref.image64 = true;
                     ref.$nextTick(() => {
                         $('#ItemPreview').attr('src', `data:image/png;base64,${b64encoded}`);
                     });
                 }else if(fileExt == 'jpeg' || fileExt == 'jpg'){
-                    ref.imageToShow = 'this'
+                    ref.imageToShow = 'this';
+                    ref.image64 = true;
                     ref.$nextTick(() => {
                         $('#ItemPreview').attr('src', `data:image/jpeg;base64,${b64encoded}`);
                     });
@@ -488,6 +493,8 @@ export default {
         },
         cancelImage(){
             this.imageToShow = ''
+            this.image64 = false;
+            this.pdf64 = false;
             $('#ItemPreview').attr('src', ``);
         },
 		editAsset(e){
@@ -863,19 +870,34 @@ label{
 #receiptViewer{
     position: fixed;
     z-index: 500;
-    width: 101vw;
-    height: calc(100vh - var(--navbar_height));
+    width: 100vw;
+    height: calc(98vh - var(--navbar_height));
     backdrop-filter: blur(10px);
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-#receiptViewer img{
-    width: 80%;
-    height: 80%;
+#receiptViewer embed {
     border: 1px solid black;
     border-radius: 10px;
+    display: block;
+    min-width: 95%;
+    min-height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+#receiptViewer img {
+    border: 1px solid black;
+    border-radius: 10px;
+    display: block;
+    min-width: 100px;
+    min-height: 100px;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
 }
 
 

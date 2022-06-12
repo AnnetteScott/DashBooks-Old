@@ -156,7 +156,6 @@ export default {
 		}
 	},
 	mounted(){
-        console.log(userDict)
         let date = new Date();
         let month = date.getMonth();
         let thisYear = date.getFullYear();
@@ -211,8 +210,6 @@ export default {
             const t = new Date();
             const date2 = new Date(d.getTime() + 12096e5);
             if(date2.getTime() <= t.getTime()){
-                console.log(projectID)
-                console.log(userDict['projects'][projectID]['name'])
                 if(parseFloat(weekDict['total']) == 0){
                     userDict['projects'][projectID]['weeks'][weekID]['invoiced'] = true;
                 }

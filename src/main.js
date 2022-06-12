@@ -4,13 +4,14 @@ import router from './router';
 import { Quasar } from 'quasar';
 import quasarUserOptions from './quasar-user-options';
 import { reactive } from 'vue';
+import JSZip from 'jszip';
 
 //Set variables for getting and process user data
 const path = window.__TAURI__.path;
 const fs = window.__TAURI__.fs;
 let pjson = require('../package.json');
 const userDictMaster = {"projects": {}, "clients": {}, "colours": {'colourWhite':{'name': 'Clear', 'colour': '#ffffff'}}, "users": {}, "records": {"accounts": [],"payee": [], "categories": {}, 'savedTransactions': {}, 'headingStates': [ 'month', 'date', 'type', 'account', 'category', 'item', 'payee', 'amount' ]}, "saveVersion": 22, "showGST": true, "version": pjson.version, "timeLogged": {"01/01/1970": {'hours': 0, 'pay': 0}}, 'archive': {'projects': {}}}
-let userDictRead = {}
+let userDictRead = undefined;
 
 //Check a dashbooks directory is present in appdata/roaming and create it if not
 let dataPath = await path.dataDir();
@@ -28,30 +29,38 @@ if(!foundDashBooks){
     fs.writeFile({path: dataPath + "DashBooks/userData.ssdb", contents: JSON.stringify(userDictMaster)})
 }
 
-//Get the user data
+//Get the settings data
 let settingsObjs = await fs.readTextFile(dataPath + "DashBooks/settings.ssdb");
 const settingsObj = JSON.parse(settingsObjs);
-let saveFileDirectory = settingsObj['saveFilePath'].split('/')[0]
 let saveFiles = {}
-//Check the save file is present otherwise read from backup
 try {
+    let saveFileDirectory = settingsObj['saveFilePath'].split('/')[0]
+    //Check the save file is present otherwise read from backup
     saveFiles = await fs.readDir(saveFileDirectory);
-} catch (error) {
-    console.error(error);
-}
-let saveFileFound = false;
-for(const[objKey, objDict] of Object.entries(saveFiles)){
-    if(objDict['name'] == 'userData.ssdb'){
-        saveFileFound = true;
+    let saveFileFound = false;
+    for(const[objKey, objDict] of Object.entries(saveFiles)){
+        if(objDict['name'] == 'DBsave.dbss'){
+            saveFileFound = true
+        }
     }
-}
-if(saveFileFound){
-    let rawUser = await fs.readTextFile(settingsObj['saveFilePath'] + 'userData.ssdb')
-    userDictRead = JSON.parse(rawUser)
-}else{
-    let rawUser = await fs.readTextFile(dataPath + "DashBooks/userData.ssdb")
-    userDictRead = JSON.parse(rawUser)
-    settingsObj['saveFilePath'] = dataPath + "DashBooks/";
+    if(saveFileFound){//read from custom save file
+        let u8arr = await fs.readBinaryFile(settingsObj['saveFilePath']);
+        let zipFile = await JSZip.loadAsync(u8arr);
+        console.log(zipFile)
+        let u8data = zipFile.files['userData.ssdb']._data.compressedContent;
+        let string = new TextDecoder().decode(u8data);
+        userDictRead = JSON.parse(string);
+    }else{
+        let rawUser = await fs.readTextFile(dataPath + "DashBooks/userData.ssdb");//user hasn't set custom save file
+        userDictRead = JSON.parse(rawUser);
+        settingsObj['saveFilePath'] = dataPath + "DashBooks/";
+    }
+} catch (error) {
+    if(userDictRead == undefined){ //If reading from save file fails, read from the roaming directory.
+        let rawUser = await fs.readTextFile(dataPath + "DashBooks/userData.ssdb");
+        userDictRead = JSON.parse(rawUser);
+        settingsObj['saveFilePath'] = dataPath + "DashBooks/";
+    }
 }
 
 
@@ -210,13 +219,25 @@ export const settingsDict = reactive({...settingsObj})
 
 //Save on exit
 import { appWindow } from '@tauri-apps/api/window'
-appWindow.listen('tauri://close-requested', ({ event, payload }) => {
-    //Only save data file.
-    fs.writeFile({path: settingsObj['saveFilePath'] + 'userData.ssdb', contents: JSON.stringify(userDict)});
+appWindow.listen('tauri://close-requested', ({ event, payload }) => {                    
     //Save Settings File
-    path.dataDir().then(function(dataPaths) {
-        fs.writeFile({path: dataPaths + "DashBooks/settings.ssdb", contents: JSON.stringify(settingsDict)})
-        appWindow.close();
+    path.dataDir().then(function(roaming) {
+        fs.writeFile({path: roaming + "DashBooks/settings.ssdb", contents: JSON.stringify(settingsDict)});
+        let uint8array = new TextEncoder("utf-8").encode(JSON.stringify(userDict));
+        let zip = new JSZip();
+        zip.file("userData.ssdb", uint8array)
+        const receipt = zip.folder("Receipts")
+        fs.readDir(`${roaming}DashBooks/Receipts`).then(function(receiptFiles) {
+            for(const[index, fileObj] of Object.entries(receiptFiles)){
+                fs.readBinaryFile(fileObj['path']).then(function(imageArr) {
+                    receipt.file(fileObj['name'], imageArr, {base64: false})
+                })
+            }
+            zip.generateAsync({type:"uint8array"}).then(function(cont) {
+                fs.writeBinaryFile({path: `${settingsDict['saveFilePath']}`, contents: cont})
+                appWindow.close();
+            });
+        });
     })
 })
 
