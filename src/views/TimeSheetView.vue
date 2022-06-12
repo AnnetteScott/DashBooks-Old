@@ -428,7 +428,7 @@ export default {
 				$(`[cellid=${columns[i]}${cellTotal}]`).text(`${colTotal}H`)
 				$(`[cellid=${columns[i]}${cellTotal + 1}]`).text(`$${colMoney.toFixed(2)}`)
 				if(i % 7 == 6){
-					$(`[cellid=${columns[i - 6]}${cellTotal + 2}]`).text(`${weekTotal}H`);
+					$(`[cellid=${columns[i - 6]}${cellTotal + 2}]`).text(`${weekTotal.toFixed(2)}H`);
 					$(`[cellid=${columns[i - 6]}${cellTotal + 3}]`).text(`$${weekMoney.toFixed(2)}`);
 					timeTotal += weekTotal;
 					timeMoney += weekMoney;
@@ -443,7 +443,7 @@ export default {
             $(`[cellid=A${cellTotal + 4}]`).text(`${timeTotal.toFixed(2)}H`);
 			$(`[cellid=A${cellTotal + 5}]`).text(`$${timeMoney.toFixed(2)}`);
             let neededHours = this.projectDict['targetHours'] - timeTotal <= 0 ? 0 : this.projectDict['targetHours'] - timeTotal;
-            $(`#hours_left`).text(neededHours)
+            $(`#hours_left`).text(this.numberWithCommas(neededHours))
 		},
         colourCell(event){
             let today = new Date();
@@ -482,6 +482,9 @@ export default {
             userDict['timeLogged'][today]['pay'] = totalPay;
 			this.selectedCellsList = [];
 			this.loadTimeSheet();
+		},
+        numberWithCommas(num) {
+			return ((parseFloat(num).toFixed(2)).replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ","));
 		},
 
     }

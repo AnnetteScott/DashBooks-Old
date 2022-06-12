@@ -323,16 +323,11 @@ export default {
             if(this.fileUploaded){
                 const receiptID = generateID(userDict);
                 fileName = `${receiptID}-${ref.filePath.split('\\').at(-1)}`;
-                path.dataDir().then(function(roaming) {
-                    fs.copyFile(ref.filePath, roaming + `DashBooks/Receipts/${fileName}`)
-                    /* if(roaming + `DashBooks/Receipts` != settingsDict['saveFilePath'] + `Receipts`){ TODO fix this
-                        fs.copyFile(ref.filePath, settingsDict['saveFilePath'] + `Receipts/${fileName}`)
-                    } */
-                });
+                fs.copyFile(ref.filePath, settingsDict['roaming'] + `DashBooks/Receipts/${fileName}`)
             }
 
 			userDict['records'][yearID]['transactions'][transID] = {'month': monthNames[month], 'date': date, 'account': account, 'payee': payee, 'type': type, 'item': item, 'category': category, 'amount': amount, 'receiptID': fileName, 'id': transID}
-
+            this.fileUploaded = false;
 			this.$emit('cancelled', '');
 		},
 		editTransaction(){
@@ -370,24 +365,20 @@ export default {
             if(this.fileUploaded){
                 const receiptID = generateID(userDict);
                 fileName = `${receiptID}-${ref.filePath.split('\\').at(-1)}`;
-                path.dataDir().then(function(roaming) {
-                    fs.copyFile(ref.filePath, roaming + `DashBooks/Receipts/${fileName}`)
-                    if(roaming + `DashBooks/Receipts` != settingsDict['saveFilePath'] + `Receipts`){
-                        fs.copyFile(ref.filePath, settingsDict['saveFilePath'] + `Receipts/${fileName}`)
-                    }
-                });
+                fs.copyFile(ref.filePath, settingsDict['roaming'] + `DashBooks/Receipts/${fileName}`)
             }
 
 			delete this.recordDict['transactions'][ID]
 			userDict['records'][yearID]['transactions'][ID] = {'month': monthNames[month], 'date': date, 'account': account, 'payee': payee, 'type': type, 'item': item, 'category': category, 'amount': amount, 'id': ID, 'receiptID': fileName}
 			this.$emit('cancelled', '');
+            this.fileUploaded = false;
 		},
 		deleteTransaction(){
 			const ID = $('#edit_transID').attr('transid');
 			const YEAR = $('#edit_transID').attr('transyear');
 
             let ref = this;
-            confirm(`Are you sure you want to delete this transaction?`).then(function(outcome) {
+            confirm(`Are you sure you want to delete this transaction? Note: This won't delete the receipt.`).then(function(outcome) {
                 if(outcome){
                     delete userDict['records'][YEAR]['transactions'][ID];
                 }

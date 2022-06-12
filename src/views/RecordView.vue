@@ -466,7 +466,7 @@ export default {
         viewImage(e, ID){
             let receiptID = this.recordDict['transactions'][ID]['receiptID'];
             let ref = this;
-            fs.readBinaryFile(`${settingsDict['saveFilePath']}Receipts/${receiptID}`).then(function(imageArr) {
+            fs.readBinaryFile(`${settingsDict['roaming']}DashBooks/Receipts/${receiptID}`).then(function(imageArr) {
                 let b64encoded = ref.bytesToBase64(imageArr);
                 let fileExt = receiptID.split('.').at(-1);
                 if(fileExt == 'pdf'){
