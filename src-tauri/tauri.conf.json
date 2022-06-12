@@ -14,7 +14,7 @@
     "bundle": {
       "active": true,
       "targets": "all",
-      "identifier": "com.tauri.dev",
+      "identifier": "nz.co.annette.dashbooks",
       "icon": [
         "icons/icon.ico"
       ],
