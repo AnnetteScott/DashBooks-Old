@@ -234,6 +234,7 @@ nav {
 	justify-content: center;
     min-width: 1438px;
     overflow-y: auto;
+    overflow-x: hidden;
 }
 
 p{

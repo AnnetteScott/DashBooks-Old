@@ -234,21 +234,26 @@ import { appWindow } from '@tauri-apps/api/window'
 appWindow.listen('tauri://close-requested', ({ event, payload }) => {                    
     //Save Settings File
     fs.writeFile({path: settingsDict['roaming'] + "DashBooks/settings.ssdb", contents: JSON.stringify(settingsDict)});
-    let uint8array = new TextEncoder("utf-8").encode(JSON.stringify(userDict));
-    let zip = new JSZip();
-    zip.file("userData.ssdb", uint8array)
-    const receipt = zip.folder("Receipts")
-    fs.readDir(`${settingsDict['roaming']}DashBooks/Receipts`).then(function(receiptFiles) {
-        for(const[index, fileObj] of Object.entries(receiptFiles)){
-            fs.readBinaryFile(fileObj['path']).then(function(imageArr) {
-                receipt.file(fileObj['name'], imageArr, {base64: false})
-            })
-        }
-        zip.generateAsync({type:"uint8array"}).then(function(cont) {
-            fs.writeBinaryFile({path: `${settingsDict['saveFilePath']}`, contents: cont})
-            appWindow.close();
+    fs.writeFile({path: settingsDict['roaming'] + "DashBooks/userData.ssdb", contents: JSON.stringify(userDict)});
+    if(`${settingsDict['roaming']}DashBooks/` != settingsDict['saveFilePath']){//User Has custom save location
+        let uint8array = new TextEncoder("utf-8").encode(JSON.stringify(userDict));
+        let zip = new JSZip();
+        zip.file("userData.ssdb", uint8array)
+        const receipt = zip.folder("Receipts")
+        fs.readDir(`${settingsDict['roaming']}DashBooks/Receipts`).then(function(receiptFiles) {
+            for(const[index, fileObj] of Object.entries(receiptFiles)){
+                fs.readBinaryFile(fileObj['path']).then(function(imageArr) {
+                    receipt.file(fileObj['name'], imageArr, {base64: false})
+                })
+            }
+            zip.generateAsync({type:"uint8array"}).then(function(cont) {
+                fs.writeBinaryFile({path: `${settingsDict['saveFilePath']}`, contents: cont})
+                appWindow.close();
+            });
         });
-    });
+    }else{
+        appWindow.close();
+    }
 })
 
 let myApp = createApp(App)

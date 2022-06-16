@@ -1,6 +1,6 @@
 <template>
     <h4>TimeSheets:</h4>
-    <p>You have logged {{ userObj['timeLogged'][today]['hours'].toFixed(2) }}H and earnt ${{ userObj['timeLogged'][today]['pay'] }} today</p>
+    <p>You have logged {{ userObj['timeLogged'][today]['hours'].toFixed(2) }}H and earnt ${{ numberWithCommas(userObj['timeLogged'][today]['pay']) }} today</p>
     <div class="pageHome">
         <div class="item_container">
             <div class="items">
@@ -55,6 +55,9 @@ export default {
             let L = (0.2126 * c[0]) + (0.7152 * c[1]) + (0.0722 * c[2]);
             return (L > 0.179) ? '#000000' : '#ffffff';
         },
+        numberWithCommas(num) {
+			return ((parseFloat(num).toFixed(2)).replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ","));
+		},
     }
 }
 </script>
