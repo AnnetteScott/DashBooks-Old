@@ -108,6 +108,7 @@ export default {
             totalList: [],
             infoList: [],
             weekInterval: '',
+            previousTime: 0,
             timeInterval: 0,
             cellClicked: false,
         }
@@ -302,7 +303,7 @@ export default {
 				this.selectCell(event.target);
 				this.selectedCellsList.push(cellID);
 
-				let timeSelected = this.selectedCellsList.length * Math.round((1/(60/this.projectDict['timeInterval'])) * 1000) / 1000;
+				let timeSelected = this.selectedCellsList.length * parseFloat((this.projectDict['timeInterval']/60).toFixed(9))
 				let minTimeCell = "Z" + this.minCell(this.selectedCellsList);
 				let maxTimeCell = "Z" + this.maxCell(this.selectedCellsList);
 				let maxTime = ($(`[cellid=${maxTimeCell}]`).text()).split(":");
@@ -322,11 +323,7 @@ export default {
 				this.previousDate = cellCol;
 			}
 			if(this.previousTime != cellNum){
-                if(this.previousTime === this.timeIndex){
-                    $(`[cellid=Z${this.previousTime}]`).css({"background-color": "#90ffde"});
-                }else{
-                    $(`[cellid=Z${this.previousTime}]`).css({"background-color": "#ffffff"});
-                }
+                $(`[cellid=Z${this.previousTime}]`).css({"background-color": "#ffffff"});
 				this.previousTime = parseInt(cellNum);
 			}
 
@@ -390,7 +387,7 @@ export default {
 						colourTotals = {'A': 0, 'B': 0, 'C': 0, 'D': 0, 'E': 0, 'F': 0, 'G': 0, 'H': 0, 'I': 0, 'J': 0, 'K': 0, 'L': 0, 'M': 0, 'N': 0};
 					}
 					cellArr.forEach(cellID => {
-						colourTotals[cellID.charAt(0)] += Math.round((1/(60/this.projectDict['timeInterval'])) * 1000) / 1000;
+						colourTotals[cellID.charAt(0)] += parseFloat((this.projectDict['timeInterval']/60).toFixed(9))
 					});
 					for(let [collID, colourTotal] of Object.entries(colourTotals)){
 						$(`[cellid=${collID}${cellTotal}]`).text(`${colourTotal.toFixed(2)}`)
