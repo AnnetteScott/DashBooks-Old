@@ -388,7 +388,7 @@ export default {
                 }
                 allStartDates.push(userDict['projects'][projectID]['weeks'][weekID]['startDate']);
                 if($('#invoice_check_invoice')[0].checked){//Set Invoice Status
-                    userDict['projects'][projectID]['weeks'][weekID]['invoiced'] = true;
+                    userDict['projects'][projectID]['weeks'][weekID]['invoiceSent'] = true;
                 }
                 for(const [colourID, cellList] of Object.entries(userDict['projects'][projectID]['weeks'][weekID]['colouredCells'])){
                     if(cellList.length != 0 || includeAllColours){
@@ -404,6 +404,9 @@ export default {
                         this.invoiceData[projectID]['projTotal'] += total
                         this.invoiceTotal += total;
                     }
+                }
+                if(this.invoiceData[projectID]['projTotal'] == 0){
+                    userDict['projects'][projectID]['weeks'][weekID]['invoiced'] = true;
                 }
             }
             //Invoice Period

@@ -10,7 +10,7 @@ import JSZip from 'jszip';
 const path = window.__TAURI__.path;
 const fs = window.__TAURI__.fs;
 let pjson = require('../package.json');
-const userDictMaster = {"projects": {}, "clients": {}, "colours": {'colourWhite':{'name': 'Clear', 'colour': '#ffffff'}}, "users": {}, "records": {"accounts": [],"payee": [], "categories": {}, 'savedTransactions': {}, 'headingStates': [ 'month', 'date', 'type', 'account', 'category', 'item', 'payee', 'amount' ]}, "saveVersion": 22, "showGST": true, "version": pjson.version, "timeLogged": {"01/01/1970": {'hours': 0, 'pay': 0}}, 'archive': {'projects': {}}}
+const userDictMaster = {"projects": {}, "clients": {}, "colours": {'colourWhite':{'name': 'Clear', 'colour': '#ffffff'}}, "users": {}, "records": {"accounts": [],"payee": [], "categories": {}, 'savedTransactions': {}, 'headingStates': [ 'month', 'date', 'type', 'account', 'category', 'item', 'payee', 'amount', "receiptID" ]}, "saveVersion": 22, "showGST": true, "version": pjson.version, "timeLogged": {"01/01/1970": {'hours': 0, 'pay': 0}}, 'archive': {'projects': {}}}
 let userDictRead = undefined;
 
 //Check a dashbooks directory is present in appdata/roaming and create it if not
@@ -91,7 +91,6 @@ export function saveChecker(saveFile){
         saveFile['colours']['colourWhite']['name'] = 'Clear';
         for(const[projectID, projectDict] of Object.entries(saveFile['projects'])){
             for(const[weekID, weekDict] of Object.entries(projectDict['weeks'])){
-                saveFile['projects'][projectID]['weeks'][weekID]['invoiced'] = false;
                 weekDict['invoiced'] = false;
             }
         }
@@ -218,8 +217,20 @@ export function saveChecker(saveFile){
                 
             }
         }
-        saveFile['records']['headingStates'] = [ 'month', 'date', 'type', 'account', 'category', 'item', 'payee', 'amount' ]
+        saveFile['records']['headingStates'] = [ 'month', 'date', 'type', 'account', 'category', 'item', 'payee', 'amount', "receiptID" ]
         saveFile['saveVersion'] = 22
+    }
+    if(saveFile['saveVersion'] == 22){
+        for(const[projectID, projectDict] of Object.entries(saveFile['projects'])){
+            for(const[weekID, weekDict] of Object.entries(projectDict['weeks'])){
+                if(weekDict['invoiced']){
+                    weekDict['invoiceSent'] = true;
+                }else{
+                    weekDict['invoiceSent'] = false;
+                }
+            }
+        }
+        saveFile['saveVersion'] = 23
     }
     saveFile['version'] = pjson.version;
     return saveFile

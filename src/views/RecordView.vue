@@ -75,7 +75,7 @@
             <div id="receiptViewer">
                 <embed v-if="pdf64" src="" id="ItemPreviewPDF"/>
                 <img v-if="image64" src="" id="ItemPreview"/>
-                <div style="height: 99%"><q-btn icon="o_close" @click="cancelImage"/></div>
+                <div style="height: 99%"><q-btn icon="o_close" @click="cancelImage" style="background-color: red;"/></div>
             </div>
         </template>
 

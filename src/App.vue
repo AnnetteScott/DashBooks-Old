@@ -32,7 +32,12 @@
             </q-btn-dropdown>
             <q-btn flat label="Save" @click="saveUserDict"/>
             <q-space />
-
+            <template v-if="update">
+                <div id="update">
+                    There is an update available. Go to&nbsp;<a href="https://github.com/NotNatural21/DashBooks/releases/latest/" target="_blank">DashBooks latest release</a> to get {{updateVersion}}.
+                </div>
+            </template>
+            <q-space />
             <q-tabs v-model="tab" shrink>
                 <q-route-tab name="DashBoard" label="DashBoard" to="/"/>
                 <q-route-tab name="Settings" label="Settings" to="/settings"/>
@@ -55,6 +60,7 @@ import JSZip from 'jszip';
 import { settingsDict, userDict, saveChecker } from './main.js';
 import SavingPopup from '@/components/SavingPopup.vue';
 import ApplicationForms from '@/components/ApplicationForms.vue';
+import $ from 'jquery'
 
 const dialog = window.__TAURI__.dialog;
 const fs = window.__TAURI__.fs;
@@ -68,7 +74,9 @@ export default {
     data() {
         return {
 			saving_in_progress: false,
-			application_Form: ''
+			application_Form: '',
+            update: false,
+            updateVersion: '',
 		}
     },
     setup () {
@@ -85,8 +93,43 @@ export default {
             ref.saveUserDict();
         }, oneMin * autoSave);
         console.log(userDict)
+        this.checkForUpdates();
     },
     methods: {
+        checkForUpdates(){
+            let masterDict = {...userDict}
+            let updateData = undefined;
+            let ref = this;
+            $.ajax({
+                dataType: "json",
+                url: 'https://api.github.com/repos/NotNatural21/DashBooks/releases',
+                cache: false,
+                success: function (data){
+                    updateData = data[0];
+                    let current_version = [
+                        parseInt(masterDict['version'].split('.')[0]), 
+                        parseInt(masterDict['version'].split('.')[1]), 
+                        parseInt(masterDict['version'].split('.')[2])
+                    ];
+                    let latest_version = [
+                        parseInt(updateData.tag_name.split('v')[1].split('.')[0]), 
+                        parseInt(updateData.tag_name.split('v')[1].split('.')[1]), 
+                        parseInt(updateData.tag_name.split('v')[1].split('.')[2])
+                    ];
+                    if(latest_version[0] > current_version[0] || latest_version[1] > current_version[1] || latest_version[2] > current_version[2]){
+                        ref.updateVar();
+                        ref.updateVersion = updateData.tag_name
+                    }
+
+                },
+                error: function (xhr){
+                    console.log("Error " + xhr.status + ", could not check for updates.");
+                }
+            });
+        },
+        updateVar(){
+            this.update = true;
+        },
         changeAutoSave(){
             this.application_Form = `changeAutoSave`
         },
@@ -245,5 +288,17 @@ h4{
 }
 .active_button{
     border: 3px solid black;
+}
+
+#update > a{
+    color: rgb(82, 191, 228);
+}
+
+#update{
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    padding: 5px 30px;
+    background-color: rgb(63, 63, 63);
+    border-radius: 10px;
 }
 </style>

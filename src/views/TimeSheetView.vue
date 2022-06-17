@@ -15,7 +15,7 @@
         <div id="time_Container">
             <div id="weeks_container">
                 <template v-for="(weekDict, weekID) in projectDict['weeks']" :key="weekDict">
-                    <template v-if="weekDict['invoiced'] == true">
+                    <template v-if="weekDict['invoiceSent'] == true">
                         <div class="week_button" :label="weekID" @click="weekButton" :data="weekID" style="background: radial-gradient(circle, #35a2ff 0%, #014a88 100%); color: white;" @contextmenu="rightClickWeek">{{ weekID }}</div>
                     </template>
                     <template v-else>
@@ -145,7 +145,8 @@ export default {
 			}) 
 		},
 		toggleCheckMark(){
-			this.projectDict['weeks'][this.week]['invoiced'] ? this.projectDict['weeks'][this.week]['invoiced'] = false : this.projectDict['weeks'][this.week]['invoiced'] = true;
+			this.projectDict['weeks'][this.week]['invoiceSent'] = !this.projectDict['weeks'][this.week]['invoiceSent'] 
+			this.projectDict['weeks'][this.week]['invoiced'] = this.projectDict['weeks'][this.week]['invoiceSent'] 
 		},
         pickTextColorBasedOnBgColor(bgColor) {
             let color = (bgColor.charAt(0) === '#') ? bgColor.substring(1, 7) : bgColor;
@@ -168,7 +169,7 @@ export default {
             if(this.projectDict['weekInterval'] == 1){
                 let date = this.projectDict['weeks'][`${duration}`]['startDate'];
                 date = addToDate(date, 14);
-                this.projectDict['weeks'][`${duration + 1}`] = {'startDate': date, 'colouredCells': {}, 'invoiced': false, 'total': '0.00'};
+                this.projectDict['weeks'][`${duration + 1}`] = {'startDate': date, 'colouredCells': {}, 'invoiced': false, 'invoiceSent': false, 'total': '0.00'};
                 colourIds.forEach(colourID => {
                     if(colourID != 'colourWhite'){
                         this.projectDict['weeks'][`${duration}`]['colouredCells'][colourID] = [];
@@ -180,7 +181,7 @@ export default {
                 let lastKey = `${duration - 1} - ${duration}`;
                 let date = this.projectDict['weeks'][lastKey]['startDate'];
                 date = addToDate(date, 14);
-                this.projectDict['weeks'][`${duration + 1} - ${duration + 2}`] = {'startDate': date, 'colouredCells': {}, 'invoiced': false, 'total': '0.00'};
+                this.projectDict['weeks'][`${duration + 1} - ${duration + 2}`] = {'startDate': date, 'colouredCells': {}, 'invoiced': false, 'invoiceSent': false, 'total': '0.00'};
                 colourIds.forEach(colourID => {
                     if(colourID != 'colourWhite'){
                         this.projectDict['weeks'][`${duration + 1} - ${duration + 2}`]['colouredCells'][colourID] = [];
@@ -434,7 +435,7 @@ export default {
 				}
 				
 			}
-            if(!this.weekDict.invoiced){
+            if(!this.weekDict.invoiced || !this.weekDict.invoiceSent ){
                 this.weekDict['total'] = timeMoney.toFixed(2)
             }
             $(`[cellid=A${cellTotal + 4}]`).text(`${timeTotal.toFixed(2)}H`);

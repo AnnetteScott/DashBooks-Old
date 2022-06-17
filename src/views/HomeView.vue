@@ -2,11 +2,6 @@
 	<div class="pageHome">
 		<div class="inner">
 			<h4>Welcome To DashBooks!</h4>
-            <template v-if="update">
-                <div id="update">
-                    There is an update available. Go to&nbsp;<a href="https://github.com/NotNatural21/DashBooks/releases/latest/" target="_blank">DashBooks latest release</a> to get the {{updateVersion}}.
-                </div>
-            </template>
 			<div id="tile_container">
 				<div id="records_container">
 				    <div class="tile">
@@ -101,21 +96,13 @@
                                 <div class="weeks_container">
                                     <div class="inner_weeks">
                                         <template v-for="(weekDict, week) in item.weeks" :key="week">
-                                            <template v-if="weekDict.invoiced">
-                                                <div class="week" style="background-color: #53b700">
-                                                    <p style="font-size:large;">{{ week }} : {{ weekDict.startDate }}</p>
-                                                    <p class="week_total" @click="totalWeeks" :amount="weekDict.total">${{ numberWithCommas(weekDict.total) }}</p>
-                                                    <p style="width: 92.61px"></p>
-                                                </div>
-                                            </template>
-                                            <template v-else>
-                                                <div class="week">
-                                                    <p style="font-size:large;">{{ week }} : {{ weekDict.startDate }}</p>
-                                                    <p class="week_total" @click="totalWeeks" :amount="weekDict.total">${{ numberWithCommas(weekDict.total) }}</p>
-                                                    <p v-if="!weekDict.invoiced && checkDate(projID, week) && parseFloat(weekDict.total) != 0" style="color: #FF4F00">Invoice Is Due!</p>
-                                                    <p v-else="" style="width: 92.61px"></p>
-                                                </div>
-                                            </template>
+                                            <div class="week" :style="`${weekDict.invoiced ? 'background-color: #53b700': !weekDict.invoiced && weekDict.invoiceSent ? 'background-color: #FFB135' : '' }`">
+                                                <p style="font-size:large;">{{ week }} : {{ weekDict.startDate }}</p>
+                                                <p class="week_total" @click="totalWeeks" :amount="weekDict.total">${{ numberWithCommas(weekDict.total) }}</p>
+                                                <p v-if="!weekDict.invoiceSent && checkDate(projID, week) && parseFloat(weekDict.total) != 0" style="color:#FF4F00">Invoice Is Due!</p>
+                                                <p v-else-if="!weekDict.invoiced && weekDict.invoiceSent" class="mark_done right_width" @click="markDone(event, projID, week)">Mark As Paid</p>
+                                                <p v-else="" class="right_width"></p>
+                                            </div>
                                         </template>
                                     </div>
                                 </div>
@@ -137,9 +124,6 @@ import { userDict } from '../main.js';
 import $ from 'jquery';
 export default {
 	name: 'HomeView',
-	components: {
-
-	},
 	data(){
 		return{
 			currentYear: '',
@@ -150,12 +134,10 @@ export default {
 			years: [],
             projectDict: {},
             showTotal: false,
-            loaded: false,
-            update: false,
-            updateVersion: ''
 		}
 	},
 	mounted(){
+        console.log(userDict)
         let date = new Date();
         let month = date.getMonth();
         let thisYear = date.getFullYear();
@@ -188,9 +170,11 @@ export default {
                 }
             }
         }
-        this.checkForUpdates();
 	},
 	methods: {
+        markDone(event, projectID, weekID){
+            userDict['projects'][projectID]['weeks'][weekID]['invoiced'] = true; 
+        },
         removeTotal(){
             this.showTotal = false;
             this.total = 0
@@ -212,6 +196,7 @@ export default {
             if(date2.getTime() <= t.getTime()){
                 if(parseFloat(weekDict['total']) == 0){
                     userDict['projects'][projectID]['weeks'][weekID]['invoiced'] = true;
+                    userDict['projects'][projectID]['weeks'][weekID]['invoiceSent'] = true;
                 }
                 return true
             }else{
@@ -236,41 +221,7 @@ export default {
                     this.expenseSum[objDict.category] += objDict.amount 
 				}
 			}
-		},
-        checkForUpdates(){
-            let masterDict = {...userDict}
-            let updateData = undefined;
-            let ref = this;
-            $.ajax({
-                dataType: "json",
-                url: 'https://api.github.com/repos/NotNatural21/DashBooks/releases',
-                cache: false,
-                success: function (data){
-                    updateData = data[0];
-                    let current_version = [
-                        parseInt(masterDict['version'].split('.')[0]), 
-                        parseInt(masterDict['version'].split('.')[1]), 
-                        parseInt(masterDict['version'].split('.')[2])
-                    ];
-                    let latest_version = [
-                        parseInt(updateData.tag_name.split('v')[1].split('.')[0]), 
-                        parseInt(updateData.tag_name.split('v')[1].split('.')[1]), 
-                        parseInt(updateData.tag_name.split('v')[1].split('.')[2])
-                    ];
-                    if(latest_version[0] > current_version[0] || latest_version[1] > current_version[1] || latest_version[2] > current_version[2]){
-                        ref.updateVar();
-                        ref.updateVersion = updateData.tag_name
-                    }
-
-                },
-                error: function (xhr){
-                    console.log("Error " + xhr.status + ", could not check for updates.");
-                }
-            });
-        },
-        updateVar(){
-            this.update = true;
-        }
+		}
 	}
 }
 </script>
@@ -438,11 +389,16 @@ p{
     font-size: larger;
 }
 
-#update > a{
-    color: blue;
+.mark_done{
+    cursor: pointer;
+    border: 1px solid black;
+    background-color: $primary;
+    color: white;
+    border-radius: 7px;
 }
 
-#update{
-    color: #e61010;
+.right_width{
+    min-width: 92.61px;
+    width: 92.61px;
 }
 </style>
