@@ -213,7 +213,7 @@
 			<input id="create_asset_total" type="number" step="0.01" />
 
 			<fieldset>
-                <q-btn class="glossy" rounded color="primary" label="Save Asset" @click="createAsset"/>
+                <q-btn class="glossy" rounded color="primary" label="Create Asset" @click="createAsset"/>
                 <q-btn class="glossy" rounded color="secondary" label="Cancel" @click="this.$emit('cancelled', '')"/>
 			</fieldset>
 		</div>
@@ -243,7 +243,7 @@
 			<input id="edit_asset_total" type="number" step="0.01" />
 
 			<fieldset>
-                <q-btn class="glossy" rounded color="primary" label="Save Transaction" @click="editAsset"/>
+                <q-btn class="glossy" rounded color="primary" label="Save Asset" @click="editAsset"/>
                 <q-btn class="glossy" rounded color="red" label="Delete" @click="deleteAsset"/>
                 <q-btn class="glossy" rounded color="secondary" label="Cancel" @click="this.$emit('cancelled', '')"/>
 			</fieldset>
