@@ -215,7 +215,7 @@
 							<p>Take Home</p>
 						</template>
 						<template v-else>
-							<p>Take Home:</p>
+							<p>Take Home</p>
 						</template>
 						<p>${{ numberWithCommas(pivotDict['months']['grandTotal'] - calculateTax(pivotDict['months']['grandTotal'])) }}</p>
 					</template>
