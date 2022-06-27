@@ -5,7 +5,7 @@
 				<label for="year_selection">Choose a Tax Year:</label>
 				<select id="year_selection"  @change="onchange">
 					<template v-for="(recordDict, recordYear) in userObj['records']" :key="recordDict" >
-						<option v-if="recordYear !== 'categories' && recordYear !== 'accounts' && recordYear !== 'payee' && recordYear !== 'savedTransactions'" :data="recordYear">
+						<option v-if="recordYear !== 'categories' && recordYear !== 'accounts' && recordYear !== 'headingStates' && recordYear !== 'payee' && recordYear !== 'savedTransactions'" :data="recordYear">
 							{{ recordYear }}
 						</option>
 					</template>

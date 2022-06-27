@@ -98,7 +98,7 @@
                                         <template v-for="(weekDict, week) in item.weeks" :key="week">
                                             <div class="week" :style="`${weekDict.invoiced ? 'background-color: #53b700': !weekDict.invoiced && weekDict.invoiceSent ? 'background-color: #FFB135' : '' }`">
                                                 <p style="font-size:large;">{{ week }} : {{ weekDict.startDate }}</p>
-                                                <p class="week_total" @click="totalWeeks" :amount="weekDict.total">${{ numberWithCommas(weekDict.total) }}</p>
+                                                <p class="week_total" @click="totalWeeks" :amount="weekDict.total" :hours="weekDict.totalHours">${{ numberWithCommas(weekDict.total) }}</p>
                                                 <p v-if="!weekDict.invoiceSent && checkDate(projID, week) && parseFloat(weekDict.total) != 0" style="color:#FF4F00">Invoice Is Due!</p>
                                                 <p v-else-if="!weekDict.invoiced && weekDict.invoiceSent" class="mark_done right_width" @click="markDone(event, projID, week)">Mark As Paid</p>
                                                 <p v-else="" class="right_width"></p>
@@ -113,7 +113,10 @@
                 </div>
 			</div>
             <div id="total_container" v-if="showTotal">
-                <p id="total_amount" style="background: radial-gradient(circle, #35a2ff 0%, #014a88 100%)" @click="removeTotal">Total: ${{ numberWithCommas(total) }}</p>
+                <div id="total_amount" style="background: radial-gradient(circle, #35a2ff 0%, #014a88 100%)" @click="removeTotal">
+                    <p>Total Pay: ${{ numberWithCommas(total) }}</p>
+                    <p>Total Hours: {{ numberWithCommas(totalHours) }}H</p>
+                </div>
             </div>
 		</div>
 	</div>
@@ -131,6 +134,7 @@ export default {
             expenseSum: {},
             incomeSum: {},
 			total: 0,
+			totalHours: 0,
 			years: [],
             projectDict: {},
             showTotal: false,
@@ -178,10 +182,12 @@ export default {
         removeTotal(){
             this.showTotal = false;
             this.total = 0
+            this.totalHours = 0
         },
         totalWeeks(event){
             this.showTotal = true;
             this.total += parseFloat($(event.target).attr('amount'))
+            this.totalHours += parseFloat($(event.target).attr('hours'))
         },
         numberWithCommas(num) {
 			return ((parseFloat(num).toFixed(2)).replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ","));
@@ -380,6 +386,7 @@ p{
     min-height: 75px;
     min-width: 250px;
     display: flex;
+    flex-direction: column;
     color: white;
     border-radius: 25px 0px 0px;
     justify-content: center;
