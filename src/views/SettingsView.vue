@@ -23,6 +23,7 @@
                                 <div style="pointer-events: none;">
                                     <p style="pointer-events: none;">{{ projectDict.name }}</p>
                                     <p style="font-size: small; pointer-events: none;">Duration: {{ projectDict.duration }} Weeks</p>
+                                    <p style="font-size: small; pointer-events: none;">Target Hours: {{ projectDict.targetHours }}H</p>
                                 </div>
                             </div>
                         </div>

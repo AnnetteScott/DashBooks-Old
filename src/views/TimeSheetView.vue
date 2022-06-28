@@ -1,6 +1,13 @@
 <template>
     <div class="pageHome">
         <div id="container">
+            <div id="time_display" :style="{background: `${projectDict['colour'][0]}`, color: `${pickTextColorBasedOnBgColor(projectDict['colour'][0])}`}">
+                <div id="time_text">
+                    <p id="time_textHours"></p>
+                    <p>&nbsp;:&nbsp;</p>
+                    <p id="time_textMins"></p>
+                </div>
+            </div>
             <div id="top_title" :style="{background: `${projectDict['colour'][0]}`, color: `${pickTextColorBasedOnBgColor(projectDict['colour'][0])}`}">
                 <template v-if="weekID !== ''">
                     <p :style="{color: `${pickTextColorBasedOnBgColor(projectDict['colour'][0])}`}">Complete </p>
@@ -11,6 +18,7 @@
                     Click on a week to get started!
                 </template>
             </div>
+            <div></div>
         </div>
         <div id="time_Container">
             <div id="weeks_container">
@@ -123,6 +131,10 @@ export default {
 			})
 		}
 		document.addEventListener('mousemove', onMouseMove);
+        this.setCurrentTime();
+        setInterval(function() {
+            this.setCurrentTime();
+        }.bind(this), 15000);
     },
     methods: {
         rightClickWeek(e) {
@@ -485,6 +497,13 @@ export default {
         numberWithCommas(num) {
 			return ((parseFloat(num).toFixed(2)).replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ","));
 		},
+        setCurrentTime(){
+            let d = new Date();
+            let hours = d.getHours();
+            let min = d.getMinutes(); 
+            $('#time_textHours').text(`${hours}`);
+            $('#time_textMins').text(`${min}`);
+        }
 
     }
 }
@@ -497,7 +516,7 @@ export default {
 #container{
     display: flex;
     align-items: center;
-	justify-content: center;
+	justify-content: space-around;
 }
 #time_Container{
     display: flex;
@@ -523,6 +542,35 @@ export default {
     padding: 0px 4px;
     color: white;
 }
+
+#time_display{
+    margin-top: 5px;
+	height: 30px;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+    width: 70px;
+    box-shadow: 0px 0px 10px -5px white inset, 0px 4px 16px -16px black;
+    border-radius: 10px;
+    background-color: #ffffff56;
+    font-family: 'Lato';
+}
+
+#time_text{
+    display: flex;
+}
+
+#time_text > p:nth-child(2){
+    opacity: 1;
+    animation: fade 1s infinite;
+}
+
+@keyframes fade {
+  0%, 100% { opacity: 0 }
+  50% { opacity: 1 }
+}
+
 #weeks_container{
 	display: flex;
 	flex-direction: column;

@@ -8,6 +8,7 @@
                     <div>
                         <p>{{ projectDict.name }}</p>
                         <p style="font-size: small;">Duration: {{ projectDict.duration }} Weeks</p>
+                        <p style="font-size: small; pointer-events: none;">Target Hours: {{ projectDict.targetHours }}H</p>
                     </div>
                 </div>
             </div>
