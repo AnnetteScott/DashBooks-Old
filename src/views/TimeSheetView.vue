@@ -501,8 +501,8 @@ export default {
             let d = new Date();
             let hours = d.getHours();
             let min = d.getMinutes(); 
-            $('#time_textHours').text(`${hours}`);
-            $('#time_textMins').text(`${min}`);
+            $('#time_textHours').text(`${hours}`.padStart(2, '0'));
+            $('#time_textMins').text(`${min}`.padStart(2, '0'));
         }
 
     }
