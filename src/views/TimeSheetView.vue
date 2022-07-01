@@ -435,7 +435,7 @@ export default {
 
 				weekTotal += colTotal;
 				weekMoney += colMoney;
-				$(`[cellid=${columns[i]}${cellTotal}]`).text(`${colTotal}H`)
+				$(`[cellid=${columns[i]}${cellTotal}]`).text(`${colTotal.toFixed(2)}H`)
 				$(`[cellid=${columns[i]}${cellTotal + 1}]`).text(`$${colMoney.toFixed(2)}`)
 				if(i % 7 == 6){
 					$(`[cellid=${columns[i - 6]}${cellTotal + 2}]`).text(`${weekTotal.toFixed(2)}H`);
