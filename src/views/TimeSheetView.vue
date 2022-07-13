@@ -30,7 +30,7 @@
                         <div class="week_button" :label="weekID" @click="weekButton" :data="weekID" style="background: radial-gradient(circle, rgb(209 53 255) 0%, rgb(93 26 120) 100%); color: white;" @contextmenu="rightClickWeek">{{ weekID }}</div>
                     </template>
                 </template>
-                <div class="week_button" color="secondary" @click="addWeek" :style="{background: `radial-gradient(circle, ${projectDict['colour'][1]} 0%, ${projectDict['colour'][0]} 100%)`, color: `${pickTextColorBasedOnBgColor(projectDict['colour'][1])}`}">+</div>
+                <div class="week_button" color="secondary" @click="projectRequest=`createWeek`" :style="{background: `radial-gradient(circle, ${projectDict['colour'][1]} 0%, ${projectDict['colour'][0]} 100%)`, color: `${pickTextColorBasedOnBgColor(projectDict['colour'][1])}`}">+</div>
             </div>
             <div id="time_sheet_container" :style="{background: `${projectDict['colour'][0]}`, color: `${pickTextColorBasedOnBgColor(projectDict['colour'][0])}`}">
                 <template v-if="weekID != ``">
@@ -88,16 +88,19 @@
                 <div class="context_option" @click="toggleCheckMark">Toggle Invoice Status</div>
             </div>
         </div>
+        <ProjectForms :projectForm="projectRequest" @cancelled="projectRequest=``" @date="addWeek"/>
     </div>
 </template>
 
 <script>
 import { userDict } from '../main.js'
+import ProjectForms from '../components/ProjectForms'
 import { addToDate, dateToAmerica } from '../../public/generalFunctions.js';
 import $ from 'jquery'
 export default {
     name: 'TimeSheetView',
     components: {
+        ProjectForms
     },
     data(){
         return {
@@ -105,6 +108,8 @@ export default {
             projectID: this.$route.params.projectID,
             projectDict: userDict['projects'][this.$route.params.projectID],
             weekID: '',
+            weekDate: '',
+            projectRequest: '',
             selectedCellsList: [],
             dateList: [],
             timeList: [],
@@ -175,13 +180,16 @@ export default {
             let L = (0.2126 * c[0]) + (0.7152 * c[1]) + (0.0722 * c[2]);
             return (L > 0.179) ? '#000000' : '#ffffff';
         },
-        addWeek(){
+        addWeek(value){
             let colourIds = Object.keys(userDict['colours'])
+            let date = value
             let duration = this.projectDict['duration'];
             if(this.projectDict['weekInterval'] == 1){
-                let date = this.projectDict['weeks'][`${duration}`]['startDate'];
-                date = addToDate(date, 14);
-                this.projectDict['weeks'][`${duration + 1}`] = {'startDate': date, 'colouredCells': {}, 'invoiced': false, 'invoiceSent': false, 'total': '0.00'};
+                if(date == 'skip'){
+                    date = this.projectDict['weeks'][`${duration}`]['startDate'];
+                    date = addToDate(date, 14);
+                }
+                this.projectDict['weeks'][`${duration + 1}`] = {'startDate': date, 'colouredCells': {}, 'invoiced': false, 'invoiceSent': false, 'total': '0.00', 'totalHours': '0.00'};
                 colourIds.forEach(colourID => {
                     if(colourID != 'colourWhite'){
                         this.projectDict['weeks'][`${duration}`]['colouredCells'][colourID] = [];
@@ -190,10 +198,12 @@ export default {
                 this.projectDict['duration'] += 1;
 
             }else if(this.projectDict['weekInterval'] == 2){
-                let lastKey = `${duration - 1} - ${duration}`;
-                let date = this.projectDict['weeks'][lastKey]['startDate'];
-                date = addToDate(date, 14);
-                this.projectDict['weeks'][`${duration + 1} - ${duration + 2}`] = {'startDate': date, 'colouredCells': {}, 'invoiced': false, 'invoiceSent': false, 'total': '0.00'};
+                if(date == 'skip'){
+                    let lastKey = `${duration - 1} - ${duration}`;
+                    date = this.projectDict['weeks'][lastKey]['startDate'];
+                    date = addToDate(date, 14);
+                }
+                this.projectDict['weeks'][`${duration + 1} - ${duration + 2}`] = {'startDate': date, 'colouredCells': {}, 'invoiced': false, 'invoiceSent': false, 'total': '0.00', 'totalHours': '0.00'};
                 colourIds.forEach(colourID => {
                     if(colourID != 'colourWhite'){
                         this.projectDict['weeks'][`${duration + 1} - ${duration + 2}`]['colouredCells'][colourID] = [];

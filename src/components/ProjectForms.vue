@@ -1,4 +1,19 @@
 <template>
+    <!-- Create New Week -->
+	<div class="form_container" v-if="projectForm == `createWeek`">
+		<div class="form">
+			<label for="create_week">Select a date or click skip to automacially select the next date period</label>
+			<label for="create_week">Week start date:</label>
+			<input id="create_week" type="date" />
+            
+			<fieldset>
+                <q-btn class="glossy" rounded color="primary" label="Create Week" @click="createWeek"/>
+                <q-btn class="glossy" rounded color="orange" label="Skip" @click="skipWeek"/>
+                <q-btn class="glossy" rounded color="secondary" label="Cancel" @click="this.$emit('cancelled')"/>
+			</fieldset>
+		</div>
+	</div>
+    
     <!-- Create Project -->
 	<div class="form_container" v-if="projectForm == `createProject`">
 		<div class="form">
@@ -112,11 +127,20 @@ import { generateID, reDoDate, addToDate } from '../../public/generalFunctions.j
 import $ from 'jquery'
 export default {
     name: 'ProjectForms',
-    emits: ["cancelled"],
+    emits: ["cancelled", "date"],
     props: {
         projectForm: String
     },
     methods: {
+        createWeek(){
+            let date = reDoDate($('#create_week').val());
+            this.$emit('date', date)
+            this.$emit('cancelled')
+        },
+        skipWeek(){
+            this.$emit('date', 'skip')
+            this.$emit('cancelled')
+        },
         createProject(){
             let name = $('#create_project_name').val();
 			let duration = parseInt($('#create_project_duration').val());
