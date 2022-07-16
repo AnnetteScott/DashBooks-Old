@@ -28,6 +28,11 @@
                             <q-item-label @click="changeAutoSave">Change Auto Save Time Period</q-item-label>
                         </q-item-section>
                     </q-item>
+                    <q-item clickable v-close-popup tabindex="0">
+                        <q-item-section>
+                            <q-item-label @click="showInfo">About</q-item-label>
+                        </q-item-section>
+                    </q-item>
                 </q-list>
             </q-btn-dropdown>
             <q-btn flat label="Save" @click="saveUserDict"/>
@@ -51,6 +56,11 @@
     </nav>
     <SavingPopup :savingStatus="saving_in_progress" />
     <ApplicationForms :ApplicationForm="application_Form" @cancelled="application_Form=``"/>
+    <div id="showInfoAbout" v-if="showInfomation">
+        <div @click="showInfo">
+            Version: {{userObj.version}}
+        </div>
+    </div>
     <router-view />
 </template>
 
@@ -77,6 +87,8 @@ export default {
 			application_Form: '',
             update: false,
             updateVersion: '',
+            showInfomation: false,
+            userObj: userDict
 		}
     },
     setup () {
@@ -228,6 +240,9 @@ export default {
                     ref.saveUserDict();
                 }
             })
+        },
+        showInfo(){
+            this.showInfomation = !this.showInfomation
         }
     }
 }
@@ -272,7 +287,7 @@ nav {
 
 .pageHome{
 	width: 100%;
-	height: calc(100% - 55px);
+	height: 100%;
 	display: flex;
 	justify-content: center;
     min-width: 1438px;
@@ -300,5 +315,24 @@ h4{
     padding: 5px 30px;
     background-color: rgb(63, 63, 63);
     border-radius: 10px;
+}
+
+#showInfoAbout{
+    z-index: 10;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(15px);
+}
+
+#showInfoAbout > div{
+    padding: 50px;
+    border: 1px solid black;
+    border-radius: 10px;
+    background-color: white;
+    cursor: pointer;
 }
 </style>

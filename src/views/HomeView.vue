@@ -3,7 +3,7 @@
 		<div class="inner">
 			<h4>Welcome To DashBooks!</h4>
 			<div id="tile_container">
-				<div id="records_container">
+				<div id="records_container" style="min-height: 310px;">
 				    <div class="tile">
                         <div class="top_display">
 							<p>Income: {{ currentYear }}</p>
@@ -266,19 +266,18 @@ export default {
 }
 #tile_container{
 	width: 100%;
-    height: 95%;
+    height: 100%;
     padding-top: 10px;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    justify-content: space-around;
+    justify-content: space-start;
 }
 
 #tile_container > div{
 	display: flex;
     justify-content: center;
     margin-bottom: 15px;
-    height: 420px;
     width: 100%;
     overflow-x: auto;
     gap: 40px;
@@ -292,6 +291,7 @@ export default {
 .inner_project_tiles{
     display: flex;
     justify-content: center;
+    flex-wrap: wrap;
     width: fit-content;
     min-width: 100%;
     gap: 40px;
@@ -306,7 +306,8 @@ h4{
 	width: 400px;
 	min-width: 400px;
 	height: 100%;
-    min-height: 290px;
+    min-height: 240px;
+    max-height: 310px;
     margin: 0px 15px;
 	background-color: white;
 	box-shadow: 2px 4px 10px -4px #000000a4;

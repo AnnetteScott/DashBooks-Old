@@ -528,7 +528,7 @@ input {
 
 .form{
     height: 75%;
-    width: 75%;
+    width: 95%;
 	display: flex;
 	position: relative;
 	flex-direction: column;
