@@ -23,8 +23,8 @@
                                     <select :id="`project_selection_${n}`" @change="checkInvoice" onchange="this.className=this.options[this.selectedIndex].className" class="blackText">>
                                         <template v-for="(projDict, projID) in userObj['projects']" :key="projDict" >
                                             <template v-for="(weekDict, weekID) in projDict['weeks']" :key="weekID">
-                                                <option :data="projID" :weekid="weekID" :class="`${!weekDict.invoiced && checkDate(weekDict.startDate) && parseFloat(weekDict.total) != 0 ? 'redText' : 'blackText'}`">
-                                                {{ projDict.name }} : {{ weekID }} {{!weekDict.invoiced && checkDate(weekDict.startDate) && parseFloat(weekDict.total) != 0 ? ': Invoice Due!' : ''}}
+                                                <option :data="projID" :weekid="weekID" :class="`${!weekDict.invoiced && !weekDict.invoiceSent && checkDate(weekDict.startDate) && parseFloat(weekDict.total) != 0 ? 'redText' : 'blackText'}`">
+                                                {{ projDict.name }} : {{ weekID }} {{!weekDict.invoiced && !weekDict.invoiceSent && checkDate(weekDict.startDate) && parseFloat(weekDict.total) != 0 ? ': Invoice Due!' : ''}}
                                                 </option>
                                             </template>
                                         </template>
@@ -171,7 +171,7 @@
 							</div>
 						</div>
 					</div>
-                    <template v-for="(dict, key) in invoiceData">
+                    <template v-for="(dict, keyed) in invoiceData" :key="keyed">
                         <div class="bottom_section">
                             <span class="bottom_section_title">{{ dict.projName }}</span>
                             <div v-for="(col, index) in columnLetter" :key="col" :colID="col" class="invoice_sheet_column">

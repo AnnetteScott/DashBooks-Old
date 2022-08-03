@@ -2,65 +2,55 @@
     <nav>
         <div>
             <q-toolbar class="bg-primary text-white shadow-2 glossy">
-            <q-btn-dropdown stretch flat label="More">
-                <q-list>
-                    <q-item clickable v-close-popup tabindex="0">
-                        <q-item-section>
-                        <q-item-label @click="loadUser">Load</q-item-label>
-                        </q-item-section>
-                        <q-item-section side>
-                        </q-item-section>
-                    </q-item>
-                    <q-item clickable v-close-popup tabindex="0">
-                        <q-item-section>
-                        <q-item-label @click="manualSave">Manual Save</q-item-label>
-                        </q-item-section>
-                        <q-item-section side>
-                        </q-item-section>
-                    </q-item>
-                    <q-item clickable v-close-popup tabindex="0">
-                        <q-item-section>
-                            <q-item-label @click="changeSaveLocation">Change Save Location</q-item-label>
-                        </q-item-section>
-                    </q-item>
-                    <q-item clickable v-close-popup tabindex="0">
-                        <q-item-section>
-                            <q-item-label @click="changeAutoSave">Change Auto Save Time Period</q-item-label>
-                        </q-item-section>
-                    </q-item>
-                    <q-item clickable v-close-popup tabindex="0">
-                        <q-item-section>
-                            <q-item-label @click="showInfo">About</q-item-label>
-                        </q-item-section>
-                    </q-item>
-                </q-list>
-            </q-btn-dropdown>
-            <q-btn flat label="Save" @click="saveUserDict"/>
-            <q-space />
-            <template v-if="update">
-                <div id="update">
-                    There is an update available. Go to&nbsp;<a href="https://github.com/NotNatural21/DashBooks/releases/latest/" target="_blank">DashBooks latest release</a> to get {{updateVersion}}.
-                </div>
-            </template>
-            <q-space />
-            <q-tabs v-model="tab" shrink>
-                <q-route-tab name="DashBoard" label="DashBoard" to="/"/>
-                <q-route-tab name="Settings" label="Settings" to="/settings"/>
-                <q-route-tab name="Projects" label="TimeSheets" to="/projects"/>
-                <q-route-tab name="Invoicing" label="Invoicing" to="/invoice"/>
-                <q-route-tab name="Records" label="Records" to="/records"/>
-                <q-route-tab name="Help" label="Help" to="/help"/>
-            </q-tabs>
+                <q-btn-dropdown stretch flat label="More">
+                    <q-list>
+                        <q-item clickable v-close-popup tabindex="0">
+                            <q-item-section>
+                            <q-item-label @click="loadUser">Load</q-item-label>
+                            </q-item-section>
+                            <q-item-section side>
+                            </q-item-section>
+                        </q-item>
+                        <q-item clickable v-close-popup tabindex="0">
+                            <q-item-section>
+                            <q-item-label @click="manualSave">Manual Save</q-item-label>
+                            </q-item-section>
+                            <q-item-section side>
+                            </q-item-section>
+                        </q-item>
+                        <q-item clickable v-close-popup tabindex="0">
+                            <q-item-section>
+                                <q-item-label @click="changeSaveLocation">Change Save Location</q-item-label>
+                            </q-item-section>
+                        </q-item>
+                        <q-item clickable v-close-popup tabindex="0">
+                            <q-item-section>
+                                <q-item-label @click="changeAutoSave">Change Auto Save Time Period</q-item-label>
+                            </q-item-section>
+                        </q-item>
+                    </q-list>
+                </q-btn-dropdown>
+                <q-btn flat label="Save" @click="saveUserDict"/>
+                <q-space />
+                <template v-if="update">
+                    <div id="update">
+                        There is an update available. Go to&nbsp;<a href="https://github.com/NotNatural21/DashBooks/releases/latest/" target="_blank">DashBooks latest release</a> to get {{updateVersion}}.
+                    </div>
+                </template>
+                <q-space />
+                <q-tabs v-model="tab" shrink>
+                    <q-route-tab name="DashBoard" label="DashBoard" to="/"/>
+                    <q-route-tab name="Settings" label="Settings" to="/settings"/>
+                    <q-route-tab name="Projects" label="TimeSheets" to="/projects"/>
+                    <q-route-tab name="Invoicing" label="Invoicing" to="/invoice"/>
+                    <q-route-tab name="Records" label="Records" to="/records"/>
+                    <q-route-tab name="Help" label="Help" to="/help"/>
+                </q-tabs>
             </q-toolbar>
         </div>
     </nav>
     <SavingPopup :savingStatus="saving_in_progress" />
     <ApplicationForms :ApplicationForm="application_Form" @cancelled="application_Form=``"/>
-    <div id="showInfoAbout" v-if="showInfomation">
-        <div @click="showInfo">
-            Version: {{userObj.version}}
-        </div>
-    </div>
     <router-view />
 </template>
 
@@ -87,7 +77,6 @@ export default {
 			application_Form: '',
             update: false,
             updateVersion: '',
-            showInfomation: false,
             userObj: userDict
 		}
     },
@@ -97,14 +86,9 @@ export default {
         }
     },
     mounted(){
-        console.log(settingsDict)
-        let autoSave = settingsDict['autoSaveTime'] ? settingsDict['autoSaveTime'] : 5;
-        let oneMin = 60 * 1000
-        let ref = this;
-        setInterval(function() {
-            ref.saveUserDict();
-        }, oneMin * autoSave);
         console.log(userDict)
+        console.log(settingsDict)
+        settingsDict['autoSaveTime'] ? delete settingsDict['autoSaveTime'] : '';
         this.checkForUpdates();
     },
     methods: {
@@ -166,7 +150,7 @@ export default {
                     for(const[key, imgData] of Object.entries(zipFile.files)){
                         if(key.includes('Receipts/') && key != 'Receipts/'){
                             let imgName = key.split('/')[1]
-                            fs.writeBinaryFile({path: settingsDict['roaming'] + `DashBooks/Receipts/${imgName}`, contents: imgData._data.compressedContent})
+                            await fs.writeBinaryFile({path: settingsDict['roaming'] + `DashBooks/Receipts/${imgName}`, contents: imgData._data.compressedContent})
                         }
                     }
 
@@ -202,6 +186,7 @@ export default {
                 });
             }
             ref.saving_in_progress = false;
+            console.log("saved!")
         },
         async manualSave(){
             await fs.writeFile({path: settingsDict['roaming'] + "DashBooks/userData.ssdb", contents: JSON.stringify(userDict)})
@@ -240,9 +225,6 @@ export default {
                     ref.saveUserDict();
                 }
             })
-        },
-        showInfo(){
-            this.showInfomation = !this.showInfomation
         }
     }
 }

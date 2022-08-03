@@ -1,5 +1,6 @@
 <template>
 	<div class="pageHome">
+        <p id="version_display">v{{userObj.version}}</p>
 		<div class="inner">
 			<h4>Welcome To DashBooks!</h4>
 			<div id="tile_container">
@@ -101,7 +102,7 @@
                                                 <p class="week_total" @click="totalWeeks" :amount="weekDict.total" :hours="weekDict.totalHours">${{ numberWithCommas(weekDict.total) }}</p>
                                                 <p v-if="!weekDict.invoiceSent && checkDate(projID, week) && parseFloat(weekDict.total) != 0" style="color:#FF4F00">Invoice Is Due!</p>
                                                 <p v-else-if="!weekDict.invoiced && weekDict.invoiceSent" class="mark_done right_width" @click="markDone(event, projID, week)">Mark As Paid</p>
-                                                <p v-else="" class="right_width"></p>
+                                                <p v-else class="right_width"></p>
                                             </div>
                                         </template>
                                     </div>
@@ -130,6 +131,7 @@ export default {
 	data(){
 		return{
 			currentYear: '',
+            userObj: userDict,
 			netData: {'income': 0, 'expenses': 0},
             incomeArray: {},
             expensesArray: {},
@@ -266,7 +268,7 @@ export default {
 }
 #tile_container{
 	width: 100%;
-    height: 100%;
+    height: 96%;
     padding-top: 10px;
     display: flex;
     flex-direction: column;
@@ -432,5 +434,10 @@ p{
 .right_width{
     min-width: 92.61px;
     width: 92.61px;
+}
+
+#version_display{
+    position: absolute;
+    right: 6px;
 }
 </style>
