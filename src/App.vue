@@ -23,11 +23,6 @@
                                 <q-item-label @click="changeSaveLocation">Change Save Location</q-item-label>
                             </q-item-section>
                         </q-item>
-                        <q-item clickable v-close-popup tabindex="0">
-                            <q-item-section>
-                                <q-item-label @click="changeAutoSave">Change Auto Save Time Period</q-item-label>
-                            </q-item-section>
-                        </q-item>
                     </q-list>
                 </q-btn-dropdown>
                 <q-btn flat label="Save" @click="saveUserDict"/>
@@ -50,7 +45,6 @@
         </div>
     </nav>
     <SavingPopup :savingStatus="saving_in_progress" />
-    <ApplicationForms :ApplicationForm="application_Form" @cancelled="application_Form=``"/>
     <router-view />
 </template>
 
@@ -59,7 +53,6 @@ import { ref } from 'vue'
 import JSZip from 'jszip';
 import { settingsDict, userDict, saveChecker } from './main.js';
 import SavingPopup from '@/components/SavingPopup.vue';
-import ApplicationForms from '@/components/ApplicationForms.vue';
 import $ from 'jquery'
 
 const dialog = window.__TAURI__.dialog;
@@ -68,8 +61,7 @@ const path = window.__TAURI__.path;
 export default {
     name: 'App',
     components: {
-        SavingPopup,
-        ApplicationForms
+        SavingPopup
     },
     data() {
         return {
@@ -112,10 +104,13 @@ export default {
                         parseInt(updateData.tag_name.split('v')[1].split('.')[1]), 
                         parseInt(updateData.tag_name.split('v')[1].split('.')[2])
                     ];
-                    if(latest_version[0] > current_version[0] || latest_version[1] > current_version[1] || latest_version[2] > current_version[2]){
+                    console.log(current_version)
+                    console.log(latest_version)
+                    if(latest_version[0] > current_version[0] || latest_version[1] > current_version[1] || latest_version[2] > current_version[2] && latest_version[1] >= current_version[1]){
                         ref.updateVar();
                         ref.updateVersion = updateData.tag_name
                     }
+                    console.log(latest_version[0] > current_version[0] || latest_version[1] > current_version[1] || latest_version[2] > current_version[2] && latest_version[1] >= current_version[1])
 
                 },
                 error: function (xhr){
@@ -125,9 +120,6 @@ export default {
         },
         updateVar(){
             this.update = true;
-        },
-        changeAutoSave(){
-            this.application_Form = `changeAutoSave`
         },
         async loadUser(){
             let ref = this;
@@ -230,8 +222,7 @@ export default {
 }
 </script>
 
-
-<style>
+<style lang="scss">
 @import url('../public/root.css');
 #app {
     font-family: Avenir, Helvetica, Arial, sans-serif;
