@@ -253,7 +253,7 @@ export function saveChecker(saveFile){
                 weekDict['invoiceID'] = '';
             }
         }
-        for(const[projectID, projectDict] of Object.entries(saveFile['archive'])){
+        for(const[projectID, projectDict] of Object.entries(saveFile['archive']['projects'])){
             for(const[weekID, weekDict] of Object.entries(projectDict['weeks'])){
                 weekDict['invoiceID'] = '';
             }
