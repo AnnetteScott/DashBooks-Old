@@ -3,35 +3,31 @@
 	<div class="form_container">
         <div class="form" style="background: radial-gradient(circle, #35a2ff 0%, #014a88 100%);">
             <div id="top">
-                <div class="side">
-                    <label for="amount_projects_invoice">Number of Projects To Invoice:</label>
-                    <template v-if="isProjects">
-                        <select id="amount_projects_invoice" @change="changeProjectNum" style="margin: 0px 0px 10px;">
-                            <option v-for="(projID, index) in projectKeys" :key="projID">
-                                {{ index + 1 }}
-                            </option>
-                        </select>
-                    </template>
-                    <template v-else>
-                        <div class="advisory">Go To Settings To Create A Project</div>
-                    </template>
+                <div class="side" style="width: 500px;">
                     <div class="project_selection_container">
                         <template v-if="isProjects">
-                            <template v-for="(n, index) in parseInt(amountOfProjects)" :key="index">
-                                <div class="selection_select">
-                                    <label :for="`project_selection_${n}`">Choose a Project and Week:</label>
-                                    <select :id="`project_selection_${n}`" @change="checkInvoice" onchange="this.className=this.options[this.selectedIndex].className" class="blackText">>
-                                        <template v-for="(projDict, projID) in userObj['projects']" :key="projDict" >
-                                            <template v-for="(weekDict, weekID) in projDict['weeks']" :key="weekID">
-                                                <option :data="projID" :weekid="weekID" :class="`${!weekDict.invoiced && !weekDict.invoiceSent && checkDate(weekDict.startDate) && parseFloat(weekDict.total) != 0 ? 'redText' : 'blackText'}`">
-                                                {{ projDict.name }} : {{ weekID }} {{!weekDict.invoiced && !weekDict.invoiceSent && checkDate(weekDict.startDate) && parseFloat(weekDict.total) != 0 ? ': Invoice Due!' : ''}}
-                                                </option>
-                                            </template>
-                                        </template>
-                                    </select>
-                                    <p style="color: white" :id="`invoice_selection_alert_${n}`"></p>
-                                </div>
-                            </template>
+                            <div class="selection_select">
+                                <label for="select_weeks">Select a Week:</label>
+			                    <v-select 
+                                    multiple 
+                                    :options="projectList"
+                                    :reduce="item => item.keys"
+                                    label="item"
+                                    :closeOnSelect=false 
+                                    :clearSearchOnSelect=false
+                                    style="width: 500px" 
+                                    id="select_weeks"
+                                    v-model="selectedWeeks"
+                                    :selectable="items => optionSelected(items)"
+                                >
+                                    <template #option="{item}">
+                                        <div :style="`${item.includes('Invoice Due!') ? 'color: red' : ''}`">{{ item }}</div>
+                                    </template>
+                                </v-select>
+                            </div>
+                        </template>
+                        <template v-else>
+                            <div class="advisory">Go To Settings To Create A Project</div>
                         </template>
                     </div>
                 </div>
@@ -67,7 +63,8 @@
                     <input id="invoice_for" type="text" />
                     
                     <label for="invoice_ID">Invoice ID:</label>
-                    <input id="invoice_ID" type="text" />
+                    <input id="invoice_ID" type="text" style="margin: 0px;"/>
+                    <p style="color: white; font-family: 'Lato'">Your last Invoice ID was: {{userObj['lastInvoiceID']}}</p>
                     
                     <label for="invoice_include_colours">Include All Colours:</label>
                     <input id="invoice_include_colours" type="checkbox" />
@@ -75,7 +72,7 @@
                 <div class="side">
                     OTHER OPTIONS:
                     <label for="invoice_check_invoice">Mark Invoice as Done:</label>
-                    <input id="invoice_check_invoice" type="checkbox" @click="checkInvoice" checked/>
+                    <input id="invoice_check_invoice" type="checkbox" checked/>
                     
                     <label for="invoice_add_records">Add To Records:</label>
                     <input id="invoice_add_records" type="checkbox" @click="changeState" checked/>
@@ -120,7 +117,10 @@
                     
                 </div>
             </div>
-        <q-btn class="glossy" rounded color="primary" label="Print Invoice" @click="generateInvoice"/>
+            <div>
+                <q-btn class="glossy" rounded color="primary" label="Print Invoice" @click="generateInvoice"/>
+                <p style="color: white; font-family: 'Lato'" v-if="showTip">Select some weeks first!</p>
+            </div>
         </div>	
 	</div>
 
@@ -209,12 +209,14 @@
 <script>
 import { userDict } from '../main.js'
 import { generateID } from '../../public/generalFunctions.js';
+import vSelect from 'vue-select';
+import 'vue-select/dist/vue-select.css';
 import $ from 'jquery'
 export default {
     name: 'InvoiceView',
     components: {
-
-    },
+		vSelect
+	},
     data(){
         return {
             userObj: userDict,
@@ -222,11 +224,12 @@ export default {
             isUsers: false,
             isClients: false,
             isAccounts: false,
+            showTip: true,
 			includedColours: {},
 			invoiceData: {},
-			amountOfProjects: 1,
 			invoiceTotal: 0,
-			projectKeys: [],
+			projectList: [],
+			selectedWeeks: [],
 			columnLetter: ['A', 'B', 'C', 'D'],
 			columnHeadings: ['Description', 'Rate', 'Quantity', 'Total $'],
 			keys: ['name', 'rate', 'QTY', 'Total'],
@@ -236,27 +239,23 @@ export default {
             currencyTo: ''
         }
     },
+    computed: {
+        
+    },
     mounted(){
-        this.$nextTick(() => {
-            Object.keys(userDict['projects']).forEach((projectID, index) => {
-                let weekID = Object.keys(userDict['projects'][projectID]['weeks'])[0]
-                if(userDict['projects'][projectID]['weeks'][weekID]['invoiced']){
-                    $(`#invoice_selection_alert_${index + 1}`).text('This week as already been invoiced')
-                }else{
-                    $(`#invoice_selection_alert_${index + 1}`).text('')
-                }
-            })
-        });
         this.isProjects = Object.keys(userDict['projects']).length != 0;
         this.isUsers = Object.keys(userDict['users']).length != 0;
         this.isClients = Object.keys(userDict['clients']).length != 0;
         this.isAccounts = userDict['records']['accounts'].length != 0;
         if(this.isProjects){
-            this.projectKeys = []
-            Object.keys(userDict['projects']).forEach((projectID, index) => {
-                this.projectKeys.push(projectID)
-                this.projectKeys.push(projectID)
-            })
+            this.projectList = []
+            for(const [key, dict] of Object.entries(userDict['projects'])){
+                for(const [week, weekDict] of Object.entries(dict['weeks'])){
+                    let item = `${dict.name} : ${ week } ${!weekDict.invoiced && !weekDict.invoiceSent && this.checkDate(weekDict.startDate) && parseFloat(weekDict.total) != 0 ? ': Invoice Due!' : ''}`;
+                    let pushItem = {"keys": {"projectID": key, "week": week}, "item": item}
+                    this.projectList.push(pushItem);
+                }
+            }
         }
     },
     methods: {
@@ -301,28 +300,6 @@ export default {
         numberWithCommas(num) {
 			return ((parseFloat(num).toFixed(2)).replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ","));
 		},
-        changeProjectNum(){
-            this.amountOfProjects = $(`#amount_projects_invoice option:selected`).val();
-            this.$nextTick(() => {
-                this.projectKeys.forEach((projectID, index) => {
-                    let weekID = Object.keys(userDict['projects'][projectID]['weeks'])[0]
-                    if(userDict['projects'][projectID]['weeks'][weekID]['invoiced']){
-                        $(`#invoice_selection_alert_${index + 1}`).text('This week as already been invoiced')
-                    }else{
-                        $(`#invoice_selection_alert_${index + 1}`).text('')
-                    }
-                })
-            });
-        },
-        checkInvoice(event){
-            let projectID = $(`#${event.target.id} option:selected`).attr('data')
-            let weekID = $(`#${event.target.id} option:selected`).attr('weekid')
-            if(userDict['projects'][projectID]['weeks'][weekID]['invoiced']){
-                $(`#invoice_selection_alert_${event.target.id.split('_')[2]}`).text('This week as already been invoiced')
-            }else{
-                $(`#invoice_selection_alert_${event.target.id.split('_')[2]}`).text('')
-            }
-        },
         changeState(){
             this.addToRecord = $('#invoice_add_records')[0].checked;
         },
@@ -347,6 +324,11 @@ export default {
             return [firstDate, lastDate]
         },
 		generateInvoice(){
+            if(Object.keys(this.selectedWeeks).length === 0){
+                this.showTip = true;
+                return
+            }
+            this.showTip = false;
             if(this.currencyConversion){
                 this.currencyFrom = $("#select_currency_from option:selected").attr('currency')
                 this.currencyTo = $("#select_currency_to option:selected").attr('currency')
@@ -362,6 +344,7 @@ export default {
 			//Invoice ID
             let invoiceID = $('#invoice_ID').val()
 			$('#invoice_id_invoice').text(invoiceID);
+            userDict["lastInvoiceID"] = invoiceID;
             //Dicts
 			let clientDict = this.userObj['clients'][$("#client_selection option:selected").attr('data')];
 			let userDicts = this.userObj['users'][$("#user_selection option:selected").attr('data')];
@@ -378,9 +361,10 @@ export default {
             this.invoiceData = {};
             let allStartDates = [];
             let includeAllColours = $('#invoice_include_colours')[0].checked;
-            for(let i = 1; i <= this.amountOfProjects; i++){
-                let projectID = $(`#project_selection_${i} option:selected`).attr('data');
-                let weekID = $(`#project_selection_${i} option:selected`).attr('weekid');
+
+            this.selectedWeeks.forEach(object => {
+                let projectID = object.projectID
+                let weekID = object.week
                 if(!Object.keys(this.invoiceData).includes(projectID)){
                     this.invoiceData[projectID] = {};
                     this.invoiceData[projectID]['projTotal'] = 0;
@@ -389,6 +373,7 @@ export default {
                 allStartDates.push(userDict['projects'][projectID]['weeks'][weekID]['startDate']);
                 if($('#invoice_check_invoice')[0].checked){//Set Invoice Status
                     userDict['projects'][projectID]['weeks'][weekID]['invoiceSent'] = true;
+                    userDict['projects'][projectID]['weeks'][weekID]['invoiceID'] = invoiceID;
                 }
                 for(const [colourID, cellList] of Object.entries(userDict['projects'][projectID]['weeks'][weekID]['colouredCells'])){
                     if(cellList.length != 0 || includeAllColours){
@@ -408,7 +393,7 @@ export default {
                 if(this.invoiceData[projectID]['projTotal'] == 0){
                     userDict['projects'][projectID]['weeks'][weekID]['invoiced'] = true;
                 }
-            }
+            });
             //Invoice Period
             let allDate = this.getFirstLastDate(allStartDates)
             let firstDate = allDate[0];
@@ -489,13 +474,21 @@ export default {
 				w.document.write(html); 
 				w.document.close() 
 			}
-		}
+		},
+        optionSelected(item){
+            let projectID = item.keys.projectID;
+            let week = item.keys.week
+            let arrayIDs = this.selectedWeeks.filter( e => e['projectID'] === projectID)
+            if(arrayIDs.some(e => e.week === week)){
+                return false
+            }
+            return true
+        }
     }
 }
 </script>
 
 <style scoped lang="scss">
-
 input {
 	width: 200px;
 	margin-bottom: 15px;
@@ -546,17 +539,20 @@ input {
 #top{
     display: flex;
     flex-direction: row;
+    justify-content: center;
     overflow-y: auto;
+    width: 100%;
+    gap: 100px;
 }
 
 .side{
     height: 100%;
+    width: 250px;
     display: flex;
 	position: relative;
 	flex-direction: column;
 	justify-content: flex-start;
 	align-items: center;
-    margin-right: 30px;
 }
 
 
@@ -593,7 +589,4 @@ input[type="checkbox"]{
     height: 21px;
     font-style: italic;
 }
-
-.redText{ color:#FF4F00; }
-.blackText{ color:black; }
 </style>

@@ -101,7 +101,10 @@
                                                 <p style="font-size:large;">{{ week }} : {{ weekDict.startDate }}</p>
                                                 <p class="week_total" @click="totalWeeks" :amount="weekDict.total" :hours="weekDict.totalHours">${{ numberWithCommas(weekDict.total) }}</p>
                                                 <p v-if="!weekDict.invoiceSent && checkDate(projID, week) && parseFloat(weekDict.total) != 0" style="color:#FF4F00">Invoice Is Due!</p>
-                                                <p v-else-if="!weekDict.invoiced && weekDict.invoiceSent" class="mark_done right_width" @click="markDone(event, projID, week)">Mark As Paid</p>
+                                                <p v-else-if="!weekDict.invoiced && weekDict.invoiceSent" class="mark_done right_width" @click="markDone(event, projID, week)">
+                                                    Mark As Paid
+                                                    <span class="tooltiptext">{{weekDict.invoiceID ? weekDict.invoiceID : "No ID found"}}</span>
+                                                </p>
                                                 <p v-else class="right_width"></p>
                                             </div>
                                         </template>
@@ -434,6 +437,38 @@ p{
 .right_width{
     min-width: 92.61px;
     width: 92.61px;
+}
+
+.mark_done {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black;
+}
+
+.mark_done .tooltiptext {
+    visibility: hidden;
+    width: 100%;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    position: absolute;
+    z-index: 1;
+    right: 110%;
+}
+
+.mark_done .tooltiptext::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    margin-top: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent transparent black;
+}
+.mark_done:hover .tooltiptext {
+    visibility: visible;
 }
 
 #version_display{
