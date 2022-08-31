@@ -10,7 +10,7 @@ import JSZip from 'jszip';
 const path = window.__TAURI__.path;
 const fs = window.__TAURI__.fs;
 let pjson = require('../package.json');
-const userDictMaster = {"projects": {}, "clients": {}, "colours": {'colourWhite':{'name': 'Clear', 'colour': '#ffffff'}}, "users": {}, "records": {"accounts": [],"payee": [], "categories": {}, 'savedTransactions': {}, 'headingStates': [ 'month', 'date', 'type', 'account', 'category', 'item', 'payee', 'amount', "receiptID" ]}, "saveVersion": 24, "showGST": true, "version": pjson.version, "timeLogged": {"01/01/1970": {'hours': 0, 'pay': 0}}, 'archive': {'projects': {}}}
+const userDictMaster = {"projects": {}, "clients": {}, "colours": {'colourWhite':{'name': 'Clear', 'colour': '#ffffff'}}, "users": {}, "records": {"accounts": [],"payee": [], "categories": {}, 'savedTransactions': {}, 'headingStates': [ 'month', 'date', 'type', 'account', 'category', 'item', 'payee', 'amount', "receiptID" ]}, "saveVersion": 25, "showGST": true, "version": pjson.version, "timeLogged": {"01/01/1970": {'hours': 0, 'pay': 0}}, 'archive': {'projects': {}}}
 let userDictRead = undefined;
 
 //Check a dashbooks directory is present in appdata/roaming and create it if not
@@ -25,7 +25,7 @@ for(const[objKey, objDict] of Object.entries(roaming)){
 if(!foundDashBooks){
     fs.createDir(dataPath + "DashBooks")
     fs.createDir(dataPath + "DashBooks/Receipts")
-    fs.writeFile({path: dataPath + "DashBooks/settings.ssdb", contents: JSON.stringify({'saveFilePath': `${dataPath + "DashBooks/"}`, 'autoSaveTime': 5})})
+    fs.writeFile({path: dataPath + "DashBooks/settings.ssdb", contents: JSON.stringify({'saveFilePath': `${dataPath + "DashBooks/"}`})})
     fs.writeFile({path: dataPath + "DashBooks/userData.ssdb", contents: JSON.stringify(userDictMaster)})
 }
 
@@ -34,7 +34,7 @@ let dashbooks = await fs.readDir(dataPath + "DashBooks");
 if(dashbooks.find(x => x.name == "Receipts") == undefined){
     fs.createDir(dataPath + "DashBooks/Receipts")
 }else if(dashbooks.find(x => x.name == "settings.ssdb") == undefined){
-    fs.writeFile({path: dataPath + "DashBooks/settings.ssdb", contents: JSON.stringify({'saveFilePath': `${dataPath + "DashBooks/"}`, 'autoSaveTime': 5})})
+    fs.writeFile({path: dataPath + "DashBooks/settings.ssdb", contents: JSON.stringify({'saveFilePath': `${dataPath + "DashBooks/"}`})})
 }else if(dashbooks.find(x => x.name == "userData.ssdb") == undefined){
     fs.writeFile({path: dataPath + "DashBooks/userData.ssdb", contents: JSON.stringify(userDictMaster)})
 }
@@ -246,6 +246,19 @@ export function saveChecker(saveFile){
             }
         }
         saveFile['saveVersion'] = 24
+    }
+    if(saveFile['saveVersion'] == 24){
+        for(const[projectID, projectDict] of Object.entries(saveFile['projects'])){
+            for(const[weekID, weekDict] of Object.entries(projectDict['weeks'])){
+                weekDict['invoiceID'] = '';
+            }
+        }
+        for(const[projectID, projectDict] of Object.entries(saveFile['archive'])){
+            for(const[weekID, weekDict] of Object.entries(projectDict['weeks'])){
+                weekDict['invoiceID'] = '';
+            }
+        }
+        saveFile['saveVersion'] = 25;
     }
     saveFile['version'] = pjson.version;
     return saveFile
