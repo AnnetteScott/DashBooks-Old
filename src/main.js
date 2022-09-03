@@ -248,13 +248,8 @@ export function saveChecker(saveFile){
         saveFile['saveVersion'] = 24
     }
     if(saveFile['saveVersion'] == 24){
-        for(const[projectID, projectDict] of Object.entries(saveFile['projects'])){
-            for(const[weekID, weekDict] of Object.entries(projectDict['weeks'])){
-                weekDict['invoiceID'] = '';
-            }
-        }
-        for(const[projectID, projectDict] of Object.entries(saveFile['archive']['projects'])){
-            for(const[weekID, weekDict] of Object.entries(projectDict['weeks'])){
+        for(let [projectID, projectDict] of Object.entries(saveFile['projects'])){
+            for(let [weekID, weekDict] of Object.entries(projectDict['weeks'])){
                 weekDict['invoiceID'] = '';
             }
         }
