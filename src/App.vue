@@ -37,6 +37,7 @@
                     <q-route-tab name="DashBoard" label="DashBoard" to="/"/>
                     <q-route-tab name="Settings" label="Settings" to="/settings"/>
                     <q-route-tab name="Projects" label="TimeSheets" to="/projects"/>
+                    <q-route-tab name="Tools" label="Tools" to="/tools"/>
                     <q-route-tab name="Invoicing" label="Invoicing" to="/invoice"/>
                     <q-route-tab name="Records" label="Records" to="/records"/>
                     <q-route-tab name="Help" label="Help" to="/help"/>
