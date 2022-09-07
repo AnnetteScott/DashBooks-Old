@@ -10,7 +10,26 @@ import JSZip from 'jszip';
 const path = window.__TAURI__.path;
 const fs = window.__TAURI__.fs;
 let pjson = require('../package.json');
-const userDictMaster = {"projects": {}, "clients": {}, "colours": {'colourWhite':{'name': 'Clear', 'colour': '#ffffff'}}, "users": {}, "records": {"accounts": [],"payee": [], "categories": {}, 'savedTransactions': {}, 'headingStates': [ 'month', 'date', 'type', 'account', 'category', 'item', 'payee', 'amount', "receiptID" ]}, "saveVersion": 25, "showGST": true, "version": pjson.version, "timeLogged": {"01/01/1970": {'hours': 0, 'pay': 0}}, 'archive': {'projects': {}}}
+const userDictMaster = {
+    "archive": {'projects': {}}, 
+    "clients": {}, 
+    "colours": {'colourWhite':{'name': 'Clear', 'colour': '#ffffff'}}, 
+    "projects": {}, 
+    "records": {
+        "accounts": [],
+        "categories": {"Salary": false}, 
+        "headingStates": [ 'month', 'date', 'type', 'account', 'category', 'item', 'payee', 'amount', "receiptID" ],
+        "payee": [], 
+        "savedTransactions": {}, 
+        "years": {}
+    }, 
+    "saveVersion": 27, 
+    "showGST": true, 
+    "timeLogged": {"01/01/1970": {'hours': 0, 'pay': 0}}, 
+    "tools": {'salaryAmount': 500},
+    "users": {}, 
+    "version": pjson.version
+}
 let userDictRead = undefined;
 
 //Check a dashbooks directory is present in appdata/roaming and create it if not
@@ -254,6 +273,23 @@ export function saveChecker(saveFile){
             }
         }
         saveFile['saveVersion'] = 25;
+    }
+    if(saveFile['saveVersion'] == 25){
+        saveFile['tools'] = {'salaryAmount': 500}
+        saveFile['saveVersion'] = 26;
+    }
+    if(saveFile['saveVersion'] == 26){
+        if ('budgets' in saveFile){
+            delete saveFile['budgets']
+        }
+        saveFile['records']['years'] = {}
+        for(const [objKey, objDict] of Object.entries(saveFile['records'])){
+            if(objKey != 'accounts' && objKey != 'categories' && objKey != 'headingStates' && objKey != 'payee' && objKey != 'savedTransactions' && objKey != 'years'){
+                saveFile['records']['years'][objKey] = objDict;
+                delete saveFile['records'][objKey]
+            }
+        }
+        saveFile['saveVersion'] = 27;
     }
     saveFile['version'] = pjson.version;
     return saveFile

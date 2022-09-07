@@ -190,7 +190,7 @@ export default {
 
             let expenseSum = {};
             let incomeSum = {};
-			for(const [objKey, OBJDICT] of Object.entries(userDict['records'][this.currentYear]['transactions'])){
+			for(const [objKey, OBJDICT] of Object.entries(userDict['records']['years'][this.currentYear]['transactions'])){
                 if(userDict['records']['categories'][OBJDICT.category]){
                     if(OBJDICT.type == 'Credit'){
                         this.netData.income += OBJDICT.amount;
@@ -218,11 +218,8 @@ export default {
             }else{
                 this.currentYear = `${thisYear} - ${thisYear + 1}`;
             }
-            for(const objKey of Object.keys(userDict['records'])){
-                if(objKey != 'accounts' && objKey != 'categories' && objKey != 'headingStates' && objKey != 'payee' && objKey != 'savedTransactions'){
-                    this.years.push(objKey)
-                }
-                
+            for(const objKey of Object.keys(userDict['records']['years'])){
+                this.years.push(objKey)
             }
             this.projectDict = userDict['projects']
             this.netData.income = 0;
@@ -230,8 +227,8 @@ export default {
 
             let expenseSum = {};
             let incomeSum = {};
-            if(this.currentYear in userDict['records']){
-                for(const [objKey, OBJDICT] of Object.entries(userDict['records'][this.currentYear]['transactions'])){
+            if(this.currentYear in userDict['records']['years']){
+                for(const [objKey, OBJDICT] of Object.entries(userDict['records']['years'][this.currentYear]['transactions'])){
                     if(userDict['records']['categories'][OBJDICT.category]){
                         if(OBJDICT.type == 'Credit'){
                             this.netData.income += OBJDICT.amount;
@@ -246,7 +243,7 @@ export default {
                     }
                 }
             } else {
-                userDict['records'][this.currentYear] = {assets: {}, transactions: {}}
+                userDict['records']['years'][this.currentYear] = {assets: {}, transactions: {}}
             }
             this.incomeArray = Object.entries(incomeSum).map(( [key, amount] ) => ({ key, amount }));
             this.expensesArray = Object.entries(expenseSum).map(( [key, amount] ) => ({ key, amount }));

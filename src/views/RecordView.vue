@@ -4,8 +4,8 @@
 			<div id="year_select">
 				<label for="year_selection">Choose a Tax Year:</label>
 				<select id="year_selection"  @change="onchange">
-					<template v-for="(recordDict, recordYear) in userObj['records']" :key="recordDict" >
-						<option v-if="recordYear !== 'categories' && recordYear !== 'accounts' && recordYear !== 'headingStates' && recordYear !== 'payee' && recordYear !== 'savedTransactions'" :data="recordYear">
+					<template v-for="(recordDict, recordYear) in userObj['records']['years']" :key="recordDict" >
+						<option :data="recordYear">
 							{{ recordYear }}
 						</option>
 					</template>
@@ -211,30 +211,39 @@
 				</div>
 				<div class="pivot_row pivot_heading">
 					<template v-if="loaded">
-						<template v-if="userObj['showGST']">
-							<p>Take Home</p>
-						</template>
-						<template v-else>
-							<p>Take Home</p>
-						</template>
-						<p>${{ numberWithCommas(pivotDict['months']['grandTotal'] - calculateTax(pivotDict['months']['grandTotal'])) }}</p>
+						<p>ACC</p>
+						<p>${{ numberWithCommas(pivotDict['months']['grandTotal'] * accAmount) }}</p>
+					</template>
+				</div>
+                <div class="pivot_row pivot_heading">
+					<template v-if="loaded">
+						<p>Take Home</p>
+						<p>${{ numberWithCommas(pivotDict['months']['grandTotal'] - calculateTax(pivotDict['months']['grandTotal']) - (pivotDict['months']['grandTotal'] * accAmount))}}
+                        </p>
 					</template>
 				</div>
 				<template v-if="userObj['showGST']">
 					<div class="pivot_row pivot_heading" style="margin-top: 5px; background-color: #41cde0">
 						<template v-if="loaded">
 							<p>Tax To Pay inc. GST</p>
-							<p>${{ numberWithCommas(calculateTax(pivotDict['months']['grandTotal']) * 1.15) }}</p>
-							<p>Effective Tax Rate: {{ ((calculateTax(pivotDict['months']['grandTotal'])  * 1.15) / (pivotDict['months']['grandTotal'] * 1.15) * 100).toFixed(2) }}%</p>
+							<p>${{ numberWithCommas(calculateTax(pivotDict['months']['grandTotal'] * GSTAmount) ) }}</p>
+							<p>Effective Tax Rate: {{ ((calculateTax(pivotDict['months']['grandTotal'] * GSTAmount)) / (pivotDict['months']['grandTotal'] * GSTAmount) * 100).toFixed(2) }}%</p>
 						</template>
 					</div>
+                    <div class="pivot_row pivot_heading" style="background-color: #41cde0">
+                        <template v-if="loaded">
+                            <p>ACC</p>
+                            <p>${{ numberWithCommas(pivotDict['months']['grandTotal'] * GSTAmount * accAmount) }}</p>
+                        </template>
+				    </div>
 					<div class="pivot_row pivot_heading" style="background-color: #41cde0">
 						<template v-if="loaded">
 							<p>Take Home w/ GST</p>
-							<p>${{ numberWithCommas(pivotDict['months']['grandTotal'] * 1.15 - calculateTax(pivotDict['months']['grandTotal']) * 1.15) }}</p>
+							<p>${{ numberWithCommas(pivotDict['months']['grandTotal'] * 1.15 - calculateTax(pivotDict['months']['grandTotal'] * GSTAmount) - pivotDict['months']['grandTotal'] * GSTAmount * accAmount) }}</p>
 						</template>
 					</div>
 				</template>
+                <p style="font-size: 0.6rem">Results have a margin of error at 1.5%</p>
 			</div>
 		</div>		
 		<TransactionForms :transform="current_request_form" :hasReceipt="receiptStatus" @cancelled="cancelForm" />
@@ -286,6 +295,8 @@ export default {
             receiptID: '',
             receiptStatus: false,
             loaded: false,
+            accAmount: 0.015,
+            GSTAmount: 1.15,
             yearID: '',
             colNamesGST: ["Category", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Total w/o GST", "Total w/ GST"],
             colNames: ["Category", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Total"]
@@ -301,20 +312,20 @@ export default {
 		}else{
             yearID = `${thisYear} - ${thisYear + 1}`;
 		}
-		if(Object.keys(userDict['records']).length == 4){
-            userDict['records'][`${thisYear - 1} - ${thisYear}`] = {'transactions': {}, 'assets': {}};
-			userDict['records'][`${thisYear} - ${thisYear + 1}`] = {'transactions': {}, 'assets': {}};
+		if(Object.keys(userDict['records']['years']).length == 0){
+            userDict['records']['years'][`${thisYear - 1} - ${thisYear}`] = {'transactions': {}, 'assets': {}};
+			userDict['records']['years'][`${thisYear} - ${thisYear + 1}`] = {'transactions': {}, 'assets': {}};
 		}
-		if(!Object.keys(userDict['records']).includes(yearID)){
-            userDict['records'][`${thisYear} - ${thisYear + 1}`] = {'transactions': {}, 'assets': {}};
+		if(!Object.keys(userDict['records']['years']).includes(yearID)){
+            userDict['records']['years'][`${thisYear} - ${thisYear + 1}`] = {'transactions': {}, 'assets': {}};
 		}
-		this.recordDict = userDict['records'][yearID];
+		this.recordDict = userDict['records']['years'][yearID];
 		this.yearID = yearID;
-		setTimeout(() => {
+		this.$nextTick(() => {
             $(`#year_selection`).val(yearID);
 			$('#show_gst_checkbox').prop('checked', userDict['showGST']);
 			this.calculatePivotTable()
-		}, 1)
+		})
 		
 	},
     setup() {
@@ -329,15 +340,15 @@ export default {
 		}else{
             yearID = `${thisYear} - ${thisYear + 1}`;
 		}
-		if(Object.keys(userDict['records']).length == 4){
-            userDict['records'][`${thisYear - 1} - ${thisYear}`] = {'transactions': {}, 'assets': {}};
-			userDict['records'][`${thisYear} - ${thisYear + 1}`] = {'transactions': {}, 'assets': {}};
+		if(Object.keys(userDict['records']['years']).length == 0){
+            userDict['records']['years'][`${thisYear - 1} - ${thisYear}`] = {'transactions': {}, 'assets': {}};
+			userDict['records']['years'][`${thisYear} - ${thisYear + 1}`] = {'transactions': {}, 'assets': {}};
 		}
-		if(!Object.keys(userDict['records']).includes(yearID)){
-            userDict['records'][`${thisYear} - ${thisYear + 1}`] = {'transactions': {}, 'assets': {}};
+		if(!Object.keys(userDict['records']['years']).includes(yearID)){
+            userDict['records']['years'][`${thisYear} - ${thisYear + 1}`] = {'transactions': {}, 'assets': {}};
 		}
         rows = reactive([
-            Object.values(userDict['records'][yearID]['transactions'])
+            Object.values(userDict['records']['years'][yearID]['transactions'])
         ]); 
         return {
             visibleColumns: ref(userDict['records']['headingStates']),
@@ -441,7 +452,7 @@ export default {
 			this.loaded = true;
 		},
 		onchange(){
-			this.recordDict = userDict['records'][$(`#year_selection option:selected`).attr('data')];
+			this.recordDict = userDict['records']['years'][$(`#year_selection option:selected`).attr('data')];
 			this.calculatePivotTable();
             this.rows = Object.values(this.recordDict['transactions'])
 		},

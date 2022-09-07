@@ -314,8 +314,8 @@ export default {
 			}
 
 			const transID = generateID(userDict);
-			if(!Object.keys(userDict['records']).includes(yearID)){
-				userDict['records'][yearID] = {'transactions': {}, 'assets': {}};
+			if(!Object.keys(userDict['records']['years']).includes(yearID)){
+				userDict['records']['years'][yearID] = {'transactions': {}, 'assets': {}};
 			}
 
             let fileName = '';
@@ -326,13 +326,13 @@ export default {
                 fs.copyFile(ref.filePath, settingsDict['roaming'] + `DashBooks/Receipts/${fileName}`)
             }
 
-			userDict['records'][yearID]['transactions'][transID] = {'month': monthNames[month], 'date': date, 'account': account, 'payee': payee, 'type': type, 'item': item, 'category': category, 'amount': amount, 'receiptID': fileName, 'id': transID}
+			userDict['records']['years'][yearID]['transactions'][transID] = {'month': monthNames[month], 'date': date, 'account': account, 'payee': payee, 'type': type, 'item': item, 'category': category, 'amount': amount, 'receiptID': fileName, 'id': transID}
             this.fileUploaded = false;
 			this.$emit('cancelled', '');
 		},
 		editTransaction(){
 			const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-			this.recordDict = userDict['records'][$('#edit_transID').attr('transyear')];
+			this.recordDict = userDict['records']['years'][$('#edit_transID').attr('transyear')];
 			const ID = $('#edit_transID').attr('transid');
             let date = ($('#edit_trans_date').val()).split("-").reverse().join("/");
 
@@ -369,7 +369,7 @@ export default {
             }
 
 			delete this.recordDict['transactions'][ID]
-			userDict['records'][yearID]['transactions'][ID] = {'month': monthNames[month], 'date': date, 'account': account, 'payee': payee, 'type': type, 'item': item, 'category': category, 'amount': amount, 'id': ID, 'receiptID': fileName}
+			userDict['records']['years'][yearID]['transactions'][ID] = {'month': monthNames[month], 'date': date, 'account': account, 'payee': payee, 'type': type, 'item': item, 'category': category, 'amount': amount, 'id': ID, 'receiptID': fileName}
 			this.$emit('cancelled', '');
             this.fileUploaded = false;
 		},
@@ -380,7 +380,7 @@ export default {
             let ref = this;
             confirm(`Are you sure you want to delete this transaction? Note: This won't delete the receipt.`).then(function(outcome) {
                 if(outcome){
-                    delete userDict['records'][YEAR]['transactions'][ID];
+                    delete userDict['records']['years'][YEAR]['transactions'][ID];
                 }
                 ref.$emit('cancelled', '');
             });
@@ -444,10 +444,10 @@ export default {
 			}
 
 			const transID = generateID(userDict);
-			if(!Object.keys(userDict['records']).includes(yearID)){
-				userDict['records'][yearID] = {'transactions': {}, 'assets': {}};
+			if(!Object.keys(userDict['records']['years']).includes(yearID)){
+				userDict['records']['years'][yearID] = {'transactions': {}, 'assets': {}};
 			}
-			userDict['records'][yearID]['transactions'][transID] = {'month': monthNames[month], 'date': date, 'account': account, 'type': type, 'item': item, 'category': category, 'amount': amount, 'receiptID': '', 'id': transID}
+			userDict['records']['years'][yearID]['transactions'][transID] = {'month': monthNames[month], 'date': date, 'account': account, 'type': type, 'item': item, 'category': category, 'amount': amount, 'receiptID': '', 'id': transID}
 
 			this.$emit('cancelled', '');
         },
@@ -470,8 +470,8 @@ export default {
 				yearID = `${thisYear} - ${thisYear + 1}`;
 			}
 
-			if(!Object.keys(userDict['records']).includes(yearID)){
-				userDict['records'][yearID] = {'transactions': {}, 'assets': {}};
+			if(!Object.keys(userDict['records']['years']).includes(yearID)){
+				userDict['records']['years'][yearID] = {'transactions': {}, 'assets': {}};
 			}
 
 			let unitCost = parseFloat($(`#create_asset_unit_cost`).val());
@@ -482,7 +482,7 @@ export default {
             isNaN(total) ? total = 0 : '';
 
 			const assetID = generateID(userDict);
-			userDict['records'][yearID]['assets'][assetID] = {'item': item, 'vendor': vendor, 'date': date, 'unitCost': unitCost, 'units': units, 'total': total}
+			userDict['records']['years'][yearID]['assets'][assetID] = {'item': item, 'vendor': vendor, 'date': date, 'unitCost': unitCost, 'units': units, 'total': total}
 			this.$emit('cancelled', '');
 		},
         editAsset(){
@@ -502,8 +502,8 @@ export default {
                 yearID = `${thisYear} - ${thisYear + 1}`;
 			}
 
-			if(!Object.keys(userDict['records']).includes(yearID)){
-                userDict['records'][yearID] = {'transactions': {}, 'assets': {}};
+			if(!Object.keys(userDict['records']['years']).includes(yearID)){
+                userDict['records']['years'][yearID] = {'transactions': {}, 'assets': {}};
 			}
 
             let item = $('#edit_asset_item').val();
@@ -513,7 +513,7 @@ export default {
 			let total = parseInt($(`#edit_asset_total`).val());
             const assetID = $('#edit_assetID').attr('assetid');
 
-            userDict['records'][yearID]['assets'][assetID] = {'item': item, 'vendor': vendor, 'date': date, 'unitCost': unitCost, 'units': units, 'total': total}
+            userDict['records']['years'][yearID]['assets'][assetID] = {'item': item, 'vendor': vendor, 'date': date, 'unitCost': unitCost, 'units': units, 'total': total}
 			this.$emit('cancelled', '');
 		},
 		deleteAsset(){
@@ -522,7 +522,7 @@ export default {
             let ref = this;
             confirm(`Are you sure you want to delete this Asset?`).then(function(outcome) {
                 if(outcome){
-                    delete userDict['records'][YEAR]['assets'][ID];
+                    delete userDict['records']['years'][YEAR]['assets'][ID];
                 }
                 ref.$emit('cancelled', '');
             });

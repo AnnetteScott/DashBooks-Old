@@ -105,14 +105,10 @@ export default {
                         parseInt(updateData.tag_name.split('v')[1].split('.')[1]), 
                         parseInt(updateData.tag_name.split('v')[1].split('.')[2])
                     ];
-                    console.log(current_version)
-                    console.log(latest_version)
                     if(latest_version[0] > current_version[0] || latest_version[1] > current_version[1] || latest_version[2] > current_version[2] && latest_version[1] >= current_version[1]){
                         ref.updateVar();
                         ref.updateVersion = updateData.tag_name
                     }
-                    console.log(latest_version[0] > current_version[0] || latest_version[1] > current_version[1] || latest_version[2] > current_version[2] && latest_version[1] >= current_version[1])
-
                 },
                 error: function (xhr){
                     console.log("Error " + xhr.status + ", could not check for updates.");
