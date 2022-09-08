@@ -77,7 +77,6 @@ try {
     if(saveFileFound){//read from custom save file
         let u8arr = await fs.readBinaryFile(settingsObj['saveFilePath']);
         let zipFile = await JSZip.loadAsync(u8arr);
-        console.log(zipFile)
         let u8data = zipFile.files['userData.ssdb']._data.compressedContent;
         let string = new TextDecoder().decode(u8data);
         userDictRead = JSON.parse(string);
@@ -298,33 +297,6 @@ userDictRead = saveChecker(userDictRead);
 
 export const userDict = reactive({...userDictRead})
 export const settingsDict = reactive({...settingsObj})
-
-//Save on exit
-import { appWindow } from '@tauri-apps/api/window'
-appWindow.listen('tauri://close-requested', ({ event, payload }) => {                    
-    //Save Settings File
-    fs.writeFile({path: settingsDict['roaming'] + "DashBooks/settings.ssdb", contents: JSON.stringify(settingsDict)});
-    fs.writeFile({path: settingsDict['roaming'] + "DashBooks/userData.ssdb", contents: JSON.stringify(userDict)});
-    if(`${settingsDict['roaming']}DashBooks/` != settingsDict['saveFilePath']){//User Has custom save location
-        let uint8array = new TextEncoder("utf-8").encode(JSON.stringify(userDict));
-        let zip = new JSZip();
-        zip.file("userData.ssdb", uint8array)
-        const receipt = zip.folder("Receipts")
-        fs.readDir(`${settingsDict['roaming']}DashBooks/Receipts`).then(function(receiptFiles) {
-            for(const[index, fileObj] of Object.entries(receiptFiles)){
-                fs.readBinaryFile(fileObj['path']).then(function(imageArr) {
-                    receipt.file(fileObj['name'], imageArr, {base64: false})
-                })
-            }
-            zip.generateAsync({type:"uint8array"}).then(function(cont) {
-                fs.writeBinaryFile({path: `${settingsDict['saveFilePath']}`, contents: cont})
-                appWindow.close();
-            });
-        });
-    }else{
-        appWindow.close();
-    }
-})
 
 let myApp = createApp(App)
 myApp.use(Quasar, quasarUserOptions).use(router).mount('#app')

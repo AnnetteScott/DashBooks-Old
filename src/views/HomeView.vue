@@ -209,7 +209,6 @@ export default {
             this.sortAmount();
 		},
         loadPage(){
-            console.log("loadPage Ran")
             let date = new Date();
             let month = date.getMonth();
             let thisYear = date.getFullYear();

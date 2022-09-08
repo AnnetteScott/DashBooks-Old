@@ -246,6 +246,7 @@ export default {
         },
         saveSalary(){
             userDict['tools']['salaryAmount'] =  parseFloat($('#salary_input').val());
+            this.onchange();
         },
         getMondays(yearID){
             let years = yearID.split(' - ');
@@ -286,7 +287,44 @@ export default {
             return `${String(newDate.getDate()).padStart(2, '0')}/${String(newDate.getMonth() + 1).padStart(2, '0')}/${newDate.getFullYear()}`
         },
         onchange(){
+            let yearID = $(`#salary_year_selection option:selected`).attr('data');
+            let date = new Date();
+            let thisYear = date.getFullYear();
+            let month = date.getMonth();
+            let yearIDToday;
+            if(month < 3){ //April is 3rd month
+                yearIDToday = `${thisYear - 1} - ${thisYear}`;
+            }else{
+                yearIDToday = `${thisYear} - ${thisYear + 1}`;
+            }
+            if(yearID != yearIDToday){
+                this.showSalary("00/00/0000", yearID)
+            }else{
+                let currentDate = this.getMonadyOfWeek(`${String(date.getDate()).padStart(2, '0')}/${String(month + 1).padStart(2, '0')}/${thisYear}`);
+                this.showSalary(currentDate, yearID)
+            }
 
+        },
+        showSalary(currentDate, yearID){
+            this.salaryProjected = {};
+            this.salaryProjectedTotal = 0
+            this.salaryCurrent = {};
+            this.salaryCurrentTotal = 0;
+            for(const element of this.getMondays(yearID)){
+                this.salaryProjected[element] = userDict['tools']['salaryAmount'];
+                this.salaryProjectedTotal += userDict['tools']['salaryAmount']
+                this.salaryCurrent[element] = 0;
+                if(element == currentDate){
+                    break;
+                }
+            }
+            for(const[transID, transDict] of Object.entries(userDict['records']['years'][yearID]['transactions'])){
+                if(transDict['category'] == "Salary"){
+                    let date = this.getMonadyOfWeek(transDict['date'])
+                    this.salaryCurrent[date] = parseInt(transDict['amount']) * -1;
+                    this.salaryCurrentTotal += parseInt(transDict['amount']) * -1
+                }
+            }
         }
     },
     watch:{
@@ -309,26 +347,7 @@ export default {
                     userDict['records']['years'][`${thisYear} - ${thisYear + 1}`] = {'transactions': {}, 'assets': {}};
                 }
                 let currentDate = this.getMonadyOfWeek(`${String(date.getDate()).padStart(2, '0')}/${String(month + 1).padStart(2, '0')}/${thisYear}`);
-                this.salaryProjected = {};
-                this.salaryProjectedTotal = 0
-                this.salaryCurrent = {};
-                this.salaryCurrentTotal = 0;
-                
-                for(const element of this.getMondays(yearID)){
-                    this.salaryProjected[element] = userDict['tools']['salaryAmount'];
-                    this.salaryProjectedTotal += userDict['tools']['salaryAmount']
-                    this.salaryCurrent[element] = 0;
-                    if(element == currentDate){
-                        break;
-                    }
-                }
-                for(const[transID, transDict] of Object.entries(userDict['records']['years'][yearID]['transactions'])){
-                    if(transDict['category'] == "Salary"){
-                        date = this.getMonadyOfWeek(transDict['date'])
-                        this.salaryCurrent[date] = parseInt(transDict['amount']) * -1;
-                        this.salaryCurrentTotal += parseInt(transDict['amount']) * -1
-                    }
-                }
+                this.showSalary(currentDate, yearID)
                 this.$nextTick(() => {
                     $('#salary_input').val(userDict['tools']['salaryAmount'])
                     $(`#salary_year_selection`).val(yearID);

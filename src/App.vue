@@ -55,7 +55,7 @@ import JSZip from 'jszip';
 import { settingsDict, userDict, saveChecker } from './main.js';
 import SavingPopup from '@/components/SavingPopup.vue';
 import $ from 'jquery'
-
+import { appWindow } from '@tauri-apps/api/window'
 const dialog = window.__TAURI__.dialog;
 const fs = window.__TAURI__.fs;
 const path = window.__TAURI__.path;
@@ -83,6 +83,9 @@ export default {
         console.log(settingsDict)
         settingsDict['autoSaveTime'] ? delete settingsDict['autoSaveTime'] : '';
         this.checkForUpdates();
+        appWindow.listen('tauri://close-requested', ({ event, payload }) => {                    
+            this.saveUserDict("closeProgram");
+        })
     },
     methods: {
         checkForUpdates(){
@@ -147,7 +150,7 @@ export default {
                 }
             }
         },
-        async saveUserDict(){
+        async saveUserDict(option){
             let ref = this;
             this.saving_in_progress = true;
             await fs.writeFile({path: settingsDict['roaming'] + "DashBooks/userData.ssdb", contents: JSON.stringify(userDict)})
@@ -171,11 +174,13 @@ export default {
                 zip.generateAsync({type:"uint8array"}).then(function(cont) {
                     fs.writeBinaryFile({path: `${settingsDict['saveFilePath']}`, contents: cont}).then(function(){
                         ref.saving_in_progress = false;
+                        if(option == "closeProgram"){
+                            appWindow.close();
+                        }
                     })
                 });
             }
             ref.saving_in_progress = false;
-            console.log("saved!")
         },
         async manualSave(){
             await fs.writeFile({path: settingsDict['roaming'] + "DashBooks/userData.ssdb", contents: JSON.stringify(userDict)})
@@ -214,7 +219,8 @@ export default {
                     ref.saveUserDict();
                 }
             })
-        }
+        },
+        
     }
 }
 </script>
