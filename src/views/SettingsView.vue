@@ -1,17 +1,17 @@
 <template>
     <div class="pageHome">
-        <div id="settings_nav">
-            <q-toolbar class="bg-secondary text-white shadow-2 rounded-borders glossy">
-            <q-tabs v-model="tab" shrink style="width:100%">
-                <q-tab name="Projects" label="Projects" @click="settingsPage = `projects`"/>
-                <q-tab name="Invoicing" label="Invoicing" @click="settingsPage = `invoicing`"/>
-                <q-tab name="Records" label="Records" @click="settingsPage = `records`"/>
-                <q-tab name="Archive" label="Archive" @click="settingsPage = `archive`"/>
-            </q-tabs>
-            </q-toolbar>
+        <div id="selection_container">
+            <div>PROJECT:</div>
+            <div v-for="colour, setting in projectList" :key="setting" class="setting_button" :style="`background-color: #${colour}`" @click="settingsPage = setting">{{setting}}</div>
+            <div>ARCHIVE:</div>
+            <div v-for="colour, setting in archiveList" :key="setting" class="setting_button" :style="`background-color: #${colour}`" @click="settingsPage = setting">{{setting}}</div>
+            <div>INVOICING:</div>
+            <div v-for="colour, setting in invoiceList" :key="setting" class="setting_button" :style="`background-color: #${colour}`" @click="settingsPage = setting">{{setting}}</div>
+            <div>RECORD:</div>
+            <div v-for="colour, setting in recordList" :key="setting" class="setting_button" :style="`background-color: #${colour}`" @click="settingsPage = setting">{{setting}}</div>
         </div>
         <div id="settings_section">
-            <div id="projects_container" v-if="settingsPage == `projects`">
+            <div id="projects_container" v-if="settingsPage == `Projects`">
                 <div class="settings_container">
                     <div class="settings_bottom_control">
                     <p>You Have {{ Object.keys(userObj['projects']).length == 1 ? Object.keys(userObj['projects']).length + ' Project' : Object.keys(userObj['projects']).length + ' Projects' }}</p>
@@ -29,6 +29,25 @@
                         </div>
                     </div>
                 </div>
+            </div>
+            <div id="archive_container" v-if="settingsPage == `Archived Projects`">
+                <div class="settings_container">
+                    <div class="settings_bottom_control">
+                    <p>You Have {{ Object.keys(userObj['archive']['projects']).length == 1 ? Object.keys(userObj['archive']['projects']).length + ' Archived Project' : Object.keys(userObj['archive']['projects']).length + ' Archived Projects' }}</p>
+                    </div>
+                    <div class="item_container">
+                        <div class="items" style="width: 100%">
+                            <div v-for="(archiveDict, projectID) in userObj['archive']['projects']" :key="archiveDict" class="list_item" :data="projectID" @click="editArchive($event, `editArchive`)" :style="{background: `radial-gradient(circle, ${archiveDict['colour'][1]} 0%, ${archiveDict['colour'][0]} 100%)`, width: '95%', color: `${pickTextColorBasedOnBgColor(archiveDict['colour'][1])}`}">
+                                <div style="pointer-events: none;">
+                                    <p style="pointer-events: none;">{{ archiveDict.name }}</p>
+                                    <p style="font-size: small; pointer-events: none;">Duration: {{ archiveDict.duration }} Weeks</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="colours_container" v-if="settingsPage == `Colours`">
                 <div class="settings_container">
                     <div class="settings_bottom_control">
                         <p>You Have {{ (Object.keys(userObj['colours']).length - 1) == 1 ? (Object.keys(userObj['colours']).length - 1) + ' Colour' : (Object.keys(userObj['colours']).length - 1) + ' Colours' }}</p>
@@ -49,28 +68,8 @@
                         </div>
                     </div>
                 </div>
-               
-                <ProjectForms :projectForm="projectRequest" @cancelled="projectRequest=``"/>
             </div>
-            <div id="archive_container" v-if="settingsPage == `archive`">
-                <div class="settings_container">
-                    <div class="settings_bottom_control">
-                    <p>You Have {{ Object.keys(userObj['archive']['projects']).length == 1 ? Object.keys(userObj['archive']['projects']).length + ' Archived Project' : Object.keys(userObj['archive']['projects']).length + ' Archived Projects' }}</p>
-                    </div>
-                    <div class="item_container">
-                        <div class="items" style="width: 100%">
-                            <div v-for="(archiveDict, projectID) in userObj['archive']['projects']" :key="archiveDict" class="list_item" :data="projectID" @click="editArchive($event, `editArchive`)" :style="{background: `radial-gradient(circle, ${archiveDict['colour'][1]} 0%, ${archiveDict['colour'][0]} 100%)`, width: '95%', color: `${pickTextColorBasedOnBgColor(archiveDict['colour'][1])}`}">
-                                <div style="pointer-events: none;">
-                                    <p style="pointer-events: none;">{{ archiveDict.name }}</p>
-                                    <p style="font-size: small; pointer-events: none;">Duration: {{ archiveDict.duration }} Weeks</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <ArchiveForms :archiveForm="archiveRequest" @cancelled="archiveRequest=``"/>
-            </div>
-            <div id="invoicing_container" v-if="settingsPage == `invoicing`">
+            <div id="user_container" v-if="settingsPage == `Users`">
                 <div class="settings_container">
                     <div class="settings_bottom_control">
                         <p>You Have {{ Object.keys(userObj['users']).length == 1 ? Object.keys(userObj['users']).length + ' User' : Object.keys(userObj['users']).length + ' Users' }}</p>
@@ -82,6 +81,8 @@
                         </div>
                     </div>
                 </div>
+            </div>
+            <div id="client_container" v-if="settingsPage == `Clients`">
                 <div class="settings_container">
                     <div class="settings_bottom_control">
                         <p>You Have {{ Object.keys(userObj['clients']).length == 1 ? Object.keys(userObj['clients']).length + ' Client' : Object.keys(userObj['clients']).length + ' Clients' }}</p>
@@ -93,9 +94,8 @@
                         </div>
                     </div>
                 </div>
-                <InvoiceForms :invoiceForm="invoiceRequest" @cancelled="invoiceRequest=``"/>
             </div>
-            <div id="records_container" v-if="settingsPage == `records`">
+            <div id="category_container" v-if="settingsPage == `Categories`">
                 <div class="settings_container">
                     <div class="settings_bottom_control">
                         <p>You Have {{(Object.keys(userObj['records']['categories']).length) == 1 ? (Object.keys(userObj['records']['categories']).length) + ' Category' : (Object.keys(userObj['records']['categories']).length) + ' Categories' }}</p>
@@ -111,6 +111,8 @@
                         </div>
                     </div>
                 </div>
+            </div>
+            <div id="payee_container" v-if="settingsPage == `Payees`">
                 <div class="settings_container">
                     <div class="settings_bottom_control">
                         <p>You Have {{ ((userObj['records']['payee']).length) == 1 ? ((userObj['records']['payee']).length) + ' Payee' : ((userObj['records']['payee']).length) + ' Payees' }}</p>
@@ -126,6 +128,8 @@
                         </div>
                     </div>
                 </div>
+            </div>
+            <div id="accounts_container" v-if="settingsPage == `Accounts`">
                 <div class="settings_container">
                     <div class="settings_bottom_control">
                         <p>You Have {{ ((userObj['records']['accounts']).length) == 1 ? ((userObj['records']['accounts']).length) + ' Account' : ((userObj['records']['accounts']).length) + ' Accounts' }}</p>
@@ -141,10 +145,13 @@
                         </div>
                     </div>
                 </div>
-                <RecordForms :recordForm="recordRequest" @cancelled="recordRequest=``"/>
             </div>
         </div>
     </div>
+    <ArchiveForms :archiveForm="archiveRequest" @cancelled="archiveRequest=``"/>
+    <ProjectForms :projectForm="projectRequest" @cancelled="projectRequest=``"/>
+    <InvoiceForms :invoiceForm="invoiceRequest" @cancelled="invoiceRequest=``"/>
+    <RecordForms :recordForm="recordRequest" @cancelled="recordRequest=``"/>
 </template>
 
 <script>
@@ -171,7 +178,11 @@ export default {
             invoiceRequest: '',
             recordRequest: '',
             archiveRequest: '',
-            userObj: userDict
+            userObj: userDict,
+            projectList: {"Projects": "00D3DB", "Colours": "00D3DB"},
+            archiveList: {"Archived Projects": "14DB00"},
+            invoiceList: {"Users": "EEA700", "Clients": "EEA700"},
+            recordList: {"Categories": "D200E2", "Accounts": "D200E2","Payees": "D200E2"}
         }
     },
     mounted(){
@@ -264,21 +275,35 @@ export default {
             });
         },
     },
-    setup () {
-        return {
-            tab: ref('')
-        }  
+    watch:{
+        settingsPage(newValue){
+            console.log(newValue)
+        }
     }
 }
 </script>
 <style scoped lang="scss">
-.pageHome{
+#selection_container{
+    margin-top: 50px;
+    margin-left: 10px;
+    width: 250px;
+    gap: 18px;
+    display: flex;
     flex-direction: column;
-    align-items: center;
+    overflow-y: auto;
 }
-#settings_nav{
-    width: 100%;
+
+.setting_button{
+    border: 1px solid black;
+    cursor: pointer;
+    padding: 8px 0px;
+    border-radius: 10px;
+    user-select: none;
 }
+.setting_button:hover {
+	box-shadow: 0 14px 28px rgba(0, 0, 0, 0.082), 0 10px 10px rgba(0, 0, 0, 0.11);
+}
+
 #settings_section{
     width: 100%;
     height: 100%;
@@ -298,7 +323,6 @@ export default {
     width: 100%;
     height: 100%;
     gap: 7px;
-    border: 1px solid $accent;
 }
 .settings_bottom_control{
     font-family: 'Lato';

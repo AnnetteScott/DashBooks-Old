@@ -1,5 +1,5 @@
 <template>
-    <h4>TimeSheets:</h4>
+    <h4>Projects:</h4>
     <p>You have logged {{ userObj['timeLogged'][today]['hours'].toFixed(2) }}H and earnt ${{ numberWithCommas(userObj['timeLogged'][today]['pay']) }} today</p>
     <div class="pageHome">
         <div class="item_container">

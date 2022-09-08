@@ -1,91 +1,88 @@
 <template>
-    <nav>
-        <div>
-            <q-toolbar class="bg-primary text-white shadow-2 glossy">
-                <q-btn-dropdown stretch flat label="More">
-                    <q-list>
-                        <q-item clickable v-close-popup tabindex="0">
-                            <q-item-section>
-                            <q-item-label @click="loadUser">Load</q-item-label>
-                            </q-item-section>
-                            <q-item-section side>
-                            </q-item-section>
-                        </q-item>
-                        <q-item clickable v-close-popup tabindex="0">
-                            <q-item-section>
-                            <q-item-label @click="manualSave">Manual Save</q-item-label>
-                            </q-item-section>
-                            <q-item-section side>
-                            </q-item-section>
-                        </q-item>
-                        <q-item clickable v-close-popup tabindex="0">
-                            <q-item-section>
-                                <q-item-label @click="changeSaveLocation">Change Save Location</q-item-label>
-                            </q-item-section>
-                        </q-item>
-                    </q-list>
-                </q-btn-dropdown>
-                <q-btn flat label="Save" @click="saveUserDict"/>
-                <q-space />
-                <template v-if="update">
-                    <div id="update">
-                        There is an update available. Go to&nbsp;<a href="https://github.com/NotNatural21/DashBooks/releases/latest/" target="_blank">DashBooks latest release</a> to get {{updateVersion}}.
-                    </div>
-                </template>
-                <q-space />
-                <q-tabs v-model="tab" shrink>
-                    <q-route-tab name="DashBoard" label="DashBoard" to="/"/>
-                    <q-route-tab name="Settings" label="Settings" to="/settings"/>
-                    <q-route-tab name="Projects" label="TimeSheets" to="/projects"/>
-                    <q-route-tab name="Tools" label="Tools" to="/tools"/>
-                    <q-route-tab name="Invoicing" label="Invoicing" to="/invoice"/>
-                    <q-route-tab name="Records" label="Records" to="/records"/>
-                    <q-route-tab name="Help" label="Help" to="/help"/>
-                </q-tabs>
-            </q-toolbar>
+    <div id="navbar">
+        <div class="page_nav_buttons_container" style="gap: 10px; margin-right: 0px;">
+            <div class="page_nav_buttons more_options" title="Load" @click="loadUser"> <q-icon name="o_file_open" size="sm" style="pointer-events: none"/> </div>
+            <div class="page_nav_buttons more_options" title="Save" @click="saveUserDict"> <q-icon name="o_save" size="sm" style="pointer-events: none"/> </div>
+            <div class="page_nav_buttons more_options" title="Save As" @click="manualSave"> <q-icon name="o_archive" size="sm" style="pointer-events: none"/> </div>
+            <div class="page_nav_buttons more_options" title="Change Save Location" @click="changeSaveLocation"> <q-icon name="o_drive_file_move" size="sm" style="pointer-events: none"/> </div>
         </div>
-    </nav>
+        <template v-if="update">
+            <div id="update">
+                <template v-if="showNavBarText">
+                    There is an update available. Go to&nbsp;<a href="https://github.com/NotNatural21/DashBooks/releases/latest/" target="_blank">DashBooks latest release</a> to get {{updateVersion}}.
+                </template>
+                <template v-else>
+                    <a href="https://github.com/NotNatural21/DashBooks/releases/latest/" target="_blank">Update</a>
+                </template>
+                
+            </div>
+        </template>
+        <div class="page_nav_buttons_container">
+            <RouterLink v-for="(dict, name) in navPages" :key="name" :to="dict.route" style="text-decoration: none;">
+                <div class="page_nav_buttons" :title="name">
+                    <q-icon :name="dict.icon" style="height: 1.2em;"/>
+                    <template v-if="showNavBarText && name != 'Help' && name != 'Settings'">
+                        {{name}}
+                    </template>
+                </div>
+            </RouterLink>
+        </div>
+    </div>
     <SavingPopup :savingStatus="saving_in_progress" />
+    <SavedPopup :savingStatus="savedUser" />
     <router-view />
 </template>
 
 <script>
-import { ref } from 'vue'
 import JSZip from 'jszip';
 import { settingsDict, userDict, saveChecker } from './main.js';
 import SavingPopup from '@/components/SavingPopup.vue';
+import SavedPopup from '@/components/SavedPopup.vue';
 import $ from 'jquery'
 import { appWindow } from '@tauri-apps/api/window'
 const dialog = window.__TAURI__.dialog;
 const fs = window.__TAURI__.fs;
-const path = window.__TAURI__.path;
 export default {
     name: 'App',
     components: {
-        SavingPopup
+        SavingPopup,
+        SavedPopup
     },
     data() {
         return {
 			saving_in_progress: false,
+			savedUser: false,
 			application_Form: '',
-            update: false,
-            updateVersion: '',
-            userObj: userDict
+            update: true,
+            showNavBarText: true,
+            updateVersion: 'v1.2.3',
+            userObj: userDict,
+            windowWidth: window.innerWidth,
+            navPages: {
+                "DashBoard": {"icon": "o_dashboard", "route": "/"}, 
+                "Projects": {"icon": "o_schedule", "route": "/projects"}, 
+                "Tools": {"icon": "o_handyman", "route": "/tools"}, 
+                "Invoicing": {"icon": "o_receipt", "route": "/invoice"}, 
+                "Records": {"icon": "o_inventory_2", "route": "/records"}, 
+                "Settings": {"icon": "o_settings", "route": "/settings"}, 
+                "Help": {"icon": "o_help_outline", "route": "/help"}
+            }
 		}
-    },
-    setup () {
-        return {
-            tab: ref('')
-        }
     },
     mounted(){
         console.log(userDict)
         console.log(settingsDict)
         settingsDict['autoSaveTime'] ? delete settingsDict['autoSaveTime'] : '';
-        this.checkForUpdates();
+        //this.checkForUpdates();
         appWindow.listen('tauri://close-requested', ({ event, payload }) => {                    
             this.saveUserDict("closeProgram");
         })
+        this.$nextTick(() => {
+            window.addEventListener('resize', this.onResize);
+        })
+        if(this.windowWidth <= 1750){
+            this.showNavBarText = false;
+        }
     },
     methods: {
         checkForUpdates(){
@@ -174,13 +171,25 @@ export default {
                 zip.generateAsync({type:"uint8array"}).then(function(cont) {
                     fs.writeBinaryFile({path: `${settingsDict['saveFilePath']}`, contents: cont}).then(function(){
                         ref.saving_in_progress = false;
+                        ref.savedUser = true;
+                        setTimeout(() =>{
+                            ref.savedUser = false;
+                        }, 3000)
                         if(option == "closeProgram"){
                             appWindow.close();
                         }
                     })
                 });
+            }else {
+                ref.saving_in_progress = false;
+                ref.savedUser = true;
+                setTimeout(() =>{
+                    ref.savedUser = false;
+                }, 3000)
+                if(option == "closeProgram"){
+                    appWindow.close();
+                }
             }
-            ref.saving_in_progress = false;
         },
         async manualSave(){
             await fs.writeFile({path: settingsDict['roaming'] + "DashBooks/userData.ssdb", contents: JSON.stringify(userDict)})
@@ -220,6 +229,15 @@ export default {
                 }
             })
         },
+        onResize(){
+            this.windowWidth = window.innerWidth;
+            if(this.windowWidth <= 1750){
+                this.showNavBarText = false;
+            }
+            else {
+                this.showNavBarText = true;
+            }
+        }
         
     }
 }
@@ -244,7 +262,7 @@ export default {
     }
 }
 
-nav {
+#navbar {
     position: fixed;
 	z-index: 999;
 	top: 0px;
@@ -258,8 +276,37 @@ nav {
 	font-family: 'Lato';
 	font-size: 0.9em;
     color: white;
-	background-color: white;
+	background-color: #027BE3;
 }
+
+.page_nav_buttons_container{
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    height: var(--navbar_height);
+    gap: 30px;
+    margin-right: 25px;
+}
+
+.page_nav_buttons{
+    cursor: pointer;
+    font-size: 1.2rem;
+    user-select: none;
+    padding: 5px 10px;
+    border: 1px solid #0002;
+    border-radius: 8px;
+    color: white;
+}
+
+.page_nav_buttons:hover{
+    border: 1px solid #000a;
+}
+
+.more_options{
+    font-size: 0.9rem;
+    padding: 5px;
+}
+
 
 .pageHome{
 	width: 100%;
