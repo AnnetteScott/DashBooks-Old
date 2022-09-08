@@ -362,7 +362,7 @@ export default {
     height: 92%;
     width: 250px;
     margin-left: 10px;
-    margin-top: 10px;
+    margin-top: 50px;
     gap: 18px;
     display: flex;
     flex-direction: column;
