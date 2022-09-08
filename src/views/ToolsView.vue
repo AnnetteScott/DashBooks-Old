@@ -66,7 +66,7 @@
                 <p v-for="id in formatedIDList" :key="id">{{id}}</p>
                 <p v-if="idLoading">Generating ID</p>
             </div>
-            <div v-if="toolItem == 'Salary Manger'" class="tool_settings">
+            <div v-if="toolItem == 'Salary Manager'" class="tool_settings">
                 <div>
                     <label for="">Enter Salary Amount: </label>
                     <input type="number" id="salary_input">
@@ -86,7 +86,7 @@
                     </select>
                 </div>
             </div>
-            <div class="id_output" v-if="toolItem == 'Salary Manger'">
+            <div class="id_output" v-if="toolItem == 'Salary Manager'">
                 <div id="salary_container">
                     <div>
                         <p v-for="(amount, monday) in salaryCurrent" :key="monday" >{{monday}} : {{amount}}</p>
@@ -115,7 +115,7 @@ export default {
     },
     data(){
         return{
-            toolList: {'ID Generator': '34DD13', 'Formated ID Generator': '138CDD', 'Salary Manger': 'AF35FF'},
+            toolList: {'ID Generator': '34DD13', 'Formated ID Generator': '138CDD', 'Salary Manager': 'AF35FF'},
             toolItem: '',
             idList: [],
             formatedIDList: [],
@@ -329,7 +329,7 @@ export default {
     },
     watch:{
         toolItem(newValue){
-            if(newValue == "Salary Manger"){
+            if(newValue == "Salary Manager"){
                 let date = new Date();
                 let thisYear = date.getFullYear();
                 let month = date.getMonth();
