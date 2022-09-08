@@ -1,5 +1,5 @@
 # dashbooks
-
+Recommended smallest resolution is 1440px by 700px
 ## Project setup
 ```
 npm install
