@@ -8,7 +8,7 @@
         </div>
         <template v-if="update">
             <div id="update">
-                <template v-if="showNavBarText">
+                <template v-if="settingsObj['showNavBarText']">
                     There is an update available. Go to&nbsp;<a href="https://github.com/NotNatural21/DashBooks/releases/latest/" target="_blank">DashBooks latest release</a> to get {{updateVersion}}.
                 </template>
                 <template v-else>
@@ -18,10 +18,10 @@
             </div>
         </template>
         <div class="page_nav_buttons_container">
-            <RouterLink v-for="(dict, name) in navPages" :key="name" :to="dict.route" style="text-decoration: none;">
-                <div class="page_nav_buttons" :title="name">
+            <RouterLink v-for="(dict, name) in navPages" :key="name" :to="dict.route" style="text-decoration: none;" @click="currentPage = name">
+                <div class="page_nav_buttons" :title="name" :style="`${currentPage == name ? 'border: 1px solid #fffa;' : ''}`">
                     <q-icon :name="dict.icon" style="height: 1.2em;"/>
-                    <template v-if="showNavBarText && name != 'Help' && name != 'Settings'">
+                    <template v-if="settingsObj['showNavBarText'] && name != 'Help' && name != 'Settings'">
                         {{name}}
                     </template>
                 </div>
@@ -51,10 +51,11 @@ export default {
     data() {
         return {
 			saving_in_progress: false,
+            currentPage: 'DashBoard',
 			savedUser: false,
-			application_Form: '',
-            update: true,
-            showNavBarText: true,
+            update: false,
+            settingsObj: settingsDict,
+            showNavBarText: settingsDict['showNavBarText'],
             updateVersion: 'v1.2.3',
             userObj: userDict,
             windowWidth: window.innerWidth,
@@ -73,7 +74,7 @@ export default {
         console.log(userDict)
         console.log(settingsDict)
         settingsDict['autoSaveTime'] ? delete settingsDict['autoSaveTime'] : '';
-        //this.checkForUpdates();
+        this.checkForUpdates();
         appWindow.listen('tauri://close-requested', ({ event, payload }) => {                    
             this.saveUserDict("closeProgram");
         })
@@ -81,8 +82,9 @@ export default {
             window.addEventListener('resize', this.onResize);
         })
         if(this.windowWidth <= 1750){
-            this.showNavBarText = false;
+            settingsDict['showNavBarText'] = false;
         }
+        
     },
     methods: {
         checkForUpdates(){
@@ -150,6 +152,7 @@ export default {
         async saveUserDict(option){
             let ref = this;
             this.saving_in_progress = true;
+            await fs.writeFile({path: settingsDict['roaming'] + "DashBooks/settings.ssdb", contents: JSON.stringify(settingsDict)})
             await fs.writeFile({path: settingsDict['roaming'] + "DashBooks/userData.ssdb", contents: JSON.stringify(userDict)})
             if(`${settingsDict['roaming']}DashBooks/` != settingsDict['saveFilePath']){//User Has custom save location
                 let zip = new JSZip();
@@ -232,10 +235,10 @@ export default {
         onResize(){
             this.windowWidth = window.innerWidth;
             if(this.windowWidth <= 1750){
-                this.showNavBarText = false;
+                settingsDict['showNavBarText'] = false;
             }
             else {
-                this.showNavBarText = true;
+                settingsDict['showNavBarText'] = true;
             }
         }
         

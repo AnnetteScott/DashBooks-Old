@@ -9,6 +9,8 @@
             <div v-for="colour, setting in invoiceList" :key="setting" class="setting_button" :style="`background-color: #${colour}`" @click="settingsPage = setting">{{setting}}</div>
             <div>RECORD:</div>
             <div v-for="colour, setting in recordList" :key="setting" class="setting_button" :style="`background-color: #${colour}`" @click="settingsPage = setting">{{setting}}</div>
+            <div>APPLICATION:</div>
+            <div class="setting_button" :style="`background-color: #027be3`" @click="settingsPage = 'Application'">Application</div>
         </div>
         <div id="settings_section">
             <div id="projects_container" v-if="settingsPage == `Projects`">
@@ -146,6 +148,24 @@
                     </div>
                 </div>
             </div>
+            <div id="app_settings_container" v-if="settingsPage == `Application`">
+                <div class="app_settings">
+                    <div class="labels_containers">
+                        <label class="switch">
+                            <input type="checkbox" v-model="autoSortDashboard">
+                            <span class="slider round"></span>
+                        </label>
+                        <label for=""> Auto sort project tiles on DashBoard </label>
+                    </div>
+                    <div class="labels_containers">
+                        <label class="switch">
+                            <input type="checkbox" v-model="showNavBarText">
+                            <span class="slider round"></span>
+                        </label>
+                        <label for=""> Show nav bar text </label>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <ArchiveForms :archiveForm="archiveRequest" @cancelled="archiveRequest=``"/>
@@ -155,14 +175,13 @@
 </template>
 
 <script>
-import { userDict } from '../main.js'
-import { ref } from 'vue'
+import { userDict, settingsDict } from '../main.js'
 import ProjectForms from '../components/ProjectForms'
 import InvoiceForms from '../components/InvoiceForms'
 import RecordForms from '../components/RecordForms'
 import ArchiveForms from '../components/ArchiveForms'
 import $ from 'jquery'
-
+const fs = window.__TAURI__.fs;
 export default {
     name: 'SettingsView',
     components: {
@@ -173,7 +192,7 @@ export default {
     },
     data(){
         return{
-            settingsPage: '',
+            settingsPage: 'Application',
             projectRequest: '',
             invoiceRequest: '',
             recordRequest: '',
@@ -182,7 +201,9 @@ export default {
             projectList: {"Projects": "00D3DB", "Colours": "00D3DB"},
             archiveList: {"Archived Projects": "14DB00"},
             invoiceList: {"Users": "EEA700", "Clients": "EEA700"},
-            recordList: {"Categories": "D200E2", "Accounts": "D200E2","Payees": "D200E2"}
+            recordList: {"Categories": "D200E2", "Accounts": "D200E2","Payees": "D200E2"},
+            autoSortDashboard: settingsDict['autoSortDashboard'],
+            showNavBarText: settingsDict['showNavBarText']
         }
     },
     mounted(){
@@ -274,10 +295,18 @@ export default {
                 }
             });
         },
+        async saveSettings(){
+            await fs.writeFile({path: settingsDict['roaming'] + "DashBooks/settings.ssdb", contents: JSON.stringify(settingsDict)})
+        }
     },
-    watch:{
-        settingsPage(newValue){
-            console.log(newValue)
+    watch: {
+        autoSortDashboard(newValue){
+            settingsDict['autoSortDashboard'] = newValue;
+            this.saveSettings();
+        },
+        showNavBarText(newValue){
+            settingsDict['showNavBarText'] = newValue;
+            this.saveSettings();
         }
     }
 }
@@ -333,6 +362,24 @@ export default {
 	width: 95%;
 	height: 80px;
 }
+
+.app_settings{
+    padding: 40px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.labels_containers{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
 .items{
     display: flex;
     flex-direction: row;
@@ -372,5 +419,65 @@ export default {
     width: 100%;
     height: calc(100vh - var(--navbar_height) - 180px - 18px);
     overflow-y: auto;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
 }
 </style>

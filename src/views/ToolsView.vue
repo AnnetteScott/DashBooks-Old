@@ -4,6 +4,7 @@
             <div v-for="colour, tool in toolList" :key="tool" class="tool_button" :style="`background-color: #${colour}`" @click="toolItem = tool">{{ tool }}</div>
         </div>
         <div id="tool_container">
+            <!-- ID Generator -->
             <div v-if="toolItem == 'ID Generator'" class="tool_settings">
                 <div>
                     <label for="">Enter amount of charcters: </label>
@@ -23,7 +24,8 @@
                 <p v-for="id in idList" :key="id">{{id}}</p>
                 <p v-if="idLoading">Generating ID</p>
             </div>
-            
+    
+            <!-- Formated ID Generator -->
             <div v-if="toolItem == 'Formated ID Generator'" class="tool_settings">
                 <div>
                     <label for="">Enter amount of charcters: </label>
@@ -66,6 +68,8 @@
                 <p v-for="id in formatedIDList" :key="id">{{id}}</p>
                 <p v-if="idLoading">Generating ID</p>
             </div>
+
+            <!-- Salaray Manager -->
             <div v-if="toolItem == 'Salary Manager'" class="tool_settings">
                 <div>
                     <label for="">Enter Salary Amount: </label>

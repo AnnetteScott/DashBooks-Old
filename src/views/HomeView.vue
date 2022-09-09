@@ -127,7 +127,7 @@
 </template>
 
 <script>
-import { userDict } from '../main.js';
+import { settingsDict, userDict } from '../main.js';
 import $ from 'jquery';
 export default {
 	name: 'HomeView',
@@ -220,10 +220,9 @@ export default {
             for(const objKey of Object.keys(userDict['records']['years'])){
                 this.years.push(objKey)
             }
-            this.projectDict = userDict['projects']
             this.netData.income = 0;
             this.netData.expenses = 0;
-
+            settingsDict['autoSortDashboard'] ? this.sortProjects() : this.projectDict = userDict['projects']
             let expenseSum = {};
             let incomeSum = {};
             if(this.currentYear in userDict['records']['years']){
@@ -253,6 +252,32 @@ export default {
             this.incomeArray.sort((a, b) => a.amount - b.amount);
             this.expensesArray.sort((a, b) => a.amount - b.amount);
         },
+        sortProjects(){
+            let invoiceDue = [];
+            let invoiceSent = [];
+            let other = [];
+            for(const[projID, projDict] of Object.entries(userDict['projects'])){
+                for(const[weekID, weekDict] of Object.entries(projDict['weeks'])){
+                    if(!weekDict.invoiceSent && this.checkDate(projID, weekID) && parseFloat(weekDict.total) != 0){//Invoice is due to be sent
+                        invoiceDue.push(projID)
+                    }else if(!weekDict.invoiced && weekDict.invoiceSent && !invoiceDue.includes(projID)){
+                        invoiceSent.push(projID)
+                    }
+                    else if(!invoiceDue.includes(projID) && !invoiceSent.includes(projID)){
+                        other.push(projID)
+                    }
+                }
+            }
+            invoiceDue.forEach((projID) => {
+                this.projectDict[projID] = userDict['projects'][projID]
+            })
+            invoiceSent.forEach((projID) => {
+                this.projectDict[projID] = userDict['projects'][projID]
+            })
+            other.forEach((projID) => {
+                this.projectDict[projID] = userDict['projects'][projID]
+            })
+        }
 	}
 }
 </script>
