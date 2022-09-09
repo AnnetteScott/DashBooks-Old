@@ -192,7 +192,7 @@ export default {
     },
     data(){
         return{
-            settingsPage: 'Application',
+            settingsPage: '',
             projectRequest: '',
             invoiceRequest: '',
             recordRequest: '',
@@ -313,8 +313,7 @@ export default {
 </script>
 <style scoped lang="scss">
 #selection_container{
-    margin-top: 50px;
-    margin-left: 10px;
+    margin: 50px 0px 70px 10px;
     width: 250px;
     gap: 18px;
     display: flex;
