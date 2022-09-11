@@ -51,11 +51,11 @@ if(!foundDashBooks){
 //Check Dashbooks directory contains all files
 let dashbooks = await fs.readDir(dataPath + "DashBooks");
 if(dashbooks.find(x => x.name == "Receipts") == undefined){
-    fs.createDir(dataPath + "DashBooks/Receipts")
+    await fs.createDir(dataPath + "DashBooks/Receipts")
 }else if(dashbooks.find(x => x.name == "settings.ssdb") == undefined){
-    fs.writeFile({path: dataPath + "DashBooks/settings.ssdb", contents: JSON.stringify({'saveFilePath': `${dataPath + "DashBooks/"}`})})
+    await fs.writeFile({path: dataPath + "DashBooks/settings.ssdb", contents: JSON.stringify({'saveFilePath': `${dataPath + "DashBooks/"}`})})
 }else if(dashbooks.find(x => x.name == "userData.ssdb") == undefined){
-    fs.writeFile({path: dataPath + "DashBooks/userData.ssdb", contents: JSON.stringify(userDictMaster)})
+    await fs.writeFile({path: dataPath + "DashBooks/userData.ssdb", contents: JSON.stringify(userDictMaster)})
 }
 
 //Get the settings data
