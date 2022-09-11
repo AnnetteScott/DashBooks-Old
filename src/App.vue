@@ -30,6 +30,7 @@
     </div>
     <SavingPopup :savingStatus="saving_in_progress" />
     <SavedPopup :savingStatus="savedUser" />
+    <LoadingScreen :showLoadingScreen="showLoadingScreen" />
     <router-view />
 </template>
 
@@ -38,6 +39,7 @@ import JSZip from 'jszip';
 import { settingsDict, userDict, saveChecker } from './main.js';
 import SavingPopup from '@/components/SavingPopup.vue';
 import SavedPopup from '@/components/SavedPopup.vue';
+import LoadingScreen from '@/components/LoadingScreen.vue';
 import $ from 'jquery'
 import { appWindow } from '@tauri-apps/api/window'
 const dialog = window.__TAURI__.dialog;
@@ -46,11 +48,13 @@ export default {
     name: 'App',
     components: {
         SavingPopup,
-        SavedPopup
+        SavedPopup,
+        LoadingScreen
     },
     data() {
         return {
 			saving_in_progress: false,
+			showLoadingScreen: false,
             currentPage: 'DashBoard',
 			savedUser: false,
             update: false,
@@ -126,6 +130,8 @@ export default {
             if(outcome){
                 let userFilePath = await dialog.open() //TODO add filter for file type
                 if(userFilePath != null && `${userFilePath}/` != settingsDict['saveFilePath']){
+                    this.saving_in_progress = true;
+                    this.showLoadingScreen = true;
                     let u8arr = await fs.readBinaryFile(userFilePath)
                     let zipFile = await JSZip.loadAsync(u8arr);
                     let u8data = zipFile.files['userData.ssdb']._data.compressedContent;
@@ -152,6 +158,9 @@ export default {
         async saveUserDict(option){
             let ref = this;
             this.saving_in_progress = true;
+            if(option == "closeProgram"){
+                this.showLoadingScreen = true;
+            }
             await fs.writeFile({path: settingsDict['roaming'] + "DashBooks/settings.ssdb", contents: JSON.stringify(settingsDict)})
             await fs.writeFile({path: settingsDict['roaming'] + "DashBooks/userData.ssdb", contents: JSON.stringify(userDict)})
             if(`${settingsDict['roaming']}DashBooks/` != settingsDict['saveFilePath']){//User Has custom save location
@@ -174,6 +183,7 @@ export default {
                 zip.generateAsync({type:"uint8array"}).then(function(cont) {
                     fs.writeBinaryFile({path: `${settingsDict['saveFilePath']}`, contents: cont}).then(function(){
                         ref.saving_in_progress = false;
+                        ref.showLoadingScreen = false;
                         ref.savedUser = true;
                         setTimeout(() =>{
                             ref.savedUser = false;
@@ -185,6 +195,7 @@ export default {
                 });
             }else {
                 ref.saving_in_progress = false;
+                ref.showLoadingScreen = false;
                 ref.savedUser = true;
                 setTimeout(() =>{
                     ref.savedUser = false;
@@ -267,7 +278,7 @@ export default {
 
 #navbar {
     position: fixed;
-	z-index: 999;
+	z-index: 500;
 	top: 0px;
 	right: 0px;
 	left: 0px;

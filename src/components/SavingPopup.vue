@@ -18,7 +18,7 @@ export default {
 <style scoped>
 #saving_pop_up {
 	position: absolute;
-	z-index: 1000;
+	z-index: 600;
 	top: 55px;
 	left: 10px;
 	display: flex;

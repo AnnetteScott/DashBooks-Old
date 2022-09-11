@@ -406,7 +406,7 @@ input {
 
 .form_container {
 	position: absolute;
-	z-index: 1000;
+	z-index: 600;
 	inset: 0px;
 	opacity: 1;
 	display: flex;
