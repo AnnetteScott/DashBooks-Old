@@ -399,7 +399,7 @@ export default {
         },
         cancelForm(){
             this.current_request_form=``;
-            this.rows = Object.values(userDict['records'][this.yearID]['transactions'])
+            this.rows = Object.values(userDict['records']['years'][this.yearID]['transactions'])
         },
 		changeCheckBox(){
 			userDict['showGST'] = $('#show_gst_checkbox')[0].checked;
@@ -533,10 +533,10 @@ export default {
 			let date = new Date();
 			thisYear = date.getFullYear();
 			$(`#year_selection`).val(this.yearID);
-			if(!Object.keys(userDict['records']).includes(this.yearID)){
+			if(!Object.keys(userDict['records']['years']).includes(this.yearID)){
 				userDict['records'][`${thisYear} - ${thisYear + 1}`] = {'transactions': {}, 'assets': {}};
 			}
-			this.recordDict = userDict['records'][this.yearID];
+			this.recordDict = userDict['records']['years'][this.yearID];
 			this.calculatePivotTable();
 		},
 		calculateTax(amount){
