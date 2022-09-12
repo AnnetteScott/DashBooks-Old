@@ -1,19 +1,22 @@
 <template>
-    <h4>Projects:</h4>
-    <p>You have logged {{ userObj['timeLogged'][today]['hours'].toFixed(2) }}H and earnt ${{ numberWithCommas(userObj['timeLogged'][today]['pay']) }} today</p>
-    <div class="pageHome">
-        <div class="item_container">
-            <div class="items">
-                <div v-for="(projectDict, projectID) in userObj['projects']" :key="projectDict" class="list_item" :data="projectID" @click="$router.push({ name: 'timesheet', params: { 'projectID': projectID } })" :style="{background: `radial-gradient(circle, ${projectDict['colour'][1]} 0%, ${projectDict['colour'][0]} 30%)`, color: `${pickTextColorBasedOnBgColor(projectDict['colour'][1])}`}">
-                    <div>
-                        <p>{{ projectDict.name }}</p>
-                        <p style="font-size: small;">Duration: {{ projectDict.duration }} Weeks</p>
-                        <p style="font-size: small; pointer-events: none;">Target Hours: {{ projectDict.targetHours }}H</p>
+    <div>
+        <h4>Projects:</h4>
+        <p>You have logged {{ userObj['timeLogged'][today]['hours'].toFixed(2) }}H and earnt ${{ numberWithCommas(userObj['timeLogged'][today]['pay']) }} today</p>
+        <div class="pageHome">
+            <div class="item_container">
+                <div class="items">
+                    <div v-for="(projectDict, projectID) in userObj['projects']" :key="projectDict" class="list_item" :data="projectID" @click="$router.push({ name: 'timesheet', params: { 'projectID': projectID } })" :style="{background: `radial-gradient(circle, ${projectDict['colour'][1]} 0%, ${projectDict['colour'][0]} 30%)`, color: `${pickTextColorBasedOnBgColor(projectDict['colour'][1])}`}">
+                        <div>
+                            <p>{{ projectDict.name }}</p>
+                            <p style="font-size: small;">Duration: {{ projectDict.duration }} Weeks</p>
+                            <p style="font-size: small; pointer-events: none;">Target Hours: {{ projectDict.targetHours }}H</p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </div> 
     </div>
+    
 </template>
 
 <script>
