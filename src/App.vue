@@ -31,7 +31,7 @@
     <SavingPopup :savingStatus="saving_in_progress" />
     <SavedPopup :savingStatus="savedUser" />
     <LoadingScreen :showLoadingScreen="showLoadingScreen" />
-    <router-view />
+    <router-view :reloadPage="reloadPage" />
 </template>
 
 <script>
@@ -55,6 +55,7 @@ export default {
         return {
 			saving_in_progress: false,
 			showLoadingScreen: false,
+			reloadPage: false,
             currentPage: 'DashBoard',
 			savedUser: false,
             update: false,
@@ -151,7 +152,7 @@ export default {
                         }
                     }
 
-                    ref.saveUserDict();                        
+                    ref.saveUserDict("loadUser");                        
                 }
             }
         },
@@ -194,15 +195,18 @@ export default {
                     })
                 });
             }else {
-                ref.saving_in_progress = false;
-                ref.showLoadingScreen = false;
-                ref.savedUser = true;
+                this.saving_in_progress = false;
+                this.showLoadingScreen = false;
+                this.savedUser = true;
                 setTimeout(() =>{
-                    ref.savedUser = false;
+                    this.savedUser = false;
                 }, 3000)
                 if(option == "closeProgram"){
                     appWindow.close();
                 }
+            }
+            if(option == "loadUser"){
+                this.reloadPage = !this.reloadPage;
             }
         },
         async manualSave(){

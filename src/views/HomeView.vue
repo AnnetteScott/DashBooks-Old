@@ -131,6 +131,11 @@ import { settingsDict, userDict } from '../main.js';
 import $ from 'jquery';
 export default {
 	name: 'HomeView',
+    props: {
+        reloadPage: {
+            type: Boolean
+        }
+    },
 	data(){
 		return{
 			currentYear: '',
@@ -209,6 +214,7 @@ export default {
             this.sortAmount();
 		},
         loadPage(){
+            console.log("loadPage")
             let date = new Date();
             let month = date.getMonth();
             let thisYear = date.getFullYear();
@@ -278,7 +284,12 @@ export default {
                 this.projectDict[projID] = userDict['projects'][projID]
             })
         }
-	}
+	},
+    watch: {
+        reloadPage(){
+            this.loadPage();
+        }
+    }
 }
 </script>
 
