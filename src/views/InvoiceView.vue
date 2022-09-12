@@ -440,18 +440,12 @@ export default {
                 }else{
                     yearID = `${thisYear} - ${thisYear + 1}`;
                 }
-                if(Object.keys(userDict['records']).length == 3){
-                    let date = new Date();
-                    let thisYear = date.getFullYear();
-                    userDict['records'][`${thisYear - 1} - ${thisYear}`] = {'transactions': {}, 'assets': {}};
-                    userDict['records'][`${thisYear} - ${thisYear + 1}`] = {'transactions': {}, 'assets': {}};
-                }
-                if(!Object.keys(userDict['records']).includes(yearID)){
-                    userDict['records'][yearID] = {'transactions': {}, 'assets': {}};
+                if(!Object.keys(userDict['records']['years']).includes(yearID)){
+                    userDict['records']['years'][yearID] = {'transactions': {}, 'assets': {}};
                 }
                 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-                userDict['records'][yearID]['transactions'][transID] = {'month': monthNames[month], 'date': invoiceDate, 'account': $('#select_account option:selected').val(), 'type': 'Credit', 'item': `${clientDict['client']} - ${invoiceID}`, 'category': 'Contract Work', 'amount': parseFloat(this.invoiceTotal), 'receiptID': '', 'id': transID, 'payee': ''}
+                userDict['records']['years'][yearID]['transactions'][transID] = {'month': monthNames[month], 'date': invoiceDate, 'account': $('#select_account option:selected').val(), 'type': 'Credit', 'item': `${clientDict['client']} - ${invoiceID}`, 'category': 'Contract Work', 'amount': parseFloat(this.invoiceTotal), 'receiptID': '', 'id': transID, 'payee': ''}
             }
 
 			setTimeout(() => {
