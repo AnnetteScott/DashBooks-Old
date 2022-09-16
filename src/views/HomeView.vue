@@ -77,12 +77,23 @@
 							</div>
 						</div>
 						<div class="mid_display">
-							<p style="font-size: large">${{ numberWithCommas(netData.income + netData.expenses) }}</p>
+							<p style="font-size: large">${{ numberWithCommas((netData.income + netData.expenses) - calculateTax(netData.income + netData.expenses) - ((netData.income + netData.expenses) * accAmount)) }}</p>
                             <p>Net Profit for {{ currentYear }}</p>
 						</div>
 						<div class="bar_grapgh" style="height: 160px">
-                            <div class="incomeBar" :style="{width: `${(Math.min(370 * Math.abs(netData.income / netData.expenses), 370))}px`}">Income: &nbsp; &nbsp; ${{ numberWithCommas(netData.income) }}</div>
-                            <div class="expenseBar" :style="{width: `${(Math.min(370 * Math.abs(netData.expenses / netData.income), 370))}px`}">Expenses: ${{ numberWithCommas(netData.expenses) }}</div>
+                            <div class="incomeBar" :style="{width: `${(Math.min(370 * Math.abs(netData.income / netData.expenses), 370))}px`}">
+                                Income: &nbsp; &nbsp; ${{ numberWithCommas(netData.income) }}
+                            </div>
+                            <div class="expenseBar" :style="{width: `${(Math.min(370 * Math.abs(netData.expenses / netData.income), 370))}px`}">
+                                Expenses: ${{ numberWithCommas(netData.expenses) }}</div>
+                            <div class="expenseBar" 
+                                :style="{width: `${(Math.min(370 * Math.abs(calculateTax(netData.income + netData.expenses) / netData.income), 370))}px`}">
+                                Tax: ${{ numberWithCommas(calculateTax(netData.income + netData.expenses)) }}
+                            </div>
+                            <div class="expenseBar" 
+                                :style="{width: `${(Math.min(370 * Math.abs(((netData.income + netData.expenses) * accAmount) / netData.income), 370))}px`}">
+                                ACC: ${{ numberWithCommas((netData.income + netData.expenses) * accAmount) }}
+                            </div>
 						</div>
 					</div>
 				</div>
@@ -148,6 +159,7 @@ export default {
 			years: [],
             projectDict: {},
             showTotal: false,
+            accAmount: 0.015
 		}
 	},
 	mounted(){
@@ -212,6 +224,7 @@ export default {
             this.incomeArray = Object.entries(incomeSum).map(( [key, amount] ) => ({ key, amount }));
             this.expensesArray = Object.entries(expenseSum).map(( [key, amount] ) => ({ key, amount }));
             this.sortAmount();
+            this.returnACCAmount();
 		},
         loadPage(){
             console.log("loadPage")
@@ -252,6 +265,7 @@ export default {
             this.incomeArray = Object.entries(incomeSum).map(( [key, amount] ) => ({ key, amount }));
             this.expensesArray = Object.entries(expenseSum).map(( [key, amount] ) => ({ key, amount }));
             this.sortAmount();
+            this.returnACCAmount();
 
         },
         sortAmount(){
@@ -283,6 +297,61 @@ export default {
             other.forEach((projID) => {
                 this.projectDict[projID] = userDict['projects'][projID]
             })
+        },
+        calculateTax(amount){
+			let firstTax = [0.105, 14000];
+			let secondTax = [0.175, 48000];
+			let thirdTax = [0.3, 70000];
+			let fourthTax = [0.33, 180000];
+			let fifthTax = [0.39];
+			
+			if(amount <= 0){
+				return 0;
+			}
+
+			let firstTaxAmount = amount > firstTax[1] ? firstTax[1] * firstTax[0]: amount * firstTax[0]; //1470 so correct!
+			if(amount <= firstTax[1]){
+				return firstTaxAmount
+			}
+
+			let secondTaxAmount = amount > firstTax[1] && amount < secondTax[1] ? (amount - firstTax[1]) * secondTax[0]: (secondTax[1] - firstTax[1]) * secondTax[0] //5950 so correct
+			if(amount <= secondTax[1]){
+				return firstTaxAmount + secondTaxAmount
+			}
+
+			let thirdTaxAmount = amount > secondTax[1] && amount < thirdTax[1] ? (amount - secondTax[1]) * thirdTax[0]: (thirdTax[1] - secondTax[1]) * thirdTax[0] //6600 so correct
+			if(amount <= thirdTax[1]){
+				return firstTaxAmount + secondTaxAmount + thirdTaxAmount;
+			}
+
+			let fourthTaxAmount = amount > thirdTax[1] && amount < fourthTax[1] ? (amount - thirdTax[1]) * fourthTax[0]: (fourthTax[1] - thirdTax[1]) * fourthTax[0] //36300 so correct
+			if(amount <= fourthTax[1]){
+				return firstTaxAmount + secondTaxAmount + thirdTaxAmount + fourthTaxAmount;
+			}
+
+			let fifthTaxAmount = amount > fourthTax[1] ? (amount - fourthTax[1]) * fifthTax[0]: 0
+			if(amount >= fourthTax[1]){
+				return firstTaxAmount + secondTaxAmount + thirdTaxAmount + fourthTaxAmount + fifthTaxAmount;
+			}
+
+		},
+        returnACCAmount(){
+            let yearID = this.currentYear;
+            if(yearID == "2021 - 2022"){
+                this.accAmount = 0.0139;
+            }
+            else if(yearID == "2022 - 2023"){
+                this.accAmount = 0.0146;
+            }
+            else if(yearID == "2023 - 2024"){
+                this.accAmount = 0.0153;
+            }
+            else if(yearID == "2024 - 2025"){
+                this.accAmount = 0.0160;
+            }
+            else {
+                this.accAmount = 0.0160;
+            }
         }
 	},
     watch: {
