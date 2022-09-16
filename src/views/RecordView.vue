@@ -202,7 +202,7 @@
 						</template>
 					</template>
 				</div> 
-				<div class="pivot_row pivot_heading" style="margin-top: 10px;">
+				<div class="pivot_row pivot_heading" style="margin-top: 15px;">
 					<template v-if="loaded">
 						<p>Tax To Pay</p>
 						<p>${{ numberWithCommas(calculateTax(pivotDict['months']['grandTotal'])) }}</p>
@@ -216,6 +216,12 @@
 					</template>
 				</div>
                 <div class="pivot_row pivot_heading">
+					<template v-if="loaded">
+						<p>Total Deductions</p>
+						<p>-${{ numberWithCommas(pivotDict['months']['grandTotal'] * accAmount + calculateTax(pivotDict['months']['grandTotal']))}}</p>
+					</template>
+				</div>
+                <div class="pivot_row pivot_heading" style="margin-top: 15px">
 					<template v-if="loaded">
 						<p>Take Home</p>
 						<p>${{ numberWithCommas(pivotDict['months']['grandTotal'] - calculateTax(pivotDict['months']['grandTotal']) - (pivotDict['months']['grandTotal'] * accAmount))}}
@@ -243,7 +249,6 @@
 						</template>
 					</div>
 				</template>
-                <p style="font-size: 0.6rem">Results have a margin of error at 1.5%</p>
 			</div>
 		</div>		
 		<TransactionForms :transform="current_request_form" :hasReceipt="receiptStatus" @cancelled="cancelForm" />
@@ -321,6 +326,7 @@ export default {
 		}
 		this.recordDict = userDict['records']['years'][yearID];
 		this.yearID = yearID;
+        this.returnACCAmount(yearID)
 		this.$nextTick(() => {
             $(`#year_selection`).val(yearID);
 			$('#show_gst_checkbox').prop('checked', userDict['showGST']);
@@ -389,6 +395,23 @@ export default {
         }
     },
 	methods: {
+        returnACCAmount(yearID){
+            if(yearID == "2021 - 2022"){
+                this.accAmount = 0.0139;
+            }
+            else if(yearID == "2022 - 2023"){
+                this.accAmount = 0.0146;
+            }
+            else if(yearID == "2023 - 2024"){
+                this.accAmount = 0.0153;
+            }
+            else if(yearID == "2024 - 2025"){
+                this.accAmount = 0.0160;
+            }
+            else {
+                this.accAmount = 0.0160;
+            }
+        },
         rememberChoice(heading){
             const index = userDict['records']['headingStates'].indexOf(heading);
             if (index > -1) {
@@ -455,6 +478,7 @@ export default {
 			this.recordDict = userDict['records']['years'][$(`#year_selection option:selected`).attr('data')];
 			this.calculatePivotTable();
             this.rows = Object.values(this.recordDict['transactions'])
+            this.returnACCAmount($(`#year_selection option:selected`).attr('data'));
 		},
 		editTransaction(e){
 			this.current_request_form = 'editTransaction';
