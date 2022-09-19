@@ -42,7 +42,7 @@
                                 <div  v-for="(time, index) in timeList" :key="time" :cellID="`Z${index}`" class="dateCell">{{ time }}</div>
                             </template>
                             <template v-else>
-                                <div  v-for="(time, index) in timeList" :key="time" :cellID="`${col}${index}`" class="cell" @mousedown="cellDown" @mouseover="cellHovered" @mouseup="cellRelease"/>
+                                <div  v-for="(time, index) in timeList" :key="time" :cellID="`${col}${index}`" class="cell" @mousedown="cellDown" @mouseover="cellHovered" @mouseup="cellRelease" :title="time"/>
                             </template>
                             <!-- Colour Details -->
                             <template v-if="col == `Z`">
